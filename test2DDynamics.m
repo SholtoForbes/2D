@@ -33,13 +33,13 @@ A = 3;
 % scaling test (all other scaling variables currently =1) I need to analyse
 % this better, mine is much more complex than brac problem
 % need to change all scaling variables in this and problem file together
-X = 4;
-Y = 1;
+X = 10;
+Y = 10;
 VX = 1;
 VY = 1;
 TAU = 1;
 THETA = 1;
-T = 1;
+T = 10;
 
 xdot = vx*VX*T/X;
 ydot = vy*VY*T/Y;							 

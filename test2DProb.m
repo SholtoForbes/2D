@@ -42,10 +42,15 @@ bounds.upper.time	= [t0; tfMax];			    % Fixed time at t0 and a possibly free ti
 % See events file for definition of events function
 
 %Scaling, need to make these global variables!
-X = 4
-Y = 1
+X = 50
+Y = 10
 
-bounds.lower.events = [0; 0; 1; 1; 40/X; 10/Y; 1 ; 1];
+%Scaling tests
+% bounds.lower.events = [0; 0; 2; 2; 100/X; 100/Y; 2 ; 2]; %works with
+% X,Y,T =100, or all 10
+bounds.lower.events = [0; 0; 2; 2; 1000/X; 100/Y; 2 ; 2];
+
+
 % bounds.lower.events = [0; 0; 1; 1; 10/X; 10/Y; 1 ; 1];
 bounds.upper.events = bounds.lower.events;      % equality event function bounds
 % bounds.upper.events = [0; 0; 2; 2; 10/X; 10/Y; 3 ; 3];
@@ -62,7 +67,7 @@ Brac_1.bounds       = bounds;
 %====================================================
 
 % Dont know how this changes the output yet...
-algorithm.nodes		= [40];					    % represents some measure of desired solution accuracy
+algorithm.nodes		= [50];					    % represents some measure of desired solution accuracy
 
 % Call dido
 tStart= cputime;    % start CPU clock 
