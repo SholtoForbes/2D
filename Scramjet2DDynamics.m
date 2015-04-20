@@ -16,11 +16,12 @@ tau  = primal.controls(2,:);
 %=======================================================
 
 %neglecting AoA, fixed reference frame
-m = 10;
-Cl = 1;
-Cd = 1;
-rho = 1;
-A = 3;
+m = 1000.;
+Cl = .1;
+Cd = .1;
+rho = 0.02;
+% rho = 1.;
+A = 3.;
 
 
 % Original

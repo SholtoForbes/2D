@@ -15,16 +15,16 @@ clear all;
 % bounds the state and control variables
 %---------------------------------------
 
-xL = 0; xU = 30;
-yL = 0; yU = 30;
-vxL = 0; vxU = 30;
-vyL = 0; vyU = 30;
+xL = 0; xU = 100;
+yL = 0; yU = 100;
+vxL = 0; vxU = 400;
+vyL = 0; vyU = 400;
 
 bounds.lower.states = [xL; yL; vxL; vyL];
 bounds.upper.states = [xU; yU; vxU; vyU];
 
 bounds.lower.controls = [0; 0];
-bounds.upper.controls = [pi/2; 20];
+bounds.upper.controls = [pi/2; 50];
 
 %------------------
 % bound the horizon
@@ -50,8 +50,8 @@ Y = 10
 %Scaling tests
 % bounds.lower.events = [0; 0; 2; 2; 100/X; 100/Y; 2 ; 2]; %works with
 % X,Y,T =100, or all 10
-bounds.lower.events = [0; 0; 2; 2; 100/X; 100/Y; 2 ; 2];
-
+% bounds.lower.events = [0; 0; 10; 10; 100/X; 100/Y; 10 ; 10];
+bounds.lower.events = [0; 0; 100/X; 100/Y];
 
 % bounds.lower.events = [0; 0; 1; 1; 10/X; 10/Y; 1 ; 1];
 bounds.upper.events = bounds.lower.events;      % equality event function bounds
@@ -60,16 +60,16 @@ bounds.upper.events = bounds.lower.events;      % equality event function bounds
 %============================================
 % Define the problem using DIDO expresssions:
 %============================================
-Brac_1.cost 		= 'test2DCost';
-Brac_1.dynamics	    = 'test2DDynamics';
-Brac_1.events		= 'test2DEvents';		
+Brac_1.cost 		= 'Scramjet2DCost';
+Brac_1.dynamics	    = 'Scramjet2DDynamics';
+Brac_1.events		= 'Scramjet2DEvents';		
 %Path file optional	
 
 Brac_1.bounds       = bounds;
 %====================================================
 
 % Dont know how this changes the output yet...
-algorithm.nodes		= [100];					    % represents some measure of desired solution accuracy
+algorithm.nodes		= [50];					    % represents some measure of desired solution accuracy
 
 % Call dido
 tStart= cputime;    % start CPU clock 
