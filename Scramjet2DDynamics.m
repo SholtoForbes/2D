@@ -3,13 +3,24 @@ function XDOT = Brac1Dynamics(primal)
 % 2D Dynamics
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-x = primal.states(1,:) ;  
-y = primal.states(2,:);		
-vx = primal.states(3,:);		
-vy = primal.states(4,:);
+% need to add AoA
 
-theta  = primal.controls(1,:);
-tau  = primal.controls(2,:);
+
+%changed notation to horizontal and vertical, x and y in plane of vehicle
+h = primal.states(1,:) ;  
+y = primal.states(2,:);		
+vh = primal.states(3,:);		
+vv = primal.states(4,:);
+theta  = primal.states(5,:);
+omega = primal.states(6,:);
+
+tau  = primal.controls(1,:); %Thrust
+Mc = primal.controls(2,:); %Control Moment
+
+
+
+% theta  = primal.controls(1,:);
+% tau  = primal.controls(2,:);
 
 %=======================================================
 % Equations of Motion:
@@ -22,6 +33,8 @@ Cd = .1;
 rho = 0.02;
 % rho = 1.;
 A = 3.;
+
+%======================================================
 
 
 % Original
@@ -36,19 +49,42 @@ A = 3.;
 % need to change all scaling variables in this and problem file together
 % X = 10;
 % Y = 10;
-global X
-global Y
-VX = 1;
-VY = 1;
-TAU = 1;
-THETA = 1;
-T = 10;
+global X;
+global Y;
+VX = 1.;
+VY = 1.;
+TAU = 1.;
+THETA = 1.;
+T = 1.;
 
-xdot = vx*VX*T/X;
-ydot = vy*VY*T/Y;							 
-vxdot = T/VX*m*(tau*TAU.*cos(theta*THETA) - 0.5*rho*A*Cl*((vx*VX).^2 + (vy*VY).^2).*sin(theta*THETA) - 0.5*rho*A*Cd*((vx*VX).^2 + (vy*VY).^2).*cos(theta*THETA));  
-vydot = T/VY*m*(tau*TAU.*sin(theta*THETA) + 0.5*rho*A*Cl*((vx*VX).^2 + (vy*VY).^2).*cos(theta*THETA) - 0.5*rho*A*Cd*((vx*VX).^2 + (vy*VY).^2).*sin(theta*THETA) - 9.8);  
+hdot = vh*VX*T/X;
+vdot = vv*VY*T/Y;							 
+% vxdot = T/VX/m*(tau*TAU.*cos(theta*THETA) - 0.5*rho*A*Cl*((vx*VX).^2 + (vy*VY).^2).*sin(theta*THETA) - 0.5*rho*A*Cd*((vx*VX).^2 + (vy*VY).^2).*cos(theta*THETA));  
+% vydot = T/VY/m*(tau*TAU.*sin(theta*THETA) + 0.5*rho*A*Cl*((vx*VX).^2 + (vy*VY).^2).*cos(theta*THETA) - 0.5*rho*A*Cd*((vx*VX).^2 + (vy*VY).^2).*sin(theta*THETA) - 9.8);  
+
+
+%===========================================================
+% Adding better scramjet dynamics, added 21/4/15
+% communicator matrix is given in terms of forces and moments
+Iy = 1.;
+
+% Fx = -sqrt(vh.^2 + vv.^2); %these will need to come from the communicator matrix, for now just approximated a function that looks close to com mat values
+% Fz = 2*sqrt(vh.^2 + vv.^2);
+% My = 250*sqrt(vh.^2 + vv.^2);
+
+Fx = 0.; %Taking these out for testing
+Fz = 0.;
+My = 0.;
+
+
+vhdot = (Fx.*cos(theta) + Fz.*sin(theta)  + tau.*cos(theta))/m;
+vvdot = (-Fx.*sin(theta) + Fz.*cos(theta)  + tau.*sin(theta))/m;
+thetadot = omega;
+omegadot = (My  + Mc)/Iy;
+%====================================================================
+
+
 
 %======================================================
-XDOT = [xdot; ydot; vxdot; vydot];
+XDOT = [hdot; vdot; vhdot; vvdot; thetadot; omegadot];
 %======================================================

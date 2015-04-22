@@ -47,8 +47,8 @@ bounds.upper.time	= [t0; tfMax];			    % Fixed time at t0 and a possibly free ti
 %Scaling, need to make these global variables!
 global X
 global Y
-X = 1;
-Y = 1;
+X = 1
+Y = 1
 
 %Scaling tests
 % bounds.lower.events = [0; 0; 2; 2; 100/X; 100/Y; 2 ; 2]; %works with
@@ -146,17 +146,10 @@ title('Hamiltonian')
 
 %------ Forward Simulation -----------
 
-% Import Controls, Time and Initial States
+% Import Controls 
 % these are the only things carried over from the PS method
 tau_Forward = tau;
-Mc_Forward = Mc;
-t_Forward = t;
-h_Forward(1) = h(1);
-v_Forward(1) = v(1);
-vh_Forward(1) = vh(1);
-vv_Forward(1) = vv(1);
-omega_Forward(1) = omega(1);
-theta_Forward(1) = theta(1);
+Mc_Forward = Mc
 %--------------
 
 
@@ -170,27 +163,17 @@ My_Forward = 0.;
 
 
 
-%simple forward method
-for i=2:length(Mc_Forward)
-omegadot_Forward(i-1) = (My_Forward  + Mc_Forward(i-1))/Iy_Forward;
-omega_Forward(i) = omegadot_Forward(i-1)*(t_Forward(i) - t_Forward(i-1)) + omega_Forward(i-1);
 
-thetadot_Forward(i-1) = omega_Forward(i-1);
-theta_Forward(i) = thetadot_Forward(i-1)*(t_Forward(i) - t_Forward(i-1)) + theta_Forward(i-1);
+for i=1:length(Mc_Forward)
+omegadot_Forward = (My_Forward  + Mc_Forward(i))/Iy_Forward;
 
+
+thetadot_Forward = omega_Forward;
     
-vhdot_Forward(i-1) = (Fx_Forward.*cos(theta_Forward(i-1)) + Fz_Forward.*sin(theta_Forward(i-1))  + tau_Forward(i-1).*cos(theta_Forward(i-1)))/m_Forward;
-vh(i) = vhdot_Forward(i-1)*(t_Forward(i) - t_Forward(i-1)) + vh(i-1);
-
-vvdot_Forward(i-1) = (-Fx_Forward.*sin(theta_Forward(i-1)) + Fz_Forward.*cos(theta_Forward(i-1))  + tau_Forward(i-1).*sin(theta_Forward(i-1)))/m_Forward;
-vv(i) = vvdot_Forward(i-1)*(t_Forward(i) - t_Forward(i-1)) + vv(i-1);
+vhdot_Forward = (Fx_Forward.*cos(theta_Forward) + Fz_Forward.*sin(theta_Forward)  + tau_Forward(i).*cos(theta_Forward))/m_Forward;
+vvdot_Forward = (-Fx_Forward.*sin(theta_Forward) + Fz_Forward.*cos(theta_Forward)  + tau_Forward(i).*sin(theta_Forward))/m_Forward;
 
 
-hdot_Forward(i-1) = vh(i-1);
-h_Forward(i) = hdot_Forward(i-1)*(t_Forward(i) - t_Forward(i-1)) + h_Forward(i-1);
-
-vdot_Forward(i-1) = vv(i-1);
-v_Forward(i) = vdot_Forward(i-1)*(t_Forward(i) - t_Forward(i-1)) + v_Forward(i-1);
 
 end
 
