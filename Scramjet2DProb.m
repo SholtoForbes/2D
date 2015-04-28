@@ -15,25 +15,27 @@ clear all;
 % bounds the state and control variables
 %---------------------------------------
 
-xL = 0; xU = 100.;
+xL = 0; xU = 100.;  % Box Constraints. Chese are important, setting upper box constraint equal to upper bounds on path does not work, nor does setting this too high
 yL = 0; yU = 100.;
-vxL = 0; vxU = 400.;
-vyL = 0; vyU = 400.;
-thetaL = 0; thetaU = 2.; %these will need to be adjusted, currently arbitrary
+
+
+vxL = 3000; vxU = 4000.;
+vyL = 0; vyU = 4000.;
+thetaL = 0; thetaU = 1.57; %these will need to be adjusted
 omegaL = 0; omegaU = 1.;
 
 
 bounds.lower.states = [xL; yL; vxL; vyL; thetaL; omegaL];
 bounds.upper.states = [xU; yU; vxU; vyU; thetaU; omegaU];
 
-bounds.lower.controls = [0; 0];
-bounds.upper.controls = [1000; 100]; %these are placeholders, will need to be changed
+bounds.lower.controls = [8000000; 0];
+bounds.upper.controls = [9000000; 100]; %these are placeholders, will need to be changed
 
 %------------------
 % bound the horizon
 %------------------
 t0	    = 0;
-tfMax 	= 10;   % swag for max tf; DO NOT set to Inf even for time-free problems
+tfMax 	= 10.;   % swag for max tf; DO NOT set to Inf even for time-free problems
 
 bounds.lower.time 	= [t0; t0];				
 bounds.upper.time	= [t0; tfMax];			    % Fixed time at t0 and a possibly free time at tf
@@ -72,7 +74,10 @@ Brac_1.bounds       = bounds;
 %====================================================
 
 % Dont know how this changes the output yet...
-algorithm.nodes		= [60];					    % represents some measure of desired solution accuracy
+algorithm.nodes		= [50];					    % represents some measure of desired solution accuracy
+
+% algorith.mode = 'accurate';  %this did not seem to make a difference 28/4
+
 
 % Call dido
 tStart= cputime;    % start CPU clock 
@@ -146,6 +151,8 @@ title('Hamiltonian')
 
 %------ Forward Simulation -----------
 
+% need to replace this with CADAC
+
 % Import Controls, Time and Initial States
 % these are the only things carried over from the PS method
 tau_Forward = tau;
@@ -180,16 +187,16 @@ theta_Forward(i) = thetadot_Forward(i-1)*(t_Forward(i) - t_Forward(i-1)) + theta
 
     
 vhdot_Forward(i-1) = (Fx_Forward.*cos(theta_Forward(i-1)) + Fz_Forward.*sin(theta_Forward(i-1))  + tau_Forward(i-1).*cos(theta_Forward(i-1)))/m_Forward;
-vh(i) = vhdot_Forward(i-1)*(t_Forward(i) - t_Forward(i-1)) + vh(i-1);
+vh_Forward(i) = vhdot_Forward(i-1)*(t_Forward(i) - t_Forward(i-1)) + vh_Forward(i-1);
 
 vvdot_Forward(i-1) = (-Fx_Forward.*sin(theta_Forward(i-1)) + Fz_Forward.*cos(theta_Forward(i-1))  + tau_Forward(i-1).*sin(theta_Forward(i-1)))/m_Forward;
-vv(i) = vvdot_Forward(i-1)*(t_Forward(i) - t_Forward(i-1)) + vv(i-1);
+vv_Forward(i) = vvdot_Forward(i-1)*(t_Forward(i) - t_Forward(i-1)) + vv_Forward(i-1);
 
 
-hdot_Forward(i-1) = vh(i-1);
+hdot_Forward(i-1) = vh_Forward(i-1);
 h_Forward(i) = hdot_Forward(i-1)*(t_Forward(i) - t_Forward(i-1)) + h_Forward(i-1);
 
-vdot_Forward(i-1) = vv(i-1);
+vdot_Forward(i-1) = vv_Forward(i-1);
 v_Forward(i) = vdot_Forward(i-1)*(t_Forward(i) - t_Forward(i-1)) + v_Forward(i-1);
 
 end
