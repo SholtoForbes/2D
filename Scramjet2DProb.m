@@ -4,6 +4,13 @@
 clear all;		
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%Scaling
+global X
+global Y
+X = 1;
+Y = 1;
+
+
 %===================
 % Problem variables:
 %-------------------
@@ -15,21 +22,28 @@ clear all;
 % bounds the state and control variables
 %---------------------------------------
 
-xL = 0; xU = 100.;  % Box Constraints. Chese are important, setting upper box constraint equal to upper bounds on path does not work, nor does setting this too high
-yL = 0; yU = 100.;
+hL = 0; hU = 20./X;  % Box Constraints. These are important, setting upper box constraint equal to upper bounds on path does not work, nor does setting this too high
+vL = 0; vU = 20./Y;
 
 
-vxL = 3000; vxU = 4000.;
-vyL = 0; vyU = 4000.;
+% vxL = 3000; vxU = 4000.;
+% vyL = 0; vyU = 4000.;
+%NORMALISED
+vxL = 0.; vxU = 1.;
+vyL = 0.; vyU = 1.;
+
+
+
 thetaL = 0; thetaU = 1.57; %these will need to be adjusted
 omegaL = 0; omegaU = 1.;
 
 
-bounds.lower.states = [xL; yL; vxL; vyL; thetaL; omegaL];
-bounds.upper.states = [xU; yU; vxU; vyU; thetaU; omegaU];
+bounds.lower.states = [hL; vL; vxL; vyL; thetaL; omegaL];
+bounds.upper.states = [hU; vU; vxU; vyU; thetaU; omegaU];
 
-bounds.lower.controls = [8000000; 0];
-bounds.upper.controls = [9000000; 100]; %these are placeholders, will need to be changed
+%ADJUSTED FOR NORMALISATION
+bounds.lower.controls = [0.; 0.];
+bounds.upper.controls = [10.; 100.]; 
 
 %------------------
 % bound the horizon
@@ -46,17 +60,13 @@ bounds.upper.time	= [t0; tfMax];			    % Fixed time at t0 and a possibly free ti
 %-------------------------------------------
 % See events file for definition of events function
 
-%Scaling, need to make these global variables!
-global X
-global Y
-X = 1;
-Y = 1;
+
 
 %Scaling tests
 % bounds.lower.events = [0; 0; 2; 2; 100/X; 100/Y; 2 ; 2]; %works with
 % X,Y,T =100, or all 10
 % bounds.lower.events = [0; 0; 10; 10; 100/X; 100/Y; 10 ; 10];
-bounds.lower.events = [0; 0; 10/X; 10/Y];
+bounds.lower.events = [0; 0; 10./X; 10./Y];
 
 % bounds.lower.events = [0; 0; 1; 1; 10/X; 10/Y; 1 ; 1];
 bounds.upper.events = bounds.lower.events;      % equality event function bounds
@@ -74,7 +84,7 @@ Brac_1.bounds       = bounds;
 %====================================================
 
 % Dont know how this changes the output yet...
-algorithm.nodes		= [50];					    % represents some measure of desired solution accuracy
+algorithm.nodes		= [30];					    % represents some measure of desired solution accuracy
 
 % algorith.mode = 'accurate';  %this did not seem to make a difference 28/4
 
@@ -202,7 +212,8 @@ v_Forward(i) = vdot_Forward(i-1)*(t_Forward(i) - t_Forward(i-1)) + v_Forward(i-1
 end
 
 
-
+figure(2)
+plot(h_Forward, v_Forward)
 
 
 
