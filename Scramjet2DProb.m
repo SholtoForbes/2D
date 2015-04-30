@@ -29,8 +29,8 @@ vL = 0; vU = 20./Y;
 % vxL = 3000; vxU = 4000.;
 % vyL = 0; vyU = 4000.;
 %NORMALISED
-vxL = 0.; vxU = 1.;
-vyL = 0.; vyU = 1.;
+vhL = 0.; vhU = 2.;
+vvL = 0.; vvU = 2.;
 
 
 
@@ -38,8 +38,8 @@ thetaL = 0; thetaU = 1.57; %these will need to be adjusted
 omegaL = 0; omegaU = 1.;
 
 
-bounds.lower.states = [hL; vL; vxL; vyL; thetaL; omegaL];
-bounds.upper.states = [hU; vU; vxU; vyU; thetaU; omegaU];
+bounds.lower.states = [hL; vL; vhL; vvL; thetaL; omegaL];
+bounds.upper.states = [hU; vU; vhU; vvU; thetaU; omegaU];
 
 %ADJUSTED FOR NORMALISATION
 bounds.lower.controls = [0.; 0.];
@@ -49,7 +49,8 @@ bounds.upper.controls = [10.; 100.];
 % bound the horizon
 %------------------
 t0	    = 0;
-tfMax 	= 10.;   % swag for max tf; DO NOT set to Inf even for time-free problems
+tfMax 	= 15.;   % swag for max tf; DO NOT set to Inf even for time-free problems
+% remember to set higher than Vmax bounds time
 
 bounds.lower.time 	= [t0; t0];				
 bounds.upper.time	= [t0; tfMax];			    % Fixed time at t0 and a possibly free time at tf
@@ -84,7 +85,7 @@ Brac_1.bounds       = bounds;
 %====================================================
 
 % Dont know how this changes the output yet...
-algorithm.nodes		= [30];					    % represents some measure of desired solution accuracy
+algorithm.nodes		= [40];					    % represents some measure of desired solution accuracy
 
 % algorith.mode = 'accurate';  %this did not seem to make a difference 28/4
 
