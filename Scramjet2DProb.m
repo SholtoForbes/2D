@@ -50,7 +50,7 @@ bounds.upper.controls = [10.; 100.];
 %------------------
 t0	    = 0;
 tfMax 	= 15.;   % swag for max tf; DO NOT set to Inf even for time-free problems
-% remember to set higher than Vmax bounds time
+% remember to set higher than Vmax bounds min time
 
 bounds.lower.time 	= [t0; t0];				
 bounds.upper.time	= [t0; tfMax];			    % Fixed time at t0 and a possibly free time at tf

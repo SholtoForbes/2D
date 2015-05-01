@@ -78,9 +78,10 @@ Out_force = dlmread('out_force.txt');
 
 
 
-Fx = -1.1.*vh; 
+Fx = -sqrt(vh.^2 + vv.^2); 
 % Fx = 0.; 
-Fz = 0.;
+% Fz = 0.;
+Fz = -0.1*sqrt(vh.^2 + vv.^2); 
 My = 0.;
 
 
