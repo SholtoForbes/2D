@@ -10,9 +10,8 @@ clear all;
 TrueDh = 10.; % True horizontal distance
 TrueDv = 10.; % True vertical distance
 
-global HScale
+global HS
 HScale = 10./TrueDh ; % Horizontal scale
-global VScale
 VScale = 10./TrueDv ; % Vertical scale
 %===============================================
 
@@ -30,10 +29,10 @@ VScale = 10./TrueDv ; % Vertical scale
 %---------------------------------------
 
 hL = 0; hU = 20.;  % Box Constraints. These are important, setting upper box constraint equal to upper bounds on path does not work, nor does setting this too high
-vL = 0; vU = 20.;  % Keep these in terms of scaled h and v
+vL = 0; vU = 20.;
 
-vhL = 0.; vhU = 3.;
-vvL = 0.; vvU = 3.;
+vhL = 0.; vhU = 2.;
+vvL = 0.; vvU = 2.;
 
 
 
@@ -46,7 +45,7 @@ bounds.upper.states = [hU; vU; vhU; vvU; thetaU; omegaU];
 
 %ADJUSTED FOR NORMALISATION
 bounds.lower.controls = [0.; 0.];
-bounds.upper.controls = [100000.; 100.]; 
+bounds.upper.controls = [10.; 100.]; 
 
 %------------------
 % bound the horizon
