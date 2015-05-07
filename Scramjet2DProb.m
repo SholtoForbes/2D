@@ -41,12 +41,17 @@ thetaL = 0; thetaU = 1.57; %these will need to be adjusted
 omegaL = 0; omegaU = 1.;
 
 
-bounds.lower.states = [hL; vL; vhL; vvL; thetaL; omegaL];
-bounds.upper.states = [hU; vU; vhU; vvU; thetaU; omegaU];
+%Added these as placeholders
+MU = 10.;
+ML = 0.;
+
+
+bounds.lower.states = [hL; vL; vhL; vvL; thetaL; omegaL; ML];
+bounds.upper.states = [hU; vU; vhU; vvU; thetaU; omegaU; MU];
 
 %ADJUSTED FOR NORMALISATION
 bounds.lower.controls = [0.; 0.];
-bounds.upper.controls = [100000.; 100.]; 
+bounds.upper.controls = [2.; 100.]; 
 
 %------------------
 % bound the horizon
