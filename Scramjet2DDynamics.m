@@ -66,8 +66,8 @@ My_array = [305002.235162 , 256125.242712 , 196654.950117 ];
 % Scaled with a dot product of the scaling factors and the force directions
 global HScale;
 global VScale;
-Fx = spline(M_array, Fx_array, M) .* (HScale.*cos(theta) + VScale.*sin(theta)) ;
-Fz = spline(M_array, Fx_array, M)  .* (HScale.*sin(theta) + VScale.*cos(theta));
+Fx = spline(M_array, Fx_array, M)  ;
+Fz = spline(M_array, Fx_array, M)  ;
 
 
 
@@ -80,8 +80,8 @@ My = 0.; %moment
 
 
 
-vhdot = (Fx.*cos(theta) - Fz.*sin(theta)  + tau.*cos(theta))/m;
-vvdot = (Fx.*sin(theta) + Fz.*cos(theta)  + tau.*sin(theta))/m;
+vhdot = (Fx.*cos(theta) - Fz.*sin(theta)  + tau.*cos(theta))/m .* HScale;
+vvdot = (Fx.*sin(theta) + Fz.*cos(theta)  + tau.*sin(theta))/m .* VScale;
 thetadot = omega;
 omegadot = (My  + Mc)/Iy;
 %====================================================================

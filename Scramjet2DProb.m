@@ -37,7 +37,7 @@ hL = 0; hU = 20.;  % Box Constraints. These are important, setting upper box con
 vL = 0; vU = 20.;  % Keep these in terms of scaled h and v
 
 % velocity limits, scaled to problem. 
-vhL = 0.; vhU = 5500.*HScale; 
+vhL = 4000.*HScale; vhU = 5500.*HScale; 
 vvL = 0.; vvU = 5500.*VScale;
 
 
