@@ -44,7 +44,7 @@ vdot = vv;
 
 % Mach no
 c = 1000; % speed of sound (replace with atmosphere)
-M = sqrt(vh.^2 + vv.^2)/1000 ./ (HScale.*cos(theta) + VScale.*sin(theta));
+M = sqrt((vh./HScale).^2 + (vv./VScale).^2)/c ;
 
 
 
@@ -58,22 +58,22 @@ Out_force = dlmread('out_force.txt');
 %an initial interpolator for the force values at a fixed Arot, alpha and
 %dynamic pressure (0,  -0.0174532925199 (negative up) , 45000.0)
 
-% M_array = [4.5 , 5. , 5.5]; 
-% Fx_array = [-36427.6593981 , -42995.3909773 , -50209.1507264];
-% Fz_array = [ 26851.676829 , 25865.7310572 , 24420.6025981 ];
-% My_array = [305002.235162 , 256125.242712 , 196654.950117 ];
-% 
+M_array = [4.5 , 5. , 5.5]; 
+Fx_array = [-36427.6593981 , -42995.3909773 , -50209.1507264];
+Fz_array = [ 26851.676829 , 25865.7310572 , 24420.6025981 ];
+My_array = [305002.235162 , 256125.242712 , 196654.950117 ];
+
 % Scaled with a dot product of the scaling factors and the force directions
-% global HScale;
-% global VScale;
-% Fx = spline(M_array, Fx_array, M) .* (HScale.*cos(theta) + VScale.*sin(theta)) ;
-% Fz = spline(M_array, Fx_array, M)  .* (HScale.*sin(theta) + VScale.*cos(theta));
+global HScale;
+global VScale;
+Fx = spline(M_array, Fx_array, M) .* (HScale.*cos(theta) + VScale.*sin(theta)) ;
+Fz = spline(M_array, Fx_array, M)  .* (HScale.*sin(theta) + VScale.*cos(theta));
 
 
 
-Fx = -sqrt(vh.^2 + vv.^2) .* (HScale.*cos(theta) + VScale.*sin(theta));
-% Fx = -50000.;
-Fz = -0.1*sqrt(vh.^2 + vv.^2).* (HScale.*sin(theta) + VScale.*cos(theta)); 
+% Fx = -sqrt(vh.^2 + vv.^2) .* (HScale.*cos(theta) + VScale.*sin(theta));
+% % Fx = -50000.;
+% Fz = -0.1*sqrt(vh.^2 + vv.^2).* (HScale.*sin(theta) + VScale.*cos(theta)); 
 % Fz = 0.;
 My = 0.; %moment
 

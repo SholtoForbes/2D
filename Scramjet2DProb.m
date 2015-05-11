@@ -10,10 +10,14 @@ clear all;
 TrueDh = 1000.; % True horizontal distance
 TrueDv = 100.; % True vertical distance
 
+ScaleDh = 10.; %scaled distance. 10 seems to be a consistently good value
+ScaleDv = 10.;
+
+
 global HScale
-HScale = 10./TrueDh ; % Horizontal scale
+HScale = ScaleDh./TrueDh ; % Horizontal scale
 global VScale
-VScale = 10./TrueDv ; % Vertical scale
+VScale = ScaleDv./TrueDv ; % Vertical scale
 %===============================================
 
 
@@ -32,8 +36,9 @@ VScale = 10./TrueDv ; % Vertical scale
 hL = 0; hU = 20.;  % Box Constraints. These are important, setting upper box constraint equal to upper bounds on path does not work, nor does setting this too high
 vL = 0; vU = 20.;  % Keep these in terms of scaled h and v
 
-vhL = 0.1; vhU = 3.; % lower bounds cannot be 0 or Mdot will be NaN
-vvL = 0.1; vvU = 3.;
+% velocity limits, scaled to problem. 
+vhL = 0.; vhU = 5500.*HScale; 
+vvL = 0.; vvU = 5500.*VScale;
 
 
 
@@ -51,7 +56,7 @@ bounds.upper.states = [hU; vU; vhU; vvU; thetaU; omegaU];
 
 %ADJUSTED FOR NORMALISATION
 bounds.lower.controls = [0.; 0.];
-bounds.upper.controls = [2.; 100.]; 
+bounds.upper.controls = [100000.; 100.]; 
 
 %------------------
 % bound the horizon
@@ -75,7 +80,7 @@ bounds.upper.time	= [t0; tfMax];			    % Fixed time at t0 and a possibly free ti
 % bounds.lower.events = [0; 0; 2; 2; 100/X; 100/Y; 2 ; 2]; %works with
 % X,Y,T =100, or all 10
 % bounds.lower.events = [0; 0; 10; 10; 100/X; 100/Y; 10 ; 10];
-bounds.lower.events = [0; 0; 10.; 10.];
+bounds.lower.events = [0; 0; ScaleDh; ScaleDv];
 
 % bounds.lower.events = [0; 0; 1; 1; 10/X; 10/Y; 1 ; 1];
 bounds.upper.events = bounds.lower.events;      % equality event function bounds
@@ -124,6 +129,10 @@ t = primal.nodes;
 
 tau = primal.controls(1,:);
 Mc = primal.controls(2,:);
+
+%calculating for interest
+c = 1000.;
+M = sqrt((vh./HScale).^2 + (vv./VScale).^2)/c 
 
 
 figure(1)
