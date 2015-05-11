@@ -47,24 +47,24 @@ Out_force = dlmread('out_force.txt');
 %an initial interpolator for the force values at a fixed Arot, alpha and
 %dynamic pressure (0,  -0.0174532925199 (negative up) , 45000.0)
 
-M_array = [4.5 , 5. , 5.5]; 
-Fx_array = [-36427.6593981 , -42995.3909773 , -50209.1507264];
-Fz_array = [ 26851.676829 , 25865.7310572 , 24420.6025981 ];
-My_array = [305002.235162 , 256125.242712 , 196654.950117 ];
-
-
-global HScale;
-global VScale;
-Fx = interp1(M_array, Fx_array, vv/1000) * HScale ;% These give NaN values if not within interpolation range
-Fz = interp1(M_array, Fx_array, vv/1000) * VScale ;
+% M_array = [4.5 , 5. , 5.5]; 
+% Fx_array = [-36427.6593981 , -42995.3909773 , -50209.1507264];
+% Fz_array = [ 26851.676829 , 25865.7310572 , 24420.6025981 ];
+% My_array = [305002.235162 , 256125.242712 , 196654.950117 ];
+% 
+% 
+% global HScale;
+% global VScale;
+% Fx = spline(M_array, Fx_array, M) * HScale ;% These give NaN values if not within interpolation range
+% Fz = spline(M_array, Fx_array, M) * VScale ;
 
 
 
 Fx = -sqrt(vh.^2 + vv.^2); 
 % Fx = -50000.;
 Fz = -0.1*sqrt(vh.^2 + vv.^2); 
-% % Fz = 0.;
-My = 0.;
+% Fz = 0.;
+My = 0.; %moment
 
 
 
@@ -76,7 +76,13 @@ omegadot = (My  + Mc)/Iy;
 %====================================================================
 
 %Placeholder
-Mdot = 0.001.*vv;
+c = 10;
+vh;
+vhdot;
+vv;
+vvdot;
+Mdot = (vh.*vhdot + vv.*vvdot)./(c.*sqrt(vh.^2 + vv.^2)); %Mach derivative calculated from base principles
+
 %======================================================
 XDOT = [hdot; vdot; vhdot; vvdot; thetadot; omegadot; Mdot];
 %======================================================

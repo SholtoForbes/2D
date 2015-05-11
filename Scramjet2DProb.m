@@ -32,8 +32,8 @@ VScale = 10./TrueDv ; % Vertical scale
 hL = 0; hU = 20.;  % Box Constraints. These are important, setting upper box constraint equal to upper bounds on path does not work, nor does setting this too high
 vL = 0; vU = 20.;  % Keep these in terms of scaled h and v
 
-vhL = 0.; vhU = 3.;
-vvL = 0.; vvU = 3.;
+vhL = 0.1; vhU = 3.; % lower bounds cannot be 0 or Mdot will be NaN
+vvL = 0.1; vvU = 3.;
 
 
 
@@ -118,6 +118,7 @@ vh = primal.states(3,:);
 vv = primal.states(4,:);
 theta = primal.states(5,:);
 omega = primal.states(6,:);
+M = primal.states(7,:);
 
 t = primal.nodes;
 
@@ -126,42 +127,45 @@ Mc = primal.controls(2,:);
 
 
 figure(1)
-subplot(3,3,1)
+subplot(3,4,1)
 plot(h,v)
 title('h-v')
-subplot(3,3,2)
+subplot(3,4,2)
 plot(t, vh)
 title('vh')
-subplot(3,3,3)
+subplot(3,4,3)
 plot(t, vv)
 title('vv')
 
-subplot(3,3,4)
+subplot(3,4,4)
 plot(t, theta)
 title('theta')
-subplot(3,3,5)
+subplot(3,4,5)
 plot(t, omega)
 title('omega')
-subplot(3,3,6)
+subplot(3,4,6)
 plot(t, Mc)
 title('Mc')
-subplot(3,3,7)
+subplot(3,4,7)
 plot(t, tau)
 title('tau')
+subplot(3,4,8)
+plot(t, M)
+title('M')
 
 lam1 = dual.dynamics(1,:);
 lam2 = dual.dynamics(2,:);
 lam3 = dual.dynamics(3,:);
 lam4 = dual.dynamics(4,:);
 
-subplot(3,3,8);
+subplot(3,4,9);
 plot(t, [lam1; lam2; lam3; lam4]);
 title('costates')
 xlabel('time');
 ylabel('costates');
 legend('\lambda_1', '\lambda_2', '\lambda_3', '\lambda_4');
 
-subplot(3,3,9)
+subplot(3,4,10)
 H = dual.Hamiltonian(1,:);
 plot(t,H);
 title('Hamiltonian')
