@@ -7,8 +7,8 @@ clear all;
 %Scaling
 
 %================================================
-TrueDh = 10.; % True horizontal distance
-TrueDv = 10.; % True vertical distance
+TrueDh = 1000.; % True horizontal distance
+TrueDv = 100.; % True vertical distance
 
 global HScale
 HScale = 10./TrueDh ; % Horizontal scale
@@ -42,12 +42,12 @@ omegaL = 0; omegaU = 1.;
 
 
 %Added these as placeholders
-MU = 10.;
-ML = 0.;
+% MU = 10.;
+% ML = 0.;
 
 
-bounds.lower.states = [hL; vL; vhL; vvL; thetaL; omegaL; ML];
-bounds.upper.states = [hU; vU; vhU; vvU; thetaU; omegaU; MU];
+bounds.lower.states = [hL; vL; vhL; vvL; thetaL; omegaL];
+bounds.upper.states = [hU; vU; vhU; vvU; thetaU; omegaU];
 
 %ADJUSTED FOR NORMALISATION
 bounds.lower.controls = [0.; 0.];
@@ -118,7 +118,7 @@ vh = primal.states(3,:);
 vv = primal.states(4,:);
 theta = primal.states(5,:);
 omega = primal.states(6,:);
-M = primal.states(7,:);
+% M = primal.states(7,:);
 
 t = primal.nodes;
 
@@ -149,9 +149,9 @@ title('Mc')
 subplot(3,4,7)
 plot(t, tau)
 title('tau')
-subplot(3,4,8)
-plot(t, M)
-title('M')
+% subplot(3,4,8)
+% plot(t, M)
+% title('M')
 
 lam1 = dual.dynamics(1,:);
 lam2 = dual.dynamics(2,:);

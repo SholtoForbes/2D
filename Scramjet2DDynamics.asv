@@ -16,7 +16,7 @@ vh = primal.states(3,:);
 vv = primal.states(4,:);
 theta  = primal.states(5,:);
 omega = primal.states(6,:);
-
+M = primal.states(7,:);
 
 tau  = primal.controls(1,:); %Thrust
 Mc = primal.controls(2,:); %Control Moment
@@ -41,14 +41,6 @@ hdot = vh;
 vdot = vv;							 
 
 %===========================================================
-
-% Mach no
-c = 1000; % speed of sound (replace with atmosphere)
-M = sqrt(vh.^2 + vv.^2)/1000 ./ (HScale.*cos(theta) + VScale.*sin(theta));
-
-
-
-
 % Adding better scramjet dynamics, added 21/4/15
 % communicator matrix is given in terms of forces and moments
 Iy = 1.;
@@ -63,17 +55,17 @@ Out_force = dlmread('out_force.txt');
 % Fz_array = [ 26851.676829 , 25865.7310572 , 24420.6025981 ];
 % My_array = [305002.235162 , 256125.242712 , 196654.950117 ];
 % 
-% Scaled with a dot product of the scaling factors and the force directions
+% 
 % global HScale;
 % global VScale;
-% Fx = spline(M_array, Fx_array, M) .* (HScale.*cos(theta) + VScale.*sin(theta)) ;
-% Fz = spline(M_array, Fx_array, M)  .* (HScale.*sin(theta) + VScale.*cos(theta));
+% Fx = spline(M_array, Fx_array, M)  ;% These give NaN values if not within interpolation range
+% Fz = spline(M_array, Fx_array, M)  ;
 
 
 
-Fx = -sqrt(vh.^2 + vv.^2) .* (HScale.*cos(theta) + VScale.*sin(theta));
+Fx = -sqrt(vh.^2 + vv.^2) .* (Hscale.*cos(theta) + ; 
 % Fx = -50000.;
-Fz = -0.1*sqrt(vh.^2 + vv.^2).* (HScale.*sin(theta) + VScale.*cos(theta)); 
+Fz = -0.1*sqrt(vh.^2 + vv.^2); 
 % Fz = 0.;
 My = 0.; %moment
 
@@ -86,7 +78,14 @@ thetadot = omega;
 omegadot = (My  + Mc)/Iy;
 %====================================================================
 
+%Placeholder
+c = 10;
+vh;
+vhdot;
+vv;
+vvdot;
+Mdot = (vh.*vhdot + vv.*vvdot)./(c.*sqrt(vh.^2 + vv.^2)); %Mach derivative calculated from base principles
 
 %======================================================
-XDOT = [hdot; vdot; vhdot; vvdot; thetadot; omegadot];
+XDOT = [hdot; vdot; vhdot; vvdot; thetadot; omegadot; Mdot];
 %======================================================
