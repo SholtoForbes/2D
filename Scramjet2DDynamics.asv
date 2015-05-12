@@ -18,10 +18,8 @@ theta  = primal.states(5,:);
 omega = primal.states(6,:);
 
 
-% tau  = primal.controls(1,:); %Thrust
-Fx  = primal.controls(1,:); %Thrust
-Fz  = primal.controls(2,:); %Thrust
-Mc = primal.controls(3,:); %Control Moment
+tau  = primal.controls(1,:); %Thrust
+Mc = primal.controls(2,:); %Control Moment
 
 %=======================================================
 % Equations of Motion:
@@ -87,8 +85,7 @@ My = 0.; %moment
 % vvdot = ((Fx.*sin(theta) + Fz.*cos(theta)  + tau.*sin(theta))/m - g) .* VScale;
 
 
-vhdot = (Fx.*cos(theta) - Fz.*sin(theta)  )/m .* HScale;
-vvdot = ((Fx.*sin(theta) + Fz.*cos(theta) )/m - g) .* VScale;
+
 
 thetadot = omega;
 omegadot = (My  + Mc)/Iy;

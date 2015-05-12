@@ -129,7 +129,6 @@ t = primal.nodes;
 
 Fx = primal.controls(1,:);
 Fz = primal.controls(2,:);
-Mc = primal.controls(3,:);
 
 %calculating for interest
 c = 1000.;
@@ -157,11 +156,8 @@ subplot(3,4,6)
 plot(t, Mc)
 title('Mc')
 subplot(3,4,7)
-plot(t, Fx)
-title('Fx')
-subplot(3,4,8)
-plot(t, Fz)
-title('Fz')
+plot(t, tau)
+title('tau')
 % subplot(3,4,8)
 % plot(t, M)
 % title('M')
@@ -184,62 +180,62 @@ plot(t,H);
 title('Hamiltonian')
 
 
-% 
-% %------ Forward Simulation -----------
-% 
-% % need to replace this with CADAC
-% 
-% % Import Controls, Time and Initial States
-% % these are the only things carried over from the PS method
-% tau_Forward = tau;
-% Mc_Forward = Mc;
-% t_Forward = t;
-% h_Forward(1) = h(1);
-% v_Forward(1) = v(1);
-% vh_Forward(1) = vh(1);
-% vv_Forward(1) = vv(1);
-% omega_Forward(1) = omega(1);
-% theta_Forward(1) = theta(1);
-% %--------------
+
+%------ Forward Simulation -----------
+
+% need to replace this with CADAC
+
+% Import Controls, Time and Initial States
+% these are the only things carried over from the PS method
+tau_Forward = tau;
+Mc_Forward = Mc;
+t_Forward = t;
+h_Forward(1) = h(1);
+v_Forward(1) = v(1);
+vh_Forward(1) = vh(1);
+vv_Forward(1) = vv(1);
+omega_Forward(1) = omega(1);
+theta_Forward(1) = theta(1);
+%--------------
 
 
-% Iy_Forward = 1.;
-% m_Forward = 1000.;
-% 
-% Fx_Forward = 0.; %Taking these out for testing
-% Fz_Forward = 0.;
-% My_Forward = 0.;
+Iy_Forward = 1.;
+m_Forward = 1000.;
+
+Fx_Forward = 0.; %Taking these out for testing
+Fz_Forward = 0.;
+My_Forward = 0.;
 
 
 
 
-% simple forward method
-% for i=2:length(Mc_Forward)
-% omegadot_Forward(i-1) = (My_Forward  + Mc_Forward(i-1))/Iy_Forward;
-% omega_Forward(i) = omegadot_Forward(i-1)*(t_Forward(i) - t_Forward(i-1)) + omega_Forward(i-1);
-% 
-% thetadot_Forward(i-1) = omega_Forward(i-1);
-% theta_Forward(i) = thetadot_Forward(i-1)*(t_Forward(i) - t_Forward(i-1)) + theta_Forward(i-1);
-% 
-%     
-% vhdot_Forward(i-1) = (Fx_Forward.*cos(theta_Forward(i-1)) + Fz_Forward.*sin(theta_Forward(i-1))  + tau_Forward(i-1).*cos(theta_Forward(i-1)))/m_Forward;
-% vh_Forward(i) = vhdot_Forward(i-1)*(t_Forward(i) - t_Forward(i-1)) + vh_Forward(i-1);
-% 
-% vvdot_Forward(i-1) = (-Fx_Forward.*sin(theta_Forward(i-1)) + Fz_Forward.*cos(theta_Forward(i-1))  + tau_Forward(i-1).*sin(theta_Forward(i-1)))/m_Forward;
-% vv_Forward(i) = vvdot_Forward(i-1)*(t_Forward(i) - t_Forward(i-1)) + vv_Forward(i-1);
-% 
-% 
-% hdot_Forward(i-1) = vh_Forward(i-1);
-% h_Forward(i) = hdot_Forward(i-1)*(t_Forward(i) - t_Forward(i-1)) + h_Forward(i-1);
-% 
-% vdot_Forward(i-1) = vv_Forward(i-1);
-% v_Forward(i) = vdot_Forward(i-1)*(t_Forward(i) - t_Forward(i-1)) + v_Forward(i-1);
-% 
-% end
-% 
-% 
-% figure(2)
-% plot(h_Forward, v_Forward)
+%simple forward method
+for i=2:length(Mc_Forward)
+omegadot_Forward(i-1) = (My_Forward  + Mc_Forward(i-1))/Iy_Forward;
+omega_Forward(i) = omegadot_Forward(i-1)*(t_Forward(i) - t_Forward(i-1)) + omega_Forward(i-1);
+
+thetadot_Forward(i-1) = omega_Forward(i-1);
+theta_Forward(i) = thetadot_Forward(i-1)*(t_Forward(i) - t_Forward(i-1)) + theta_Forward(i-1);
+
+    
+vhdot_Forward(i-1) = (Fx_Forward.*cos(theta_Forward(i-1)) + Fz_Forward.*sin(theta_Forward(i-1))  + tau_Forward(i-1).*cos(theta_Forward(i-1)))/m_Forward;
+vh_Forward(i) = vhdot_Forward(i-1)*(t_Forward(i) - t_Forward(i-1)) + vh_Forward(i-1);
+
+vvdot_Forward(i-1) = (-Fx_Forward.*sin(theta_Forward(i-1)) + Fz_Forward.*cos(theta_Forward(i-1))  + tau_Forward(i-1).*sin(theta_Forward(i-1)))/m_Forward;
+vv_Forward(i) = vvdot_Forward(i-1)*(t_Forward(i) - t_Forward(i-1)) + vv_Forward(i-1);
+
+
+hdot_Forward(i-1) = vh_Forward(i-1);
+h_Forward(i) = hdot_Forward(i-1)*(t_Forward(i) - t_Forward(i-1)) + h_Forward(i-1);
+
+vdot_Forward(i-1) = vv_Forward(i-1);
+v_Forward(i) = vdot_Forward(i-1)*(t_Forward(i) - t_Forward(i-1)) + v_Forward(i-1);
+
+end
+
+
+figure(2)
+plot(h_Forward, v_Forward)
 
 
 
