@@ -49,10 +49,13 @@ omegaL = -1.0; omegaU = 1.;
 %Added these as placeholders
 % MU = 10.;
 % ML = 0.;
+% fuel, bounds are arbitrary
+fuelL = 0;
+fuelU = 1;
 
 
-bounds.lower.states = [hL; vL; vhL; vvL; thetaL; omegaL];
-bounds.upper.states = [hU; vU; vhU; vvU; thetaU; omegaU];
+bounds.lower.states = [hL; vL; vhL; vvL; thetaL; omegaL; fuelL];
+bounds.upper.states = [hU; vU; vhU; vvU; thetaU; omegaU; fuelU];
 
 %ADJUSTED FOR NORMALISATION
 bounds.lower.controls = [-200000.;-200000.; -100.];
@@ -75,13 +78,12 @@ bounds.upper.time	= [t0; tfMax];			    % Fixed time at t0 and a possibly free ti
 % See events file for definition of events function
 
 
-% bounds.lower.events = [0; 0; ScaleDh; ScaleDv];
-bounds.lower.events = [0; 0;  ScaleDh; ScaleDv ];
+bounds.lower.events = [0; 0; ScaleDh; ScaleDv];
+% bounds.lower.events = [0; 0; 0; 0;  ScaleDh; ScaleDv ; 0; 0]; %ADDED V BOUNDS< CANT GET THIS TO WORK
 
 
-% bounds.lower.events = [0; 0; 1; 1; 10/X; 10/Y; 1 ; 1];
 bounds.upper.events = bounds.lower.events;      % equality event function bounds
-% bounds.upper.events = [0; 0; 2; 2; 10/X; 10/Y; 3 ; 3];
+% bounds.upper.events = [0; 0; 7000*HScale; 7000*VScale;  ScaleDh; ScaleDv ; 7000*HScale; 7000*VScale];
 
 %============================================
 % Define the problem using DIDO expresssions:
@@ -109,6 +111,7 @@ guess.states(3,:) = [(ScaleDh-0)/(tfGuess-0), (ScaleDh-0)/(tfGuess-0), (ScaleDh-
 guess.states(4,:) = [(ScaleDh-0)/(tfGuess-0), (ScaleDv-0)/(tfGuess-0), (ScaleDh-0)/(tfGuess-0)]; %vv
 guess.states(5,:) = [0.78,0.78,0.78]; %theta, guess set at 45 degrees
 guess.states(6,:) = [0,0,0]; %omega
+guess.states(7,:) = [1.,1.,1.]; %fuel
 guess.controls(1,:)    = [0,0,0]; %Fx, these are net force so 0 guess
 guess.controls(2,:)    = [0,0,0]; %Fz
 guess.controls(3,:)    = [0,0,0]; %Mc

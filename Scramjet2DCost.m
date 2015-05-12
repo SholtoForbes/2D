@@ -8,11 +8,14 @@ function [EndpointCost, RunningCost] = Brac1Cost(primal)
 % tf = primal.nodes(end);     
 % EndpointCost = tf;
 
+dfuel = primal.states(7,end) - primal.states(7,1);     %change in fuel, this will be negative
+EndpointCost = -dfuel;
 
 % It is able to run with no cost at all:
-EndpointCost = 0;
+% EndpointCost = 0;
 
 % RunningCost = primal.controls(1,:);
 RunningCost = 0;
+
 % That's it!
 % Remember to fill the first output first!

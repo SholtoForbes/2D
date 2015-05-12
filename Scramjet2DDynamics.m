@@ -16,6 +16,7 @@ vh = primal.states(3,:);
 vv = primal.states(4,:);
 theta  = primal.states(5,:);
 omega = primal.states(6,:);
+fuel = primal.states(7,:); % might need to be changed to a generic efficiency term
 
 
 % tau  = primal.controls(1,:); %Thrust
@@ -92,9 +93,12 @@ vvdot = ((Fx.*sin(theta) + Fz.*cos(theta) )/m - g) .* VScale;
 
 thetadot = omega;
 omegadot = (My  + Mc)/Iy;
+
+
+fueldot = -0.000001* Fx; % this will need to be changed, as fuel is percentage at the moment
 %====================================================================
 
 
 %======================================================
-XDOT = [hdot; vdot; vhdot; vvdot; thetadot; omegadot];
+XDOT = [hdot; vdot; vhdot; vvdot; thetadot; omegadot; fueldot];
 %======================================================
