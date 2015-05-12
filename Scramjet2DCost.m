@@ -5,14 +5,14 @@ function [EndpointCost, RunningCost] = Brac1Cost(primal)
 % I. Michael Ross
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-tf = primal.nodes(end);     
-EndpointCost = tf;
+% tf = primal.nodes(end);     
+% EndpointCost = tf;
 
 
-% It seems to be able to run with no cost at all:
-% EndpointCost = 0;
+% It is able to run with no cost at all:
+EndpointCost = 0;
 
+% RunningCost = primal.controls(1,:);
 RunningCost = 0;
-
 % That's it!
 % Remember to fill the first output first!

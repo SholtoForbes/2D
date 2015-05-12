@@ -37,13 +37,13 @@ hL = 0; hU = 20.;  % Box Constraints. These are important, setting upper box con
 vL = 0; vU = 20.;  % Keep these in terms of scaled h and v
 
 % velocity limits, scaled to problem. 
-vhL = 4000.*HScale; vhU = 5500.*HScale; 
-vvL = 0.; vvU = 5500.*VScale;
+vhL = 0.*HScale; vhU = 5500.*HScale; 
+vvL = -5500.*VScale; vvU = 5500.*VScale;
 
 
 
-thetaL = 0; thetaU = 1.57; %these will need to be adjusted
-omegaL = 0; omegaU = 1.;
+thetaL = -1.57; thetaU = 1.57; %these will need to be adjusted
+omegaL = -1.0; omegaU = 1.;
 
 
 %Added these as placeholders
@@ -55,8 +55,8 @@ bounds.lower.states = [hL; vL; vhL; vvL; thetaL; omegaL];
 bounds.upper.states = [hU; vU; vhU; vvU; thetaU; omegaU];
 
 %ADJUSTED FOR NORMALISATION
-bounds.lower.controls = [0.; 0.];
-bounds.upper.controls = [100000.; 100.]; 
+bounds.lower.controls = [0.; -100.];
+bounds.upper.controls = [200000.; 100.]; % Control bounds, Unscaled
 
 %------------------
 % bound the horizon
@@ -98,7 +98,7 @@ Brac_1.bounds       = bounds;
 %====================================================
 
 % Dont know how this changes the output yet...
-algorithm.nodes		= [40];					    % represents some measure of desired solution accuracy
+algorithm.nodes		= [50];					    % represents some measure of desired solution accuracy
 
 % algorith.mode = 'accurate';  %this did not seem to make a difference 28/4
 
