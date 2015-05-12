@@ -1,4 +1,4 @@
-function endpointFunction = Brac1Events(primal)
+function endpointFunction = ScramEvents(primal)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Endpoint function for the Brac: 1 Problem 
 % Template for a A Beginner's Guide to DIDO 

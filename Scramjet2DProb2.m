@@ -41,22 +41,12 @@ vhL = 0.*HScale; vhU = 10000.*HScale;
 vvL = -10000.*VScale; vvU = 10000.*VScale;
 
 
-
-thetaL = -1.57; thetaU = 1.57; %these will need to be adjusted
-omegaL = -1.0; omegaU = 1.;
-
-
-%Added these as placeholders
-% MU = 10.;
-% ML = 0.;
-
-
-bounds.lower.states = [hL; vL; vhL; vvL; thetaL; omegaL];
-bounds.upper.states = [hU; vU; vhU; vvU; thetaU; omegaU];
+bounds.lower.states = [hL; vL; vhL; vvL];
+bounds.upper.states = [hU; vU; vhU; vvU];
 
 %ADJUSTED FOR NORMALISATION
-bounds.lower.controls = [-200000.;-200000.; -100.];
-bounds.upper.controls = [200000.;200000.; 100.]; % Control bounds, Unscaled
+bounds.lower.controls = [-200000.;-200000.];
+bounds.upper.controls = [200000.;200000.]; % Control bounds, Unscaled
 
 %------------------
 % bound the horizon
@@ -76,7 +66,7 @@ bounds.upper.time	= [t0; tfMax];			    % Fixed time at t0 and a possibly free ti
 
 
 % bounds.lower.events = [0; 0; ScaleDh; ScaleDv];
-bounds.lower.events = [0; 0;  ScaleDh; ScaleDv ];
+bounds.lower.events = [0.; 0.; ScaleDh; ScaleDv;];
 
 
 % bounds.lower.events = [0; 0; 1; 1; 10/X; 10/Y; 1 ; 1];
@@ -86,12 +76,12 @@ bounds.upper.events = bounds.lower.events;      % equality event function bounds
 %============================================
 % Define the problem using DIDO expresssions:
 %============================================
-Brac_1.cost 		= 'Scramjet2DCost';
-Brac_1.dynamics	    = 'Scramjet2DDynamics';
-Brac_1.events		= 'Scramjet2DEvents';		
+Scram.cost 		= 'Scramjet2DCost2';
+Scram.dynamics	    = 'Scramjet2DDynamics2';
+Scram.events		= 'Scramjet2DEvents2';		
 %Path file optional	
 
-Brac_1.bounds       = bounds;
+Scram.bounds       = bounds;
 %====================================================
 
 % Dont know how this changes the output yet...
@@ -100,32 +90,32 @@ algorithm.nodes		= [50];					    % represents some measure of desired solution a
 % algorith.mode = 'accurate';  %this did not seem to make a difference 28/4
 
 
-% Guess
-tfGuess = .15;  % this has been chosen to give an appropriate Mach no guess
-%========================================================================
-guess.states(1,:) = [0, ScaleDh/2, ScaleDh]; %H
-guess.states(2,:) = [0, ScaleDv/2,  ScaleDv]; %V
-guess.states(3,:) = [(ScaleDh-0)/(tfGuess-0), (ScaleDh-0)/(tfGuess-0), (ScaleDh-0)/(tfGuess-0) ]; %vh, Just basic derivatives fo now, constant
-guess.states(4,:) = [(ScaleDh-0)/(tfGuess-0), (ScaleDv-0)/(tfGuess-0), (ScaleDh-0)/(tfGuess-0)]; %vv
-guess.states(5,:) = [0.78,0.78,0.78]; %theta, guess set at 45 degrees
-guess.states(6,:) = [0,0,0]; %omega
-guess.controls(1,:)    = [0,0,0]; %Fx, these are net force so 0 guess
-guess.controls(2,:)    = [0,0,0]; %Fz
-guess.controls(3,:)    = [0,0,0]; %Mc
-guess.time        = [t0, tfGuess/2, tfGuess];
-%=======================================================================
-
-% Tell DIDO the guess.  Note: The guess-free option is not available when
-% using "knots"
-%========================
-algorithm.guess = guess;
-%========================
+% % Guess
+% tfGuess = .15;  % this has been chosen to give an appropriate Mach no guess
+% %========================================================================
+% guess.states(1,:) = [0, ScaleDh/2, ScaleDh]; %H
+% guess.states(2,:) = [0, ScaleDv/2,  ScaleDv]; %V
+% guess.states(3,:) = [2000, (ScaleDh-0)/(tfGuess-0), 5000 ]; %vh, Just basic derivatives fo now, constant
+% guess.states(4,:) = [2000, (ScaleDv-0)/(tfGuess-0), 0]; %vv
+% guess.states(5,:) = [0.78,0.78/2,0.]; %theta, guess set at 45 degrees
+% guess.states(6,:) = [0,0,0]; %omega
+% guess.controls(1,:)    = [0,0,0]; %Fx, these are net force so 0 guess
+% guess.controls(2,:)    = [0,0,0]; %Fz
+% guess.controls(3,:)    = [0,0,0]; %Mc
+% guess.time        = [t0, tfGuess/2, tfGuess];
+% %=======================================================================
+% 
+% % Tell DIDO the guess.  Note: The guess-free option is not available when
+% % using "knots"
+% %========================
+% algorithm.guess = guess;
+% %========================
 
 
 
 % Call dido
 tStart= cputime;    % start CPU clock 
-[cost, primal, dual] = dido(Brac_1, algorithm);
+[cost, primal, dual] = dido(Scram, algorithm);
 runTime = cputime-tStart
 % Ta da!
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -141,15 +131,13 @@ h = primal.states(1,:);
 v = primal.states(2,:);
 vh = primal.states(3,:);
 vv = primal.states(4,:);
-theta = primal.states(5,:);
-omega = primal.states(6,:);
-% M = primal.states(7,:);
+
 
 t = primal.nodes;
 
-Fx = primal.controls(1,:);
-Fz = primal.controls(2,:);
-Mc = primal.controls(3,:);
+Fh = primal.controls(1,:);
+Fv = primal.controls(2,:);
+
 
 %calculating for interest
 c = 1000.;
@@ -167,21 +155,13 @@ subplot(3,4,3)
 plot(t, vv)
 title('vv')
 
-subplot(3,4,4)
-plot(t, theta)
-title('theta')
-subplot(3,4,5)
-plot(t, omega)
-title('omega')
-subplot(3,4,6)
-plot(t, Mc)
-title('Mc')
+
 subplot(3,4,7)
-plot(t, Fx)
-title('Fx')
+plot(t, Fh)
+title('Fh')
 subplot(3,4,8)
-plot(t, Fz)
-title('Fz')
+plot(t, Fv)
+title('Fv')
 % subplot(3,4,8)
 % plot(t, M)
 % title('M')
