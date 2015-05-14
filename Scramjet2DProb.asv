@@ -1,7 +1,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 2D Scramjet Flight
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-clear all;		
+% clear all;		
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Inputs ============================================
@@ -69,13 +69,8 @@ bounds.lower.states = [hL; vL; vhL; vvL; thetaL; omegaL; fuelL];
 bounds.upper.states = [hU; vU; vhU; vvU; thetaU; omegaU; fuelU];
 
 %ADJUSTED FOR NORMALISATION
-% bounds.lower.controls = [-200000.;-200000.; -200.];
-% bounds.upper.controls = [200000.;200000.; 200.]; % Control bounds, Unscaled
-
-bounds.lower.controls = [-15.;-15.; -200.];
-bounds.upper.controls = [15.;15.; 200.]; % Control bounds, Unscaled
-
-%works with omega bound to -1,1 and My bound to -200, 200
+bounds.lower.controls = [-200000.;-200000.; -100.];
+bounds.upper.controls = [200000.;200000.; 100.]; % Control bounds, Unscaled
 
 %------------------
 % bound the horizon
@@ -113,7 +108,7 @@ Brac_1.bounds       = bounds;
 %====================================================
 
 % Dont know how this changes the output yet...
-algorithm.nodes		= [50];					    % represents some measure of desired solution accuracy
+algorithm.nodes		= [60];					    % represents some measure of desired solution accuracy
 
 % algorith.mode = 'accurate';  %this did not seem to make a difference 28/4
 
@@ -162,8 +157,8 @@ guess.time        = [t0, tfGuess/2, tfGuess];
 % Tell DIDO the guess.  Note: The guess-free option is not available when
 % using "knots"
 %========================
-algorithm.guess = guess;
-% algorithm.guess = primal_old;
+% algorithm.guess = guess;
+algorithm.guess = primal_old;
 %========================
 
 
@@ -192,9 +187,9 @@ omega = primal.states(6,:);
 
 t = primal.nodes;
 
-ax = primal.controls(1,:);
-az = primal.controls(2,:);
-omegadot = primal.controls(3,:);
+Fx = primal.controls(1,:);
+Fz = primal.controls(2,:);
+Mc = primal.controls(3,:);
 
 %calculating for interest
 c = 300.; % this will need to be brought into line with vehicle model
@@ -219,14 +214,14 @@ subplot(3,4,5)
 plot(t, omega)
 title('omega')
 subplot(3,4,6)
-plot(t, omegadot)
-title('omegadot')
+plot(t, Mc)
+title('Mc')
 subplot(3,4,7)
-plot(t, ax)
-title('ax')
+plot(t, Fx)
+title('Fx')
 subplot(3,4,8)
-plot(t, az)
-title('az')
+plot(t, Fz)
+title('Fz')
 % subplot(3,4,8)
 % plot(t, M)
 % title('M')

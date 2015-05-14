@@ -94,11 +94,11 @@ My = spline(M_array, My_array, M)  ;
 
 
 
-Thrust = ax*m - Fd;
+Fx = 
 
 
 
-% Thrust =   Fx - Fd;
+Thrust =   Fx - Fd;
 
 % = Fz  - Flift; will need an additional z force term 
 
