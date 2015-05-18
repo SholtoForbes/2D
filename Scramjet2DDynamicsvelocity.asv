@@ -3,38 +3,30 @@ function XDOT = Brac1Dynamics(primal)
 % 2D Dynamics
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% need to add AoA
+global H_input
+global V_input
+global theta_array
+global StartingV
 
-global HScale
-global VScale
-global StartingV 
-global EndV 
-global EndH
 
 %changed notation to horizontal and vertical, x and y in plane of vehicle
-H = primal.states(1,:) ;  
-V = primal.states(2,:);		
-vh = primal.states(3,:);		
-vv = primal.states(4,:);
-theta  = primal.states(5,:);
-omega = primal.states(6,:);
-fuel = primal.states(7,:); % might need to be changed to a generic efficiency term
+vH = primal.states(1,:) ;  
+vV = primal.states(2,:);	
+
+fuel = primal.states(3,:); % might need to be changed to a generic efficiency term
+
+H = primal.states(4,:);
 
 
-% tau  = primal.controls(1,:); %Thrust
-
-% Fx  = primal.controls(1,:); %Thrust
-% Fz  = primal.controls(2,:); %Thrust
-% Mc = primal.controls(3,:); %Control Moment
+a  = primal.controls(1,:); %acceleration in x plane
 
 
-ax  = primal.controls(1,:); %Thrust
-az  = primal.controls(2,:); %Thrust
-omegadot = primal.controls(3,:); %Control Moment
+%Interpolating for V
+V = spline(H_input, V_input, H);
 
 
 %=======================================================
-% Equations of Motion:
+% Vehicle Model:
 %=======================================================
 
 %neglecting AoA, fixed reference frame
@@ -45,16 +37,6 @@ rho = 0.02;
 A = 3.;
 g = 9.81;
 %======================================================
-
-
-%
-
-						 
-
-%===========================================================
-% Vehicle Model for Fuel Term
-
-
 % Adding better scramjet dynamics, added 21/4/15
 % communicator matrix is given in terms of forces and moments
 
@@ -94,44 +76,30 @@ My = spline(M_array, My_array, M)  ;
 
 
 
-Fx = 
+Thrust = a*m - Fd + g*sin(theta);
 
 
 
-Thrust =   Fx - Fd;
+% Thrust =   Fx - Fd;
 
-% = Fz  - Flift; will need an additional z force term 
-
-
-
-
-
-
-
-% 1
-% vhdot = (Fx.*cos(theta) - Fz.*sin(theta)  + tau.*cos(theta))/m .* HScale;
-% vvdot = ((Fx.*sin(theta) + Fz.*cos(theta)  + tau.*sin(theta))/m - g) .* VScale;
 
 
 %=========================================================================================
 % Calculate Derivative Terms
-hdot = vh;
-vdot = vv;	
+Hdot = vH;
 
-% vhdot = (Fx.*cos(theta) - Fz.*sin(theta)  )/m .* HScale;
-% vvdot = ((Fx.*sin(theta) + Fz.*cos(theta) )/m - g) .* VScale;
+theta = spline(H_input(2:end), theta_array, H(2:end));
 
-vhdot = ax.*cos(theta) - az.*sin(theta)  ;
-vvdot = ax.*sin(theta) + az.*cos(theta) ;
-
-thetadot = omega;
-% omegadot = (Mc)/Iy;
+vHdot = a.*cos([0.78,theta]);   %will need to add initial angle term calculated from initial velocities
+vVdot = a.*sin([0.78,theta]); 
 
 
-fueldot = -0.01* Thrust; % this will need to be changed
+
+fueldot = -0.001 .* abs(a); % this will need to be changed
+
 %====================================================================
 
 
 %======================================================
-XDOT = [hdot; vdot; vhdot; vvdot; thetadot; omegadot; fueldot];
+XDOT = [vHdot; vVdot;  fueldot; Hdot];
 %======================================================

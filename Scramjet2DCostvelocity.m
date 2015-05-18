@@ -1,4 +1,4 @@
-function [EndpointCost, RunningCost] = Scram1Cost(primal)
+function [EndpointCost, RunningCost] = Brac1Cost(primal)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Endpoint Cost for the Brac:1 Formulation of the Brachistochrone Prob
 % Template for A Beginner's Guide to DIDO 
@@ -8,11 +8,14 @@ function [EndpointCost, RunningCost] = Scram1Cost(primal)
 % tf = primal.nodes(end);     
 % EndpointCost = tf;
 
+dfuel = primal.states(3,end) - primal.states(3,1);     %change in fuel, this will be negative
+EndpointCost = -dfuel;
 
 % It is able to run with no cost at all:
-EndpointCost = 0;
+% EndpointCost = 0;
 
-RunningCost = primal.controls(2,:);
-% RunningCost = 0;
+% RunningCost = primal.controls(1,:);
+RunningCost = 0;
+
 % That's it!
 % Remember to fill the first output first!

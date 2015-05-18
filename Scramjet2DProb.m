@@ -21,8 +21,8 @@ EndH = 10000;
 TrueDh = EndH; % True horizontal distance
 TrueDv = EndV - StartingV; % True vertical distance
 
-ScaleDh = 10.; %scaled distance. 10 seems to be a consistently good value
-ScaleDv = 10.;
+ScaleDh = 100.; %scaled distance. 10 seems to be a consistently good value
+ScaleDv = 100.;
 
 
 global HScale
@@ -45,7 +45,7 @@ VScale = ScaleDv./TrueDv ; % Vertical scale
 %---------------------------------------
 
 hL = 0; hU = 20.;  % Box Constraints. These are important, setting upper box constraint equal to upper bounds on path does not work, nor does setting this too high
-vL = 0; vU = 20.;  % Keep these in terms of scaled h and v
+vL = 0; vU = 11.;  % Keep these in terms of scaled h and v
 
 % velocity limits, scaled to problem. 
 vhL = 0.*HScale; vhU = 10000.*HScale; 
@@ -54,6 +54,7 @@ vvL = -10000.*VScale; vvU = 10000.*VScale;
 
 
 thetaL = -1.57; thetaU = 1.57; %these will need to be adjusted
+% thetaL = 0.6; thetaU = 0.9;
 omegaL = -1.0; omegaU = 1.;
 
 
@@ -65,15 +66,15 @@ fuelL = 0;
 fuelU = 1000;
 
 
-bounds.lower.states = [hL; vL; vhL; vvL; thetaL; omegaL; fuelL];
-bounds.upper.states = [hU; vU; vhU; vvU; thetaU; omegaU; fuelU];
+bounds.lower.states = [hL; vL;thetaL; omegaL; vhL; vvL;  fuelL];
+bounds.upper.states = [hU; vU; thetaU; omegaU; vhU; vvU;  fuelU];
 
 %ADJUSTED FOR NORMALISATION
 % bounds.lower.controls = [-200000.;-200000.; -200.];
 % bounds.upper.controls = [200000.;200000.; 200.]; % Control bounds, Unscaled
 
-bounds.lower.controls = [-15.;-15.; -200.];
-bounds.upper.controls = [15.;15.; 200.]; % Control bounds, Unscaled
+bounds.lower.controls = [-10.;-10.; -3.];
+bounds.upper.controls = [10.;10.; 3.]; % Control bounds, Unscaled
 
 %works with omega bound to -1,1 and My bound to -200, 200
 
@@ -94,7 +95,7 @@ bounds.upper.time	= [t0; tfMax];			    % Fixed time at t0 and a possibly free ti
 % See events file for definition of events function
 
 
-bounds.lower.events = [0; 0; ScaleDh; ScaleDv];
+bounds.lower.events = [0; 0; 0.78;0.; ScaleDh; ScaleDv; 0.;0.];
 % bounds.lower.events = [0; 0; 0; 0;  ScaleDh; ScaleDv ; 0; 0]; %ADDED V BOUNDS< CANT GET THIS TO WORK
 
 
@@ -124,14 +125,16 @@ tfGuess = .15;  % this has been chosen to give an appropriate Mach no guess
 % Straight trajectory
 guess.states(1,:) = [0, ScaleDh/2, ScaleDh]; %H
 guess.states(2,:) = [0, ScaleDv/2,  ScaleDv]; %V
-guess.states(3,:) = [ScaleDh/tfGuess, ScaleDh/tfGuess, ScaleDh/tfGuess ]; %vh, Just basic derivatives fo now, constant
-guess.states(4,:) = [ScaleDv/tfGuess, ScaleDv/tfGuess, ScaleDv/tfGuess]; %vv
-guess.states(5,:) = [0.78,0.78,0.78]; %theta, guess set at 45 degrees (scaled)
-guess.states(6,:) = [0,0,0]; %omega
+guess.states(3,:) = [0.78,0.78,0.78]; %theta, guess set at 45 degrees (scaled)
+guess.states(4,:) = [0,0,0]; %omega
+guess.states(5,:) = [ScaleDh/tfGuess, ScaleDh/tfGuess, ScaleDh/tfGuess ]; %vh, Just basic derivatives fo now, constant
+guess.states(6,:) = [ScaleDv/tfGuess, ScaleDv/tfGuess, ScaleDv/tfGuess]; %vv
+
 guess.states(7,:) = [1.,1.,1.]; %fuel
-guess.controls(1,:)    = [0,0,0]; %Fx, these are net force so 0 guess
-guess.controls(2,:)    = [0,0,0]; %Fz
-guess.controls(3,:)    = [0,0,0]; %Mc
+
+guess.controls(1,:)    = [0,0,0]; %ax, these are net force so 0 guess
+guess.controls(2,:)    = [0,0,0]; %az
+guess.controls(3,:)    = [0,0,0]; %omegadot
 guess.time        = [t0, tfGuess/2, tfGuess];
 %=======================================================================
 
@@ -184,10 +187,11 @@ runTime = cputime-tStart
 
 h = primal.states(1,:);
 v = primal.states(2,:);
-vh = primal.states(3,:);
-vv = primal.states(4,:);
-theta = primal.states(5,:);
-omega = primal.states(6,:);
+theta = primal.states(3,:);
+omega = primal.states(4,:);
+vh = primal.states(5,:);
+vv = primal.states(6,:);
+
 % M = primal.states(7,:);
 
 t = primal.nodes;

@@ -4,49 +4,53 @@
 clear all;		
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%Scaling
+% Inputs ============================================
 
-%================================================
-TrueDh = 1000.; % True horizontal distance
-TrueDv = 100.; % True vertical distance
-
-ScaleDh = 10.; %scaled distance. 10 seems to be a consistently good value
-ScaleDv = 10.;
-
-
-global HScale
-HScale = ScaleDh./TrueDh ; % Horizontal scale
-global VScale
-VScale = ScaleDv./TrueDv ; % Vertical scale
 %===============================================
 
 
 %===================
 % Problem variables:
-%-------------------
-% states = x, y, vx, vy, theta, omega
-% controls = tau, Mc
-%===================
 
+%===================
+global H_input
+H_input = [0,10,20,30,40,50,60,70,80,90,100] % Flight track starting at 0,0
+global V_input
+V_input = [0,10,20,30,40,50,60,70,80,90,100]
+
+
+HL = H_input(1);
+HU = H_input(end);
+
+global theta_array
+theta_array = atan(V_input(2:end)./H_input(2:end)); %this is calculated from 2nd term onwards as first term will always give NaN (also used in dynamics file)
+
+global StartingV
+StartingV = 20000; %Initial altitude in m
 
 %---------------------------------------
 % bounds the state and control variables
 %---------------------------------------
 
-hL = 0; hU = 20.;  % Box Constraints. These are important, setting upper box constraint equal to upper bounds on path does not work, nor does setting this too high
-vL = 0; vU = 20.;  % Keep these in terms of scaled h and v
+vHL = 1000.; vHU = 10000.;  % Box Constraints. These are important, setting upper box constraint equal to upper bounds on path does not work, nor does setting this too high
+vVL = 1000.; vVU = 10000.;  % Keep these in terms of scaled h and v
 
-% velocity limits, scaled to problem. 
-vhL = 0.*HScale; vhU = 10000.*HScale; 
-vvL = -10000.*VScale; vvU = 10000.*VScale;
+HL_box = 2*HL;
+HU_box = 2*HU;
+
+% fuel, bounds are arbitrary
+fuelL = 0;
+fuelU = 1000;
 
 
-bounds.lower.states = [hL; vL; vhL; vvL];
-bounds.upper.states = [hU; vU; vhU; vvU];
+bounds.lower.states = [vHL; vVL;  fuelL; HL_box];
+bounds.upper.states = [vHU; vVU;  fuelU; HU_box];
 
-%ADJUSTED FOR NORMALISATION
-bounds.lower.controls = [-200000.;-200000.];
-bounds.upper.controls = [200000.;200000.]; % Control bounds, Unscaled
+
+bounds.lower.controls = [-20.];
+bounds.upper.controls = [50.]; % Control bounds
+
+
 
 %------------------
 % bound the horizon
@@ -64,60 +68,37 @@ bounds.upper.time	= [t0; tfMax];			    % Fixed time at t0 and a possibly free ti
 %-------------------------------------------
 % See events file for definition of events function
 
+% bounds.lower.events = [1.; 1.; HL; 1. ; 1.; HU]; %with velocity
+% constraints
+bounds.lower.events = [HL;  HU];
 
-% bounds.lower.events = [0; 0; ScaleDh; ScaleDv];
-bounds.lower.events = [0.; 0.; ScaleDh; ScaleDv;];
-
-
-% bounds.lower.events = [0; 0; 1; 1; 10/X; 10/Y; 1 ; 1];
 bounds.upper.events = bounds.lower.events;      % equality event function bounds
-% bounds.upper.events = [0; 0; 2; 2; 10/X; 10/Y; 3 ; 3];
 
 %============================================
 % Define the problem using DIDO expresssions:
 %============================================
-Scram.cost 		= 'Scramjet2DCost2';
-Scram.dynamics	    = 'Scramjet2DDynamics2';
-Scram.events		= 'Scramjet2DEvents2';		
+Brac_1.cost 		= 'Scramjet2DCostvelocity';
+Brac_1.dynamics	    = 'Scramjet2DDynamicsvelocity';
+Brac_1.events		= 'Scramjet2DEventsvelocity';		
 %Path file optional	
 
-Scram.bounds       = bounds;
+Brac_1.bounds       = bounds;
 %====================================================
 
 % Dont know how this changes the output yet...
-algorithm.nodes		= [50];					    % represents some measure of desired solution accuracy
+algorithm.nodes		= [60];					    % represents some measure of desired solution accuracy
 
 % algorith.mode = 'accurate';  %this did not seem to make a difference 28/4
 
 
-% % Guess
-% tfGuess = .15;  % this has been chosen to give an appropriate Mach no guess
-% %========================================================================
-% guess.states(1,:) = [0, ScaleDh/2, ScaleDh]; %H
-% guess.states(2,:) = [0, ScaleDv/2,  ScaleDv]; %V
-% guess.states(3,:) = [2000, (ScaleDh-0)/(tfGuess-0), 5000 ]; %vh, Just basic derivatives fo now, constant
-% guess.states(4,:) = [2000, (ScaleDv-0)/(tfGuess-0), 0]; %vv
-% guess.states(5,:) = [0.78,0.78/2,0.]; %theta, guess set at 45 degrees
-% guess.states(6,:) = [0,0,0]; %omega
-% guess.controls(1,:)    = [0,0,0]; %Fx, these are net force so 0 guess
-% guess.controls(2,:)    = [0,0,0]; %Fz
-% guess.controls(3,:)    = [0,0,0]; %Mc
-% guess.time        = [t0, tfGuess/2, tfGuess];
-% %=======================================================================
-% 
-% % Tell DIDO the guess.  Note: The guess-free option is not available when
-% % using "knots"
-% %========================
-% algorithm.guess = guess;
-% %========================
-
 
 
 % Call dido
+% =====================================================================
 tStart= cputime;    % start CPU clock 
-[cost, primal, dual] = dido(Scram, algorithm);
+[cost, primal, dual] = dido(Brac_1, algorithm);
 runTime = cputime-tStart
-% Ta da!
+% ===================================================================
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -127,44 +108,49 @@ runTime = cputime-tStart
 
 
 
-h = primal.states(1,:);
-v = primal.states(2,:);
-vh = primal.states(3,:);
-vv = primal.states(4,:);
+vH = primal.states(1,:);
+vV = primal.states(2,:);
 
+fuel = primal.states(3,:);
+
+H = primal.states(4,:);
 
 t = primal.nodes;
 
-Fh = primal.controls(1,:);
-Fv = primal.controls(2,:);
+a = primal.controls(1,:);
 
 
 %calculating for interest
-c = 1000.;
-M = sqrt((vh./HScale).^2 + (vv./VScale).^2)/c 
+c = 300.; % this will need to be brought into line with vehicle model
+M = sqrt((vH).^2 + (vV).^2)/c ;
 
 
 figure(1)
+
 subplot(3,4,1)
-plot(h,v)
-title('h-v')
-subplot(3,4,2)
-plot(t, vh)
+plot(t, vH)
 title('vh')
-subplot(3,4,3)
-plot(t, vv)
+
+subplot(3,4,2)
+plot(t, vV)
 title('vv')
 
+subplot(3,4,3)
+plot(t, fuel)
+title('fuel')
+
+subplot(3,4,4)
+plot(t, H)
+title('H')
+
+subplot(3,4,5)
+plot(t, M)
+title('M')
 
 subplot(3,4,7)
-plot(t, Fh)
-title('Fh')
-subplot(3,4,8)
-plot(t, Fv)
-title('Fv')
-% subplot(3,4,8)
-% plot(t, M)
-% title('M')
+plot(t, a)
+title('a')
+
 
 lam1 = dual.dynamics(1,:);
 lam2 = dual.dynamics(2,:);
@@ -246,7 +232,7 @@ title('Hamiltonian')
 
 
 
-
+primal_old = primal;
 
 
 
