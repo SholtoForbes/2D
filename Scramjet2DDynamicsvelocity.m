@@ -10,12 +10,13 @@ global StartingV
 
 
 %changed notation to horizontal and vertical, x and y in plane of vehicle
-vH = primal.states(1,:) ;  
-vV = primal.states(2,:);	
+% vH = primal.states(1,:) ;  
+% vV = primal.states(2,:);	
+v = primal.states(1,:) ; 
 
-fuel = primal.states(3,:); % might need to be changed to a generic efficiency term
+fuel = primal.states(2,:); % might need to be changed to a generic efficiency term
 
-H = primal.states(4,:);
+H = primal.states(3,:);
 
 
 a  = primal.controls(1,:); %acceleration in x plane
@@ -58,8 +59,9 @@ c = spline( Atmosphere(:,1),  Atmosphere(:,5), Vabs);
 
 % Mach no
 % c = 300; % speed of sound (replace with atmosphere)
-M = sqrt((vH).^2 + (vV).^2)./c ;
+% M = sqrt((vH).^2 + (vV).^2)./c ;
 
+M = v./c ;
 
 
 %an initial interpolator for the force values at a fixed Arot, alpha and
@@ -91,21 +93,22 @@ Thrust = a*m - Fd + g*sin(theta) ; % Thrust term
 
 %=========================================================================================
 % Calculate Derivative Terms
-Hdot = vH;
+% Hdot = vH;
+
+Hdot = v.*sin(theta);
 
 
-
-vHdot = a.*cos(theta);   %will need to add initial angle term calculated from initial velocities
-vVdot = a.*sin(theta); 
-
+% vHdot = a.*cos(theta);   %will need to add initial angle term calculated from initial velocities
+% vVdot = a.*sin(theta); 
+vdot = a;
 
 
 % fueldot = -0.001 .* abs(a); % this will need to be changed
-fueldot = -0.0001 * Thrust;
+fueldot = -0.000001 * Thrust;
 
 %====================================================================
 
 
 %======================================================
-XDOT = [vHdot; vVdot;  fueldot; Hdot];
+XDOT = [vdot;  fueldot; Hdot];
 %======================================================

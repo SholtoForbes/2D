@@ -14,11 +14,12 @@ function endpointFunction = Brac1Events(primal)
 % H0 = primal.states(4,1);        Hf = primal.states(4,end);
 
 %no velocity constraints
-H0 = primal.states(4,1);		Hf = primal.states(4,end);
+H0 = primal.states(3,1);		Hf = primal.states(3,end);
+v0 = primal.states(1,1);
 
 % preallocate the endpointFunction evaluation for good MATLAB computing
 % endpointFunction = zeros(6,1);
-endpointFunction = zeros(2,1);
+endpointFunction = zeros(3,1);
 
 %need to change this depending on boundary conditions
 
@@ -30,6 +31,7 @@ endpointFunction = zeros(2,1);
 
 endpointFunction(1) = H0;
 endpointFunction(2) = Hf;
+endpointFunction(3) = v0;
 
 %-----------------------------------------------------------
 % endpointFunction(4) = vHf;

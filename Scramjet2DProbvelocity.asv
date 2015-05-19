@@ -49,8 +49,8 @@ bounds.lower.states = [vL ; fuelL; HL_box];
 bounds.upper.states = [vU;  fuelU; HU_box];
 
 
-bounds.lower.controls = [-20000.];
-bounds.upper.controls = [20000.]; % Control bounds
+bounds.lower.controls = [-200.];
+bounds.upper.controls = [1000.]; % Control bounds
 
 
 
@@ -88,19 +88,19 @@ Brac_1.bounds       = bounds;
 %====================================================
 
 % Dont know how this changes the output yet...
-algorithm.nodes		= [70];					    % represents some measure of desired solution accuracy
+algorithm.nodes		= [80];					    % represents some measure of desired solution accuracy
 
 % algorith.mode = 'accurate';  %this did not seem to make a difference 28/4
 
 
 %  Guess =================================================================
-guess.states(1,:) = [2500, 2500, 2500]; %v
-guess.states(2,:) = [50, 50,50]; %fuel
-guess.states(3,:) = [0, 500, 1000]; %H
+guess.states(1,:) = [2500, 2500, 2500]; %H
+guess.states(2,:) = [50, 50,50]; %V
+guess.states(3,:) = [0, ScaleDh/tfGuess, 2*ScaleDh/tfGuess, 4*ScaleDh/tfGuess ]; %vh, Just basic derivatives fo now, constant
 
-guess.controls(1,:)    = [100,100, 100]; %a, these are net force so 0 guess
+guess.controls(1,:)    = [0,0,0, 0]; %Fx, these are net force so 0 guess
 
-guess.time        = [t0,500/2500, 1000/2500];
+guess.time        = [t0, tfGuess/3,2*tfGuess/3, tfGuess];
 
 
 % Tell DIDO the guess.  Note: The guess-free option is not available when
