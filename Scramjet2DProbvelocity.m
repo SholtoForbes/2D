@@ -16,26 +16,38 @@ clear all;
 global H_input
 H_input = [0,100,200,300,400,500,600,700,800,900,1000] % Flight track starting at 0,0
 global V_input
-V_input = [0,100,200,300,400,500,600,700,800,900,1000]
-
-
-HL = H_input(1);
-HU = H_input(end);
+V_input = [0,50,100,150,200,250,300,350,400,450,500]
+% V_input = [0,0,0,0,0,0,0,0,0,0,0]
 
 global theta_array
-theta_array = atan(V_input(2:end)./H_input(2:end)); %this is calculated from 2nd term onwards as first term will always give NaN (also used in dynamics file)
+theta_array = atan((V_input(2:end)-V_input(1:end-1))./(H_input(2:end)-H_input(1:end-1))) 
 
+% Set required initial values
 global StartingV
 StartingV = 20000; %Initial altitude in m
 
+global theta_initial
+theta_initial = 0.78;
+
+global v_initial
+v_initial = 2500;
+
+% Scaling ========================================
+H_Scaled = 1000;
+
+global ScaleFactor
+ScaleFactor = H_Scaled/H_input(end);
+%========================================================
+
 %---------------------------------------
-% bounds the state and control variables
+% bound and scale the state and control variables
 %---------------------------------------
 
-% vHL = 1000.; vHU = 10000.;  % Box Constraints. These are important, setting upper box constraint equal to upper bounds on path does not work, nor does setting this too high
-% vVL = 1000.; vVU = 10000.;  % Keep these in terms of scaled h and v
+HL = H_input(1).*ScaleFactor;
+HU = H_input(end).*ScaleFactor;
 
-vL = 2000.; vU = 3000.;
+vL = 1000.*ScaleFactor;
+vU = 10000.*ScaleFactor;
 
 HL_box = 2*HL;
 HU_box = 2*HU;
@@ -49,14 +61,18 @@ bounds.lower.states = [vL ; fuelL; HL_box];
 bounds.upper.states = [vU;  fuelU; HU_box];
 
 
-bounds.lower.controls = [-20000.];
-bounds.upper.controls = [20000.]; % Control bounds
+% control (acceleration) bounds
+aL = -150.*ScaleFactor;
+aU = 150.*ScaleFactor;
 
+bounds.lower.controls = [aL];
+bounds.upper.controls = [aU]; 
 
 
 %------------------
 % bound the horizon
 %------------------
+% time bounds, this is SCALED
 t0	    = 0;
 tfMax 	= 15.;   % swag for max tf; DO NOT set to Inf even for time-free problems
 % remember to set higher than Vmax bounds min time
@@ -70,9 +86,9 @@ bounds.upper.time	= [t0; tfMax];			    % Fixed time at t0 and a possibly free ti
 %-------------------------------------------
 % See events file for definition of events function
 
-% bounds.lower.events = [1.; 1.; HL; 1. ; 1.; HU]; %with velocity
-% constraints
-bounds.lower.events = [HL;  HU; 2500];
+fuel_initial = 50;
+
+bounds.lower.events = [HL;  HU; v_initial; fuel_initial];
 
 bounds.upper.events = bounds.lower.events;      % equality event function bounds
 
@@ -94,13 +110,13 @@ algorithm.nodes		= [70];					    % represents some measure of desired solution a
 
 
 %  Guess =================================================================
-guess.states(1,:) = [2500, 2500, 2500]; %v
-guess.states(2,:) = [50, 50,50]; %fuel
-guess.states(3,:) = [0, 500, 1000]; %H
+guess.states(1,:) = [v_initial, v_initial, v_initial, v_initial, v_initial, v_initial, v_initial, v_initial, v_initial, v_initial, v_initial]*ScaleFactor; %v
+guess.states(2,:) = [50, 50, 50 , 50, 50, 50, 50, 50, 50, 50, 50]; %fuel
+guess.states(3,:) = [0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]*ScaleFactor; %H
 
-guess.controls(1,:)    = [100,100, 100]; %a, these are net force so 0 guess
+guess.controls(1,:)    = [0,0, 0,0,0,0,0,0,0,0,0]*ScaleFactor; %a
 
-guess.time        = [t0,500/2500, 1000/2500];
+guess.time        = [t0, 100/v_initial, 200/v_initial, 300/v_initial, 400/v_initial, 500/v_initial, 600/v_initial, 700/v_initial, 800/v_initial, 900/v_initial, 1000/v_initial]*ScaleFactor;
 
 
 % Tell DIDO the guess.  Note: The guess-free option is not available when

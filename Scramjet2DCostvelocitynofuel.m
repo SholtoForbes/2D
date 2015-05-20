@@ -1,8 +1,9 @@
-function XDOT = Brac1Dynamics(primal)
+function [EndpointCost, RunningCost] = Brac1Cost(primal)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 2D Dynamics
+% Endpoint Cost for the Brac:1 Formulation of the Brachistochrone Prob
+% Template for A Beginner's Guide to DIDO 
+% I. Michael Ross
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 global H_input
 global V_input
 global theta_array
@@ -10,31 +11,22 @@ global StartingV
 global theta_initial
 global ScaleFactor
 
-%changed notation to horizontal and vertical, x and y in plane of vehicle
-% vH = primal.states(1,:) ;  
-% vV = primal.states(2,:);	
-v = primal.states(1,:) ; 
-
-fuel = primal.states(2,:); % might need to be changed to a generic efficiency term
-
-H = primal.states(3,:);
-
-
-a  = primal.controls(1,:); %acceleration in x plane
-
-
-%Interpolating for V and descaling
-V = spline(H_input, V_input, H/ScaleFactor);
-
-%Interpolating for theta
-theta_temp = spline(H_input(2:end), theta_array, H(2:end));
-theta = [theta_initial,theta_temp]; %Appending an initial term on
-
-
 
 %=======================================================
 % Vehicle Model:
 %=======================================================
+v = primal.states(1,:) ; 
+
+H = primal.states(2,:);
+
+a  = primal.controls(1,:); %acceleration in x plane
+
+% %Interpolating for V and descaling
+V = spline(H_input, V_input, H/ScaleFactor);
+
+% %Interpolating for theta
+theta_temp = spline(H_input(2:end), theta_array, H(2:end));
+theta = [theta_initial,theta_temp]; %Appending an initial term on
 
 %neglecting AoA, fixed reference frame
 m = 3000.;
@@ -83,19 +75,24 @@ Flift = spline(M_array, Flift_array, M)  ;
 My = spline(M_array, My_array, M)  ;
 
 
-Thrust = a/ScaleFactor*m - Fd + g*sin(theta) ; % Thrust term
-
-%=========================================================================================
-% Calculate Derivative Terms
-vdot = a;
-
-Hdot = v.*sin(theta);
-
-fueldot = -0.000001 * Thrust;
-
-%====================================================================
+Thrust = a/ScaleFactor*m - Fd + g*sin(theta);  % Thrust term
 
 
-%======================================================
-XDOT = [vdot;  fueldot; Hdot];
-%======================================================
+efficiency = sum(Thrust); % this could be changes to anything rpresentative of efficiency
+
+% Define Cost =======================================================
+
+% EndpointCost = efficiency;
+
+tf = primal.nodes(end);     
+EndpointCost = tf;
+
+
+% It is able to run with no cost at all:
+% EndpointCost = 0;
+
+
+RunningCost = 0;
+
+% That's it!
+% Remember to fill the first output first!

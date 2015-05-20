@@ -16,47 +16,62 @@ clear all;
 global H_input
 H_input = [0,100,200,300,400,500,600,700,800,900,1000] % Flight track starting at 0,0
 global V_input
-V_input = [0,100,200,300,400,500,600,700,800,900,1000]
-
-
-HL = H_input(1);
-HU = H_input(end);
+V_input = [0,0,0,0,0,0,0,0,0,0,0]
 
 global theta_array
-theta_array = atan(V_input(2:end)./H_input(2:end)); %this is calculated from 2nd term onwards as first term will always give NaN (also used in dynamics file)
+theta_array = atan((V_input(2:end)-V_input(1:end-1))./(H_input(2:end)-H_input(1:end-1))) 
 
+% Set required initial values
 global StartingV
 StartingV = 20000; %Initial altitude in m
 
+global theta_initial
+theta_initial = 0.;
+
+
+
+% Scaling ========================================
+H_Scaled = 10;
+
+global ScaleFactor
+ScaleFactor = H_Scaled/H_input(end);
+%========================================================
+
+
+global v_initial
+v_initial = 2500.*ScaleFactor;
+
 %---------------------------------------
-% bounds the state and control variables
+% bound and scale the state and control variables
 %---------------------------------------
 
-% vHL = 1000.; vHU = 10000.;  % Box Constraints. These are important, setting upper box constraint equal to upper bounds on path does not work, nor does setting this too high
-% vVL = 1000.; vVU = 10000.;  % Keep these in terms of scaled h and v
+HL = H_input(1).*ScaleFactor;
+HU = H_input(end).*ScaleFactor;
 
-vL = 2000.; vU = 3000.;
+vL = 1000.*ScaleFactor;
+vU = 10000.*ScaleFactor;
 
 HL_box = 2*HL;
 HU_box = 2*HU;
 
 % fuel, bounds are arbitrary
-fuelL = 0;
-fuelU = 100;
+
+bounds.lower.states = [vL ;  HL_box];
+bounds.upper.states = [vU;  HU_box];
 
 
-bounds.lower.states = [vL ; fuelL; HL_box];
-bounds.upper.states = [vU;  fuelU; HU_box];
+% control (acceleration) bounds
+aL = -150.*ScaleFactor;
+aU = 150.*ScaleFactor;
 
-
-bounds.lower.controls = [-200.];
-bounds.upper.controls = [1000.]; % Control bounds
-
+bounds.lower.controls = [aL];
+bounds.upper.controls = [aU]; 
 
 
 %------------------
 % bound the horizon
 %------------------
+% time bounds, this is SCALED
 t0	    = 0;
 tfMax 	= 15.;   % swag for max tf; DO NOT set to Inf even for time-free problems
 % remember to set higher than Vmax bounds min time
@@ -70,18 +85,16 @@ bounds.upper.time	= [t0; tfMax];			    % Fixed time at t0 and a possibly free ti
 %-------------------------------------------
 % See events file for definition of events function
 
-% bounds.lower.events = [1.; 1.; HL; 1. ; 1.; HU]; %with velocity
-% constraints
-bounds.lower.events = [HL;  HU; 2500];
+bounds.lower.events = [HL;  HU; v_initial];
 
 bounds.upper.events = bounds.lower.events;      % equality event function bounds
 
 %============================================
 % Define the problem using DIDO expresssions:
 %============================================
-Brac_1.cost 		= 'Scramjet2DCostvelocity';
-Brac_1.dynamics	    = 'Scramjet2DDynamicsvelocity';
-Brac_1.events		= 'Scramjet2DEventsvelocity';		
+Brac_1.cost 		= 'Scramjet2DCostvelocitynofuel';
+Brac_1.dynamics	    = 'Scramjet2DDynamicsvelocitynofuel';
+Brac_1.events		= 'Scramjet2DEventsvelocitynofuel';		
 %Path file optional	
 
 Brac_1.bounds       = bounds;
@@ -94,21 +107,20 @@ algorithm.nodes		= [80];					    % represents some measure of desired solution a
 
 
 %  Guess =================================================================
-guess.states(1,:) = [2500, 2500, 2500]; %H
-guess.states(2,:) = [50, 50,50]; %V
-guess.states(3,:) = [0, ScaleDh/tfGuess, 2*ScaleDh/tfGuess, 4*ScaleDh/tfGuess ]; %vh, Just basic derivatives fo now, constant
-
-guess.controls(1,:)    = [0,0,0, 0]; %Fx, these are net force so 0 guess
-
-guess.time        = [t0, tfGuess/3,2*tfGuess/3, tfGuess];
-
-
-% Tell DIDO the guess.  Note: The guess-free option is not available when
-% using "knots"
-%========================
-algorithm.guess = guess;
-% algorithm.guess = primal_old;
-%========================
+% guess.states(1,:) = [v_initial, v_initial, v_initial, v_initial, v_initial, v_initial, v_initial, v_initial, v_initial, v_initial, v_initial]*ScaleFactor; %v
+% guess.states(2,:) = [0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]*ScaleFactor; %H
+% 
+% guess.controls(1,:)    = [0,0, 0,0,0,0,0,0,0,0,0]*ScaleFactor; %a
+% 
+% guess.time        = [t0, 100/v_initial, 200/v_initial, 300/v_initial, 400/v_initial, 500/v_initial, 600/v_initial, 700/v_initial, 800/v_initial, 900/v_initial, 1000/v_initial]*ScaleFactor;
+% 
+% 
+% % Tell DIDO the guess.  Note: The guess-free option is not available when
+% % using "knots"
+% %========================
+% algorithm.guess = guess;
+% % algorithm.guess = primal_old;
+% %========================
 
 
 % Call dido
@@ -130,9 +142,7 @@ runTime = cputime-tStart
 % vV = primal.states(2,:);
 v = primal.states(1,:) ; 
 
-fuel = primal.states(2,:);
-
-H = primal.states(3,:);
+H = primal.states(2,:);
 
 t = primal.nodes;
 
@@ -151,13 +161,6 @@ subplot(3,4,1)
 plot(t, v)
 title('v')
 
-% subplot(3,4,2)
-% plot(t, vV)
-% title('vv')
-
-subplot(3,4,3)
-plot(t, fuel)
-title('fuel')
 
 subplot(3,4,4)
 plot(t, H)
@@ -172,33 +175,16 @@ plot(t, a)
 title('a')
 
 
-% lam1 = dual.dynamics(1,:);
-% lam2 = dual.dynamics(2,:);
-% lam3 = dual.dynamics(3,:);
-% lam4 = dual.dynamics(4,:);
-% 
-% subplot(3,4,9);
-% plot(t, [lam1; lam2; lam3; lam4]);
-% title('costates')
-% xlabel('time');
-% ylabel('costates');
-% legend('\lambda_1', '\lambda_2', '\lambda_3', '\lambda_4');
-% 
-% subplot(3,4,10)
-% H = dual.Hamiltonian(1,:);
-% plot(t,H);
-% title('Hamiltonian')
 
 lam1 = dual.dynamics(1,:);
 lam2 = dual.dynamics(2,:);
-lam3 = dual.dynamics(3,:);
 
 subplot(3,4,9);
-plot(t, [lam1; lam2; lam3]);
+plot(t, [lam1; lam2]);
 title('costates')
 xlabel('time');
 ylabel('costates');
-legend('\lambda_1', '\lambda_2', '\lambda_3');
+legend('\lambda_1', '\lambda_2');
 
 subplot(3,4,10)
 H = dual.Hamiltonian(1,:);
