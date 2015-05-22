@@ -74,18 +74,26 @@ Fd = spline(M_array, Fd_array, M);
 Flift = spline(M_array, Flift_array, M)  ;
 My = spline(M_array, My_array, M)  ;
 
+% NEED TO INTRODUCE AoA FROM LIFT FORCE EQUALITY AND RESOLVE THRUST AND
+% MOMENT
+
 
 Thrust = a/ScaleFactor*m - Fd + g*sin(theta);  % Thrust term
 
+% NEED TO INTRODUCE EFFICIENCY AND Isp
 
-efficiency = sum(Thrust); % this could be changes to anything rpresentative of efficiency
+dt_array = primal.nodes(2:end)-primal.nodes(1:end-1);
+fuelchange_array = -Thrust(1:end-1).*dt_array ; %fuel change set as directly proportional to thrust
+
+dfuel = sum(fuelchange_array); %total change in 'fuel' this is negative
+
 
 % Define Cost =======================================================
 
-% EndpointCost = efficiency;
+EndpointCost = -dfuel;
 
-tf = primal.nodes(end);     
-EndpointCost = tf;
+% tf = primal.nodes(end);     
+% EndpointCost = tf;
 
 
 % It is able to run with no cost at all:

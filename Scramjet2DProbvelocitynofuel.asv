@@ -6,7 +6,7 @@ clear all;
 
 % Inputs ============================================
 global MultiStage
-MultiStage = 0;
+MultiStage = 1;
 
 %===============================================
 
