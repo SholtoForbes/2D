@@ -54,6 +54,7 @@ Vabs = V + StartingV;
 c = spline( Atmosphere(:,1),  Atmosphere(:,5), Vabs);
 
 % Calculating mach No (Descaled)
+global M
 M = v/ScaleFactor./c ;
 
 
@@ -80,10 +81,18 @@ My = spline(M_array, My_array, M)  ;
 
 Thrust = a/ScaleFactor*m - Fd + g*sin(theta);  % Thrust term
 
-% NEED TO INTRODUCE EFFICIENCY AND Isp
+% Thrust = Thrust./Thrust;  % makes it an array of 1s for testing (careful, it is sometimes NaN)
 
-dt_array = primal.nodes(2:end)-primal.nodes(1:end-1);
-fuelchange_array = -Thrust(1:end-1).*dt_array ; %fuel change set as directly proportional to thrust
+% Efficiency
+% Efficiency = (-(M(1:end-1)-5.).^2 +25.)/25.; % this is a simple inverse parabola centred around M=5 and going to zero at M=0 and M=10 and scaled so that it varies between 1 and 0
+Efficiency = (-(M(1:end-1)-8).^2 + 80.)/80.; % increasing the added value gives a smoother function
+% Efficiency = 1;
+
+%Fuel rate of change
+Fueldt = Thrust(1:end-1) ./ Efficiency; % Temporary fuel rate of change solution, directly equated to thrust (should give correct efficiency result, but cannot analyse total fuel change accurately)
+
+dt_array = primal.nodes(2:end)-primal.nodes(1:end-1); % Length of each timestep
+fuelchange_array = -Fueldt.*dt_array ; %Fuel change over each timestep
 
 dfuel = sum(fuelchange_array); %total change in 'fuel' this is negative
 

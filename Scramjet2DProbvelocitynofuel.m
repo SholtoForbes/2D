@@ -16,9 +16,14 @@ MultiStage = 0;
 
 %===================
 global H_input
-H_input = [0,100,200,300,400,500,600,700,800,900,1000] % Flight track starting at 0,0
+H_input = [0,10000,20000,30000,40000,50000,60000,70000,80000,90000,100000] % Flight track starting at 0,0, 100km flight distance
+
+% Vertical track input
 global V_input
-V_input = [0,0,0,0,0,0,0,0,0,0,0]
+% V_input = [0,0,0,0,0,0,0,0,0,0,0] % Horizontal flight
+% V_input = [0,1000,2000,3000,4000,5000,6000,7000,8000,9000,10000] % 10km altitude increase
+V_input = 10*(sqrt(H_input+10) - sqrt(10)) % a square root curve
+
 
 global theta_array
 theta_array = atan((V_input(2:end)-V_input(1:end-1))./(H_input(2:end)-H_input(1:end-1))) 
@@ -52,8 +57,8 @@ v_final = 2500.*ScaleFactor;
 HL = H_input(1).*ScaleFactor;
 HU = H_input(end).*ScaleFactor;
 
-vL = 1000.*ScaleFactor;
-vU = 10000.*ScaleFactor;
+vL = 1500.*ScaleFactor;
+vU = 5000.*ScaleFactor;
 
 HL_box = 2*HL;
 HU_box = 2*HU;
@@ -215,14 +220,19 @@ a = primal.controls(1,:);
 
 
 %calculating for interest
-c = 300.; % this will need to be brought into line with vehicle model
-% M = sqrt((vH).^2 + (vV).^2)/c ;
-M = v./c;
+% c = 300.; % this will need to be brought into line with vehicle model
+
+% M = v./ScaleFactor/c;
+global M
 
 
 figure(1)
 
 subplot(3,4,1)
+plot(H_input, V_input)
+title('Input Flight Track')
+
+subplot(3,4,2)
 plot(t, v)
 title('v')
 
@@ -240,22 +250,22 @@ plot(t, a)
 title('a')
 
 
+if MultiStage ==0
+    lam1 = dual.dynamics(1,:);
+    lam2 = dual.dynamics(2,:);
 
-% lam1 = dual.dynamics(1,:);
-% lam2 = dual.dynamics(2,:);
-% 
-% subplot(3,4,9);
-% plot(t, [lam1; lam2]);
-% title('costates')
-% xlabel('time');
-% ylabel('costates');
-% legend('\lambda_1', '\lambda_2');
-% 
-% subplot(3,4,10)
-% H = dual.Hamiltonian(1,:);
-% plot(t,H);
-% title('Hamiltonian')
+    subplot(3,4,9);
+    plot(t, [lam1; lam2]);
+    title('costates')
+    xlabel('time');
+    ylabel('costates');
+    legend('\lambda_1', '\lambda_2');
 
+    subplot(3,4,10)
+    H = dual.Hamiltonian(1,:);
+    plot(t,H);
+    title('Hamiltonian')
+end
 
 % 
 % %------ Forward Simulation -----------
