@@ -26,17 +26,19 @@ MultiStage = 0;
 % bound and scale the state and control variables
 %---------------------------------------
 
-VL = 0.;
-VU = 1000;
+VL = -1.;
+VU = 6.;
 
+HL = -1.;
+HU = 6.;
 
-bounds.lower.states = [VL];
-bounds.upper.states = [VU];
+bounds.lower.states = [VL ; HL];
+bounds.upper.states = [VU ; HU];
 
 
 % control bounds
-thetaL = 0.;
-thetaU = 2.0;
+thetaL = -1.;
+thetaU = 1.8;
 
 bounds.lower.controls = [thetaL];
 bounds.upper.controls = [thetaU]; 
@@ -70,10 +72,11 @@ end
 
 %MULTI STAGE
 
-V0 = 0;
+V0 = 0.;
+Vf = 5.;
 
-Vf = 2;
-
+H0 = 0.;
+Hf = 5.;
 
 if MultiStage == 1
 %     dv = 0.;
@@ -81,7 +84,7 @@ if MultiStage == 1
 %     bounds.lower.events = [HL;  HU; v_initial; v_final; dv; dH];
 %     bounds.upper.events = bounds.lower.events;      % equality event function bounds
 else
-    bounds.lower.events = [V0;  Vf];
+    bounds.lower.events = [V0;  Vf; H0; Hf];
     bounds.upper.events = bounds.lower.events;      % equality event function bounds
 end
 
@@ -173,6 +176,7 @@ runTime = cputime-tStart
 % vH = primal.states(1,:);
 % vV = primal.states(2,:);
 V = primal.states(1,:) ; 
+H = primal.states(2,:) ; 
 
 t = primal.nodes;
 
@@ -192,6 +196,10 @@ subplot(3,4,2)
 plot(t, V)
 title('V')
 
+subplot(3,4,3)
+plot(t, H)
+title('H')
+
 % subplot(3,4,5)
 % plot(t, M)
 % title('M')
@@ -205,7 +213,7 @@ if MultiStage ==0
     lam1 = dual.dynamics(1,:);
 
     subplot(3,4,9);
-    plot(t, [lam1]);
+    plot(t, lam1);
     title('costates')
     xlabel('time');
     ylabel('costates');
