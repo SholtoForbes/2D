@@ -57,7 +57,8 @@ v_final = 2500.*ScaleFactor;
 HL = H_input(1).*ScaleFactor;
 HU = H_input(end).*ScaleFactor;
 
-vL = 1500.*ScaleFactor;
+% vL = 1500.*ScaleFactor;
+vL = 0.;
 vU = 5000.*ScaleFactor;
 
 HL_box = 2*HL;
@@ -123,9 +124,9 @@ end
 %============================================
 % Define the problem using DIDO expresssions:
 %============================================
-Brac_1.cost 		= 'Scramjet2DCostvelocitynofuel';
-Brac_1.dynamics	    = 'Scramjet2DDynamicsvelocitynofuel';
-Brac_1.events		= 'Scramjet2DEventsvelocitynofuel';		
+Brac_1.cost 		= 'Scramjet2DCostVariableT';
+Brac_1.dynamics	    = 'Scramjet2DDynamicsVariableT';
+Brac_1.events		= 'Scramjet2DEventsVariableT';		
 %Path file optional	
 
 Brac_1.bounds       = bounds;

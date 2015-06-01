@@ -1,0 +1,35 @@
+function XDOT = Brac1Dynamics(primal)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 2D Dynamics
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+global H_input
+global V_input
+global theta_array
+global StartingV
+global theta_initial
+global ScaleFactor
+
+%changed notation to horizontal and vertical, x and y in plane of vehicle
+v = primal.states(1,:) ; 
+
+H = primal.states(2,:);
+
+
+a  = primal.controls(1,:); %acceleration in x plane
+
+
+
+%=========================================================================================
+% Calculate Derivative Terms
+vdot = a;
+
+Hdot = v.*cos(theta);
+
+
+%====================================================================
+
+
+%======================================================
+XDOT = [vdot; Hdot];
+%======================================================
