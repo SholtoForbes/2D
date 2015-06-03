@@ -5,17 +5,17 @@ function [EndpointCost, RunningCost] = Brac1Cost(primal)
 % I. Michael Ross
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 global Scale
+global v
+v = 20;
 
 % =======================================================
 % Vehicle Model:
 % =======================================================
 VScaled = primal.states(1,:) ; 
 HScaled = primal.states(2,:) ; 
-vScaled = primal.states(3,:) ; 
 
 V = VScaled * Scale;
 H = HScaled * Scale;
-v = vScaled * Scale;
 
 theta  = primal.controls(1,:); %acceleration in x plane
 
@@ -74,6 +74,13 @@ My_array = [305002.235162 , 256125.242712 , 196654.950117 ];
 
 %WORK IN PROGRESS
 
+
+
+% Fd = spline(M_array, Fd_array, M) ./ Vabs ; % drag force including fudge
+% factor for altitude test! this fudge factor is too large... needs to be a
+% fraction or something
+
+
 % NEED TO INTRODUCE AoA FROM LIFT FORCE EQUALITY AND RESOLVE THRUST AND
 % MOMENT
 
@@ -87,17 +94,38 @@ M = v./c ;
 
 Fd = spline(M_array, Fd_array, M);
 Flift = spline(M_array, Flift_array, M)  ;
-My = spline(M_array, My_array, M)  ;
+My( = spline(M_array, My_array, M)  ;
+
 
 % Calculating Dynamic Pressure
 q = 0.5 * rho .* (v .^2);
+
+
 
 Thrust =  - Fd + g*sin(theta) + 10000; % PLACEHOLDER TERM FOR CONSTANT ACCELERATION
 
 a = Thrust - (- Fd + g*sin(theta)) / m ; % acceleration
 
+dv = a(1:end-1) .* dt_array; 
+
+global v
+v = 1;
+v_initial = 3000; % PLACEHOLDER... THIS WILL BE REPLACED WHEN MORE STAGES ADDED
+
+
+    
+    
+
+
+
+
 %===========================================================================
 
+
+% Thrust = a*m - Fd + g*sin(theta);  % Thrust term
+% Thrust =  - Fd + g*sin(theta);  % Thrust term, THIS WILL BE REPLACED BY CONSTANT THRUST TERM, WILL NOT BE ASSUMING THAT DRAG IS EQUALLED
+
+% Thrust = Thrust./Thrust;  % makes it an array of 1s for testing (careful, it is sometimes NaN)
 
 % Efficiency CHANGE THIS TO DYNAMIC PRESSURE RATHER THAN M
 % Efficiency = (-(M(1:end-1)-5.).^2 +25.)/25.; % this is a simple inverse parabola centred around M=5 and going to zero at M=0 and M=10 and scaled so that it varies between 1 and 0

@@ -2,32 +2,29 @@ function XDOT = Brac1Dynamics(primal)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 2D Dynamics
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-global H_input
-global V_input
-global theta_array
-global StartingV
-global theta_initial
-global ScaleFactor
+global Scale
 
 %changed notation to horizontal and vertical, x and y in plane of vehicle
-V = primal.states(1,:) ; 
-H = primal.states(2,:) ; 
+VScaled = primal.states(1,:) ; 
+HScaled = primal.states(2,:) ; 
+vScaled = primal.states(3,:);
 
 theta  = primal.controls(1,:); %
 
-global v
-v = 1;
 
-%=========================================================================================
+% %=========================================================================================
 % Calculate Derivative Terms
-Vdot = v.*sin(theta);
-Hdot = v.*cos(theta);
+a = 1; % PLACEHOLDER a THIS IS SCALED
+vScaleddot = a *theta./theta; % this is an array of a, with size same as theta
 
 
-%====================================================================
+VScaleddot = vScaled.*sin(theta);
+HScaleddot = vScaled.*cos(theta);
+
+
+% %====================================================================
 
 
 %======================================================
-XDOT = [Vdot; Hdot];
+XDOT = [VScaleddot; HScaleddot; vScaleddot];
 %======================================================

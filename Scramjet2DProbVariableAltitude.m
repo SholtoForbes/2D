@@ -11,6 +11,14 @@ MultiStage = 0;
 %===============================================
 
 
+V0 = 0.; % Keep initial values zero
+Vf = 10.;
+
+H0 = 0.;
+Hf = 100.;
+
+
+
 %===================
 % Problem variables:
 % control factor: omega
@@ -19,6 +27,12 @@ MultiStage = 0;
 
 
 % Scaling ========================================
+global Scale
+Scale =  Hf / 5; %  both are divided by this
+
+HfScaled = Hf / Scale;
+VfScaled = Vf / Scale;
+v0 = 20/Scale; %initial velocity SCALED THIS SCALING WILL NEED TO BE LOOKED AT
 
 %========================================================
 
@@ -27,13 +41,16 @@ MultiStage = 0;
 %---------------------------------------
 
 VL = -1.;
-VU = 6.;
+VU = 2*VfScaled;
 
 HL = -1.;
-HU = 6.;
+HU = 2*HfScaled;
 
-bounds.lower.states = [VL ; HL];
-bounds.upper.states = [VU ; HU];
+vL = -1;
+vU = 50 / Scale;
+
+bounds.lower.states = [VL ; HL; vL];
+bounds.upper.states = [VU ; HU; vU];
 
 
 % control bounds
@@ -72,11 +89,6 @@ end
 
 %MULTI STAGE
 
-V0 = 0.;
-Vf = 5.;
-
-H0 = 0.;
-Hf = 5.;
 
 if MultiStage == 1
 %     dv = 0.;
@@ -84,7 +96,7 @@ if MultiStage == 1
 %     bounds.lower.events = [HL;  HU; v_initial; v_final; dv; dH];
 %     bounds.upper.events = bounds.lower.events;      % equality event function bounds
 else
-    bounds.lower.events = [V0;  Vf; H0; Hf];
+    bounds.lower.events = [V0;  VfScaled; H0; HfScaled; v0];
     bounds.upper.events = bounds.lower.events;      % equality event function bounds
 end
 

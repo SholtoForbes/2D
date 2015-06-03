@@ -20,6 +20,7 @@ global MultiStage
 %no velocity constraints
 V0 = primal.states(1,1);        Vf = primal.states(1,end);
 H0 = primal.states(2,1);        Hf = primal.states(2,end);
+v0 = primal.states(3,1);
 
 % MULTI STAGE ===========================================================
 if MultiStage ==1
@@ -42,7 +43,7 @@ end
 if MultiStage ==1
 %     endpointFunction = zeros(6,1); %MULTI STAGE
 else
-    endpointFunction = zeros(4,1);
+    endpointFunction = zeros(5,1);
 end
 %need to change this depending on boundary conditions
 
@@ -55,7 +56,7 @@ endpointFunction(1) = V0;
 endpointFunction(2) = Vf;
 endpointFunction(3) = H0;
 endpointFunction(4) = Hf;
-
+endpointFunction(5) = v0;
 
 if MultiStage ==1
 % endpointFunction(5) = preSeparation_v - postSeparation_v; % dv over stage transition
