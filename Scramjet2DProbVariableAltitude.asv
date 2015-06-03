@@ -32,6 +32,8 @@ Scale =  Hf / 5; %  both are divided by this
 
 HfScaled = Hf / Scale;
 VfScaled = Vf / Scale;
+vH0 = 20/Scale; %initial velocity SCALED THIS SCALING WILL NEED TO BE LOOKED AT
+vV0 = 20/Scale;
 
 %========================================================
 
@@ -45,9 +47,14 @@ VU = 2*VfScaled;
 HL = -1.;
 HU = 2*HfScaled;
 
+vVL = -1;
+vVU = 50 / Scale;
 
-bounds.lower.states = [VL ; HL];
-bounds.upper.states = [VU ; HU];
+vHL = -1;
+vHU = 50 / Scale;
+
+bounds.lower.states = [VL ; HL; vVL; vHL];
+bounds.upper.states = [VU ; HU; vVU; vHU];
 
 
 % control bounds
@@ -93,7 +100,7 @@ if MultiStage == 1
 %     bounds.lower.events = [HL;  HU; v_initial; v_final; dv; dH];
 %     bounds.upper.events = bounds.lower.events;      % equality event function bounds
 else
-    bounds.lower.events = [V0;  VfScaled; H0; HfScaled];
+    bounds.lower.events = [V0;  VfScaled; H0; HfScaled; vV0; vH0];
     bounds.upper.events = bounds.lower.events;      % equality event function bounds
 end
 
@@ -186,7 +193,7 @@ runTime = cputime-tStart
 % vV = primal.states(2,:);
 V = primal.states(1,:) ; 
 H = primal.states(2,:) ; 
-
+v = primal.states(3,:) ; 
 t = primal.nodes;
 
 theta = primal.controls(1,:);
@@ -209,6 +216,13 @@ subplot(3,4,3)
 plot(t, H)
 title('H')
 
+subplot(3,4,4)
+plot(t, vV)
+title('vV')
+
+subplot(3,4,4)
+plot(t, v)
+title('v')
 
 % subplot(3,4,5)
 % plot(t, M)
