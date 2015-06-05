@@ -20,17 +20,22 @@ H = HScaled * Scale;
 theta  = primal.controls(1,:); %acceleration in x plane
 
 % PLACEHOLDER VELOCITY ==========================
-global v
-v = 1*theta./theta;
+% global v
+% v = 1*theta./theta;
 %========================================
 
 
-timeScaled = primal.nodes(1,:);
-time = timeScaled*Scale;
+% timeScaled = primal.nodes(1,:);
+% time = timeScaled*Scale;
+time = primal.nodes(1,:);
 
 dt_array = time(2:end)-time(1:end-1); % Length of each timestep
 
-%%%% NEED TO COMPUTE VELOCITY, CREATE THRUST TERM
+dV_array = V(2:end)-V(1:end-1);
+
+dH_array = H(2:end)-H(1:end-1);
+
+v_array = sqrt(dV_array.^2 + dH_array.^2) ./ dt_array; % calculate velocity array using 'previous iteration'
 
 
 %neglecting AoA, fixed reference frame
@@ -88,19 +93,27 @@ My_array = [305002.235162 , 256125.242712 , 196654.950117 ];
 global M
 
 % Calculating Mach No (Descaled)
-M = v./c ;
+M = v_array./c(1:end-1) ;
 
 Fd = spline(M_array, Fd_array, M);
 Flift = spline(M_array, Flift_array, M)  ;
 My = spline(M_array, My_array, M)  ;
 
 % Calculating Dynamic Pressure
-q = 0.5 * rho .* (v .^2);
+global v
+q = 0.5 * rho(1:end-1) .* (v_array .^2);
 
-Thrust =  - Fd + g*sin(theta) + 10000; % PLACEHOLDER TERM FOR CONSTANT ACCELERATION
+Thrust =  - Fd + g*sin(theta(1:end-1)) + 100.; % INCLUDES PLACEHOLDER TERM FOR CONSTANT ACCELERATION
 
+a = ((Thrust - (- Fd + g*sin(theta(1:end-1)))) / m ) / Scale; % acceleration SCALED
 
-a = Thrust - (- Fd + g*sin(theta)) / m ; % acceleration
+% v(1) = 1000/Scale; % Initial Velocity SCALED THIS WILL NEED TO BE INTEGRATED WIH MULTI STAGE
+v(1) = 1;
+for i=2:length(a)+1
+    
+    v(i) = a(i-1) * dt_array(i-1) + v(i-1);  % Velocity calculated stepwise
+    
+end
 
 %===========================================================================
 
@@ -108,10 +121,11 @@ a = Thrust - (- Fd + g*sin(theta)) / m ; % acceleration
 % Efficiency CHANGE THIS TO DYNAMIC PRESSURE RATHER THAN M
 % Efficiency = (-(M(1:end-1)-5.).^2 +25.)/25.; % this is a simple inverse parabola centred around M=5 and going to zero at M=0 and M=10 and scaled so that it varies between 1 and 0
 % Efficiency = (-(M(1:end-1)-8).^2 + 80.)/80.; % increasing the added value gives a smoother function
-Efficiency = 1;
+% Efficiency = 1;
+Efficiency = 1 + V(1:end-1)/100;
 
 %Fuel rate of change
-Fueldt = Thrust(1:end-1) ./ Efficiency; % Temporary fuel rate of change solution, directly equated to thrust (should give correct efficiency result, but cannot analyse total fuel change accurately)
+Fueldt = Thrust ./ Efficiency; % Temporary fuel rate of change solution, directly equated to thrust (should give correct efficiency result, but cannot analyse total fuel change accurately)
 
 
 fuelchange_array = -Fueldt.*dt_array ; %Fuel change over each timestep

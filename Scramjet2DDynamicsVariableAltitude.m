@@ -15,9 +15,7 @@ theta  = primal.controls(1,:); %
 % %=========================================================================================
 % Calculate Derivative Terms
 
-a = 1*theta./theta; % PLACEHOLDER a THIS IS SCALED % this is an array of a, with size same as theta
-
-
+% a = 1*theta./theta; % PLACEHOLDER a THIS IS SCALED % this is an array of a, with size same as theta
 
 VScaleddot = v.*sin(theta);
 HScaleddot = v.*cos(theta);

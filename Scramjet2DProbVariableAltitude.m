@@ -3,19 +3,20 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 clear all;		
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+global v
 
 % Inputs ============================================
 global MultiStage
 MultiStage = 0;
 
-%===============================================
+%=============================================== 
 
 
 V0 = 0.; % Keep initial values zero
-Vf = 10.;
+Vf = 100.;
 
 H0 = 0.;
-Hf = 10.;
+Hf = 100.;
 
 
 
@@ -63,12 +64,8 @@ bounds.upper.controls = [thetaU];
 %------------------
 % time bounds, this is SCALED
 t0	    = 0;
-tfMax 	= 100;   % swag for max tf; DO NOT set to Inf even for time-free problems
-% tfMax = 15
+tfMax 	= 20;   % swag for max tf; DO NOT set to Inf even for time-free problems
 % remember to set higher than Vmax bounds min time
-
-% bounds.lower.time 	= [t0; t0];				
-% bounds.upper.time	= [t0; tfMax];			    % Fixed time at t0 and a possibly free time at tf
 
 % MULTI STAGE
 if MultiStage == 1
@@ -202,17 +199,17 @@ global M
 figure(1)
 
 subplot(3,4,2)
-plot(t, V)
-title('V')
+plot(H, V)
+title('Trajectory')
 
-subplot(3,4,3)
-plot(t, H)
-title('H')
+subplot(3,4,4)
+plot(t, v)
+title('v')
 
 
-% subplot(3,4,5)
-% plot(t, M)
-% title('M')
+subplot(3,4,5)
+plot(t(1:end-1), M)
+title('M')
 
 subplot(3,4,7)
 plot(t, theta)
