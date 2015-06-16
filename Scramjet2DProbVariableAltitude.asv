@@ -7,7 +7,7 @@ global v
 
 % Inputs ============================================
 global MultiStage
-MultiStage = 0; % 0 for no multistage 1 for multi
+MultiStage = 0;
 
 %=============================================== 
 
@@ -81,15 +81,18 @@ end
 %-------------------------------------------
 % See events file for definition of events function
 
-% if MultiStage == 1
-% bounds.lower.events = [V0;  VfScaled; H0; HfScaled; 0; 0];
-% else
-% bounds.lower.events = [V0;  VfScaled; H0; HfScaled];
-% end
+%MULTI STAGE
 
-bounds.lower.events = [V0;  VfScaled; H0; HfScaled];
-bounds.upper.events = bounds.lower.events;      % equality event function bounds
 
+if MultiStage == 1
+    dv = 0.;
+    dH = 0.;
+    bounds.lower.events = [HL;  HU; v_initial; v_final; dv; dH];
+    bounds.upper.events = bounds.lower.events;      % equality event function bounds
+else
+    bounds.lower.events = [V0;  VfScaled; H0; HfScaled];
+    bounds.upper.events = bounds.lower.events;      % equality event function bounds
+end
 
 % PATH BOUNDS IF NECESSARY
 
@@ -132,16 +135,16 @@ end
 %  Guess =================================================================
 % This is also useable for multi stage! guess for stage transition not
 % necessary 
-guess.states(1,:) = [0, VfScaled]; %v
-guess.states(2,:) = [0, HfScaled]; %H
+guess.states(1,:) = [0,  v_initial]*ScaleFactor; %v
+guess.states(2,:) = [0,  1000]*ScaleFactor; %H
 
-guess.controls(1,:)    = [0.78,0.78]; %a
+guess.controls(1,:)    = [0,0]*ScaleFactor; %a
 
-guess.time        = [t0, tfMax];
+guess.time        = [t0, 1000/v_initial]*ScaleFactor;
 
 %  Guess MULTI STAGE =================================================================
-if MultiStage == 1
-tfGuess = tfMax;
+if Multistage == 1
+tfGuess = 1000/v_initial*ScaleFactor
 % guess.time        = [t0, tfGuess/2,  tfGuess];
 
 % Guess interior event time:

@@ -103,11 +103,12 @@ My = spline(M_array, My_array, M)  ;
 global v
 q = 0.5 * rho(1:end-1) .* (v_array .^2);
 
-Thrust =  - Fd + g*sin(theta(1:end-1)) + 100.; % INCLUDES PLACEHOLDER TERM FOR CONSTANT ACCELERATION
+% Thrust =  - Fd + g*sin(theta(1:end-1)) + 100.; % INCLUDES PLACEHOLDER TERM FOR CONSTANT ACCELERATION
+Thrust =  - Fd + g*sin(theta(1:end-1));
 
 a = ((Thrust - (- Fd + g*sin(theta(1:end-1)))) / m ) / Scale; % acceleration SCALED
 
-% v(1) = 1000/Scale; % Initial Velocity SCALED THIS WILL NEED TO BE INTEGRATED WIH MULTI STAGE
+% v(1) = 1000/Scale; % Initial Velocity SCALED THIS WILL NEED TO BE CHANGED WHEN MULTI STAGE
 v(1) = 1;
 for i=2:length(a)+1
     
@@ -130,15 +131,16 @@ Fueldt = Thrust ./ Efficiency; % Temporary fuel rate of change solution, directl
 
 fuelchange_array = -Fueldt.*dt_array ; %Fuel change over each timestep
 
+global dfuel
 dfuel = sum(fuelchange_array); %total change in 'fuel' this is negative
 
 
 % Define Cost =======================================================
 
-EndpointCost = -dfuel;
+% EndpointCost = -dfuel;
 
-% tf = primal.nodes(end);     
-% EndpointCost = tf;
+tf = primal.nodes(end);     
+EndpointCost = tf;
 
 
 % It is able to run with no cost at all:
