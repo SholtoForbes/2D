@@ -53,7 +53,7 @@ bounds.upper.states = [VU ; HU];
 
 % control bounds
 thetaL = -1.;
-thetaU = 1.8;
+thetaU = 1.5;
 
 bounds.lower.controls = [thetaL];
 bounds.upper.controls = [thetaU]; 
@@ -69,8 +69,10 @@ tfMax 	= 20;   % swag for max tf; DO NOT set to Inf even for time-free problems
 
 % MULTI STAGE
 if MultiStage == 1
-    bounds.lower.time 	= [t0 t0 t0];				
-    bounds.upper.time	= [t0 tfMax/2 tfMax];			    % Fixed time at t0 and a possibly free time at tf
+%     bounds.lower.time 	= [t0 t0 t0];				
+%     bounds.upper.time	= [t0 tfMax/2 tfMax];			    % Fixed time at t0 and a possibly free time at tf
+        bounds.lower.time 	= [t0 t0 t0];				
+    bounds.upper.time	= [t0 tfMax/2 tfMax];
 else  
     bounds.lower.time 	= [t0; t0];				
     bounds.upper.time	= [t0; tfMax];
@@ -81,14 +83,17 @@ end
 %-------------------------------------------
 % See events file for definition of events function
 
-% if MultiStage == 1
-% bounds.lower.events = [V0;  VfScaled; H0; HfScaled; 0; 0];
-% else
-% bounds.lower.events = [V0;  VfScaled; H0; HfScaled];
-% end
-
+if MultiStage == 1
+bounds.lower.events = [V0;  VfScaled; H0; HfScaled; 0; 0];
+else
 bounds.lower.events = [V0;  VfScaled; H0; HfScaled];
+end
+
+% bounds.lower.events = [V0;  VfScaled; H0; HfScaled];
+
+
 bounds.upper.events = bounds.lower.events;      % equality event function bounds
+
 
 
 % PATH BOUNDS IF NECESSARY
@@ -122,16 +127,31 @@ end
 % Node Definition ====================================================
 
 if MultiStage ==1
-    algorithm.nodes     = [60 60];
+    algorithm.nodes     = [50 50];
 else
     algorithm.nodes		= [80];	
 end
 
+global nodes
+nodes = algorithm.nodes;
 
 
 %  Guess =================================================================
-% This is also useable for multi stage! guess for stage transition not
-% necessary 
+
+%  Guess MULTI STAGE =================================================================
+if MultiStage == 1
+tfGuess = tfMax;
+
+guess.states(1,:) = [0,VfScaled/2, VfScaled]; %v
+guess.states(2,:) = [0, HfScaled/2,HfScaled]; %H
+
+guess.controls(1,:)    = [0.78,0.78,0.78]; %a
+
+guess.time        = [t0, tfGuess/2,  tfGuess];
+
+% Guess interior event time:
+algorithm.knots.locations    = [t0, tfGuess/2,  tfGuess];
+else
 guess.states(1,:) = [0, VfScaled]; %v
 guess.states(2,:) = [0, HfScaled]; %H
 
@@ -139,13 +159,7 @@ guess.controls(1,:)    = [0.78,0.78]; %a
 
 guess.time        = [t0, tfMax];
 
-%  Guess MULTI STAGE =================================================================
-if MultiStage == 1
-tfGuess = tfMax;
-% guess.time        = [t0, tfGuess/2,  tfGuess];
 
-% Guess interior event time:
-algorithm.knots.locations    = [t0, tfGuess/2,  tfGuess];
 end
 
 % Tell DIDO the guess.  Note: The guess-free option is not available when
@@ -168,7 +182,6 @@ runTime = cputime-tStart
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %          OUTPUT             %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 
 global dfuel
 dfuel
@@ -201,9 +214,9 @@ plot(t, v)
 title('v')
 
 
-subplot(3,4,5)
-plot(t(1:end-1), M)
-title('M')
+% subplot(3,4,5)
+% plot(t(1:end-1), M)
+% title('M')
 
 subplot(3,4,7)
 plot(t, theta)

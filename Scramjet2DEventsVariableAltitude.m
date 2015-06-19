@@ -23,19 +23,19 @@ H0 = primal.states(2,1);        Hf = primal.states(2,end);
 
 
 % MULTI STAGE ===========================================================
-% if MultiStage ==1
-% %--------------------------------------------------------------------------
-% % Collect all the left and right limit points
-% Left    = primal.indices.left;      
-% Right   = primal.indices.right;
-% %--------------------------------------------------------------------------
-% % If this problem had more than two stages, Left and Right would be row
-% % vectors; here they are just numbers
-% %------------------------------------------------------------------------
-% preSeparation_V = primal.states(1, Left);   postSeparation_V = primal.states(1, Right);
-% preSeparation_H = primal.states(2, Left);   postSeparation_H = primal.states(2, Right);
-% 
-% end
+if MultiStage ==1
+%--------------------------------------------------------------------------
+% Collect all the left and right limit points
+Left    = primal.indices.left;      
+Right   = primal.indices.right;
+%--------------------------------------------------------------------------
+% If this problem had more than two stages, Left and Right would be row
+% vectors; here they are just numbers
+%------------------------------------------------------------------------
+preSeparation_V = primal.states(1, Left);   postSeparation_V = primal.states(1, Right);
+preSeparation_H = primal.states(2, Left);   postSeparation_H = primal.states(2, Right);
+
+end
 %=========================================================================
 
 
@@ -58,10 +58,10 @@ endpointFunction(3) = H0;
 endpointFunction(4) = Hf;
 
 
-% if MultiStage ==1
-% endpointFunction(5) = preSeparation_V - postSeparation_V; % dv over stage transition
-% endpointFunction(6) = preSeparation_H - postSeparation_H; % dH over stage transition
-% end
+if MultiStage ==1
+endpointFunction(5) = preSeparation_V - postSeparation_V; % dv over stage transition
+endpointFunction(6) = preSeparation_H - postSeparation_H; % dH over stage transition
+end
 %-----------------------------------------------------------
 % endpointFunction(4) = vHf;
 % endpointFunction(5) = vVf; 
