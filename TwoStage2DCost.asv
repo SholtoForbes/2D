@@ -66,7 +66,7 @@ mdot2 = 0.;
 m(1) = 5000;
 m(nodes/2+1) = 1200;
 
-% NEED TO CHANGE THIS TO SEPARATE AT A DISTINCT CONDITION
+% NEE
 for i = 2:nodes/2
     m(i) = m(i-1) + mdot1*dt_array(i-1);
 end
@@ -120,6 +120,7 @@ M_array = [4.5 , 5. , 5.5];
 Fd_array = [-36427.6593981 , -42995.3909773 , -50209.1507264];
 Flift_array = [ 26851.676829 , 25865.7310572 , 24420.6025981 ];
 My_array = [305002.235162 , 256125.242712 , 196654.950117 ];
+
 
 
 % Calculating Dynamic Pressure
@@ -184,12 +185,13 @@ end
 
 %===========================================================================
 % Efficiency
-% NOTE DYNAMIC PRESSURE DOES NOT CHANGE DRAG IN FORCE FILE INGO GAVE ME, so
-% making the efficiency only reliant on a specific dynamic pressure is
-% nonsensical
+% NOTE DYNAMIC PRESSURE DOES NOT CHANGE DRAG IN FORCE FILE INGO GAVE ME
 
+% Efficiency = (-(M(1:end-1)-5.).^2 +25.)/25.; % this is a simple inverse parabola centred around M=5 and going to zero at M=0 and M=10 and scaled so that it varies between 1 and 0
+% Efficiency = (-(M(1:end-1)-8).^2 + 80.)/80.; % increasing the added value gives a smoother function
 % Efficiency = 1;
 Efficiency = 1 + Vabs(1:end-1)/10000;
+
 % Efficiency = (-(q(1:end)-50000.).^2 + 300000^2)/300000^2.;
 
 %Fuel rate of change
@@ -199,8 +201,6 @@ fuelchange_array = -Fueldt.*dt_array ; %Fuel change over each timestep
 
 global dfuel
 dfuel = sum(fuelchange_array); %total change in 'fuel' this is negative
-
-
 
 
 % Define Cost =======================================================
@@ -213,5 +213,9 @@ EndpointCost = -dfuel;
 
 % It is able to run with no cost at all:
 % EndpointCost = 0;
+
+
+
+
 
 RunningCost = 0;

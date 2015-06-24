@@ -104,11 +104,9 @@ Brac_1.bounds       = bounds;
 
 % Node Definition ====================================================
 
-if MultiStage ==1
-    algorithm.nodes     = [50 50];
-else
-    algorithm.nodes		= [80];	
-end
+
+algorithm.nodes		= [80];	
+
 
 global nodes
 nodes = algorithm.nodes;
@@ -156,8 +154,10 @@ runTime = cputime-tStart
 global dfuel
 dfuel
 
-V = primal.states(1,:) ; 
-H = primal.states(2,:) ; 
+global StartingV
+V = primal.states(1,:)*Scale + StartingV; 
+
+H = primal.states(2,:)*Scale ; 
 
 t = primal.nodes;
 
@@ -171,6 +171,7 @@ theta = primal.controls(1,:);
 global M
 global v_array
 v_array
+global m
 
 figure(1)
 
@@ -191,6 +192,9 @@ subplot(3,4,7)
 plot(t, theta)
 title('theta')
 
+subplot(3,4,8)
+plot(t(1:end-1), m)
+title('mass')
 
 
 lam1 = dual.dynamics(1,:);
