@@ -1,8 +1,14 @@
 function XDOT = Brac1Dynamics(primal)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 2D Dynamics
+
+% This uses velocity calculated in the Cost file
+
+% This file is calculated after the Cost file in the iterative process 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% global Scale
+global ScaleH
+global ScaleV
 global v
 
 %changed notation to horizontal and vertical, x and y in plane of vehicle
@@ -13,8 +19,8 @@ theta  = primal.controls(1,:); %
 
 % %=========================================================================================
 
-VScaleddot = v.*sin(theta);
-HScaleddot = v.*cos(theta);
+VScaleddot = v.*sin(theta)/ScaleV;
+HScaleddot = v.*cos(theta)/ScaleH;
 
 % %====================================================================
 

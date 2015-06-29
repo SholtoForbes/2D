@@ -12,14 +12,19 @@ MultiStage = 0; % 0 for no multistage 1 for multi
 %=============================================== 
 
 
+% V0 = 0.; % Keep initial values zero
+% Vf = 10000.;
+% 
+% H0 = 0.;
+% Hf = 10000.;
+% 
 V0 = 0.; % Keep initial values zero
-Vf = 10000.;
+Vf = 9000.;
 
 H0 = 0.;
-Hf = 10000.;
+Hf = 700000.;
 
-
-
+%dawids results have around 1% or under flight path angle
 %===================
 % Problem variables:
 % control factor: omega
@@ -28,11 +33,16 @@ Hf = 10000.;
 
 
 % Scaling ========================================
-global Scale
-Scale =  Hf / 5; %  both are divided by this
 
-HfScaled = Hf / Scale;
-VfScaled = Vf / Scale;
+% How can I scale so that H and V are scaled differently... Maybe need to
+% scale velocity separately
+global ScaleH
+ScaleH =  Hf / 4; %  Horizontal Scale
+global ScaleV
+ScaleV =  Vf / 20; %  Vertical Scale
+
+HfScaled = Hf / ScaleH;
+VfScaled = Vf / ScaleV;
 
 %========================================================
 
@@ -62,9 +72,9 @@ bounds.upper.controls = [thetaU];
 %------------------
 % bound the horizon
 %------------------
-% time bounds, this is SCALED
+% time bounds, this is unscaled
 t0	    = 0;
-tfMax 	= 20;   % swag for max tf; DO NOT set to Inf even for time-free problems
+tfMax 	= Hf/1000*2;   % swag for max tf; DO NOT set to Inf even for time-free problems
 % remember to set higher than Vmax bounds min time
 
 % MULTI STAGE
@@ -105,7 +115,7 @@ Brac_1.bounds       = bounds;
 % Node Definition ====================================================
 
 
-algorithm.nodes		= [80];	
+algorithm.nodes		= [120];	
 
 
 global nodes
@@ -123,7 +133,7 @@ tfGuess = 9.7; % this needs to be close to make sure solution stays withing Out_
 guess.states(1,:) = [0, VfScaled]; %v
 guess.states(2,:) = [0, HfScaled]; %H
 
-guess.controls(1,:)    = [0.78,0.78]; %a
+guess.controls(1,:)    = [atan((Vf-V0)/(Hf-H0)),atan((Vf-V0)/(Hf-H0))]; %a
 
 guess.time        = [t0, tfGuess];
 
@@ -155,9 +165,9 @@ global dfuel
 dfuel
 
 global StartingV
-V = primal.states(1,:)*Scale + StartingV; 
+V = primal.states(1,:)*ScaleV + StartingV; 
 
-H = primal.states(2,:)*Scale ; 
+H = primal.states(2,:)*ScaleH ; 
 
 t = primal.nodes;
 

@@ -14,7 +14,8 @@ function [EndpointCost, RunningCost] = Brac1Cost(primal, algorithm)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-global Scale
+global ScaleH
+global ScaleV
 global MultiStage
 global nodes
 % =======================================================
@@ -36,8 +37,8 @@ VScaled = primal.states(1,1:nodes(1)) ; % Scaled vertical position
 HScaled = primal.states(2,1:nodes(1)) ; % Scaled horizontal position
 
 %Descaling
-V = VScaled * Scale;
-H = HScaled * Scale;
+V = VScaled * ScaleV;
+H = HScaled * ScaleH;
 
 theta  = primal.controls(1,1:nodes(1)); % Velocity angle
 
@@ -79,8 +80,9 @@ end
 % m(1:nodes/2) = 5000;
 % m(nodes/2+1:nodes-1) = 1200;
 else
-mdot = -100.;
-    
+% mdot = -100.;
+mdot = 0.; 
+
 m(1) = 5000; 
 for i = 2:nodes-1
     m(i) = m(i-1) + mdot*dt_array(i-1);
@@ -162,20 +164,26 @@ My = spline(M_array, My_array, M)  ;
 
 
 %VARIABLE THRUST WITH STAGES ----------------------------------------------
-if MultiStage == 1
-% Stage 2 -----------------------------------------------------------------
-Thrust(1:nodes/2) =  - Fd(1:nodes/2) + g*sin(theta(1:nodes/2))+ 200;
-% Stage 3 -----------------------------------------------------------------
-Thrust(nodes/2+1:nodes(1)-1) =  - Fd(nodes/2+1:nodes-1) + g*sin(theta(nodes/2+1:nodes-1)) + 100.;
-else
-Thrust(1:nodes-1) =  - Fd(1:nodes-1) + g*sin(theta(1:nodes-1))+ 200;
-end
+% if MultiStage == 1
+% % Stage 2 -----------------------------------------------------------------
+% Thrust(1:nodes/2) =  - Fd(1:nodes/2) + g*sin(theta(1:nodes/2))+ 200;
+% % Stage 3 -----------------------------------------------------------------
+% Thrust(nodes/2+1:nodes(1)-1) =  - Fd(nodes/2+1:nodes-1) + g*sin(theta(nodes/2+1:nodes-1)) + 100.;
+% else
+% Thrust(1:nodes-1) =  - Fd(1:nodes-1) + g*sin(theta(1:nodes-1))+ 200; % This thrust is created so that there is constant acceleration
+% end
+
+Thrust(1:nodes-1) =  80000;
 
 % Acceleration ------------------------------------------------------------
-a = ((Thrust - (- Fd + g*sin(theta(1:end-1)))) ./ m ) / Scale; % acceleration SCALED
+a = ((Thrust - (- Fd + g*sin(theta(1:end-1)))) ./ m ); % acceleration 
+
+
+
 
 % Velocity ----------------------------------------------------------------
-v(1) = 0.8;
+% v(1) = 0.8;
+v(1) = 2000;
 for i=2:nodes(1)
     
     v(i) = a(i-1) * dt_array(i-1) + v(i-1);  % Velocity calculated stepwise
@@ -188,9 +196,10 @@ end
 % making the efficiency only reliant on a specific dynamic pressure is
 % nonsensical
 
-% Efficiency = 1;
-Efficiency = 1 + Vabs(1:end-1)/10000;
+Efficiency = 1;
+% Efficiency = 1 + Vabs(1:end-1)/100000000;
 % Efficiency = (-(q(1:end)-50000.).^2 + 300000^2)/300000^2.;
+%  Efficiency = (-(Vabs(1:end-1)-25000.).^2 + 300000^2)/300000^2.;
 
 %Fuel rate of change
 Fueldt = Thrust ./ Efficiency; % Temporary fuel rate of change solution, directly equated to thrust (should give correct efficiency result, but cannot analyse total fuel change accurately)
@@ -205,10 +214,10 @@ dfuel = sum(fuelchange_array); %total change in 'fuel' this is negative
 
 % Define Cost =======================================================
 
-EndpointCost = -dfuel;
+% EndpointCost = -dfuel;
 
-% tf = primal.nodes(end);     
-% EndpointCost = tf;
+tf = primal.nodes(end);     
+EndpointCost = tf;
 
 
 % It is able to run with no cost at all:
