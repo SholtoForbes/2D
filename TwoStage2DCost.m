@@ -16,6 +16,7 @@ function [EndpointCost, RunningCost] = Brac1Cost(primal, algorithm)
 
 global ScaleH
 global ScaleV
+global ThetaScale
 global MultiStage
 global nodes
 % =======================================================
@@ -40,7 +41,7 @@ HScaled = primal.states(2,1:nodes(1)) ; % Scaled horizontal position
 V = VScaled * ScaleV;
 H = HScaled * ScaleH;
 
-theta  = primal.controls(1,1:nodes(1)); % Velocity angle
+theta  = primal.controls(1,1:nodes(1))/ThetaScale; % Velocity angle
 
 time = primal.nodes(1,1:nodes(1)); % Time
 
@@ -214,10 +215,10 @@ dfuel = sum(fuelchange_array); %total change in 'fuel' this is negative
 
 % Define Cost =======================================================
 
-% EndpointCost = -dfuel;
+EndpointCost = -dfuel;
 
-tf = primal.nodes(end);     
-EndpointCost = tf;
+% tf = primal.nodes(end);     
+% EndpointCost = tf;
 
 
 % It is able to run with no cost at all:

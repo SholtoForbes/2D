@@ -12,17 +12,18 @@ MultiStage = 0; % 0 for no multistage 1 for multi
 %=============================================== 
 
 
-% V0 = 0.; % Keep initial values zero
-% Vf = 10000.;
-% 
-% H0 = 0.;
-% Hf = 10000.;
-% 
 V0 = 0.; % Keep initial values zero
-Vf = 9000.;
+Vf = 6000.;
+% Vf = 6000.;
 
 H0 = 0.;
-Hf = 700000.;
+Hf = 400000.;
+% 
+% V0 = 0.; % Keep initial values zero
+% Vf = 8000.;
+% 
+% H0 = 0.;
+% Hf = 700000.;
 
 %dawids results have around 1% or under flight path angle
 %===================
@@ -37,13 +38,16 @@ Hf = 700000.;
 % How can I scale so that H and V are scaled differently... Maybe need to
 % scale velocity separately
 global ScaleH
-ScaleH =  Hf / 4; %  Horizontal Scale
+ScaleH =  Hf / 400000; %  Horizontal Scale
 global ScaleV
-ScaleV =  Vf / 20; %  Vertical Scale
+ScaleV =  Vf / 6000; %  Vertical Scale
 
 HfScaled = Hf / ScaleH;
 VfScaled = Vf / ScaleV;
 
+
+global ThetaScale
+ThetaScale = 1;
 %========================================================
 
 %---------------------------------------
@@ -62,8 +66,11 @@ bounds.upper.states = [VU ; HU];
 
 
 % control bounds
-thetaL = -1.;
-thetaU = 1.5;
+% thetaL = -1.;
+% thetaU = 1.5;
+
+thetaL = -.1; % CHANGED THIS, NEED TO WATCH THAT ITS NOT OVERCONSTRAINING
+thetaU = .3;
 
 bounds.lower.controls = [thetaL];
 bounds.upper.controls = [thetaU]; 
@@ -115,7 +122,7 @@ Brac_1.bounds       = bounds;
 % Node Definition ====================================================
 
 
-algorithm.nodes		= [120];	
+algorithm.nodes		= [300];	
 
 
 global nodes
@@ -133,7 +140,7 @@ tfGuess = 9.7; % this needs to be close to make sure solution stays withing Out_
 guess.states(1,:) = [0, VfScaled]; %v
 guess.states(2,:) = [0, HfScaled]; %H
 
-guess.controls(1,:)    = [atan((Vf-V0)/(Hf-H0)),atan((Vf-V0)/(Hf-H0))]; %a
+guess.controls(1,:)    = [atan((Vf-V0)/(Hf-H0)),atan((Vf-V0)/(Hf-H0))]*ThetaScale; %a
 
 guess.time        = [t0, tfGuess];
 

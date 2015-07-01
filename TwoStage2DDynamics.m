@@ -9,13 +9,14 @@ function XDOT = Brac1Dynamics(primal)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 global ScaleH
 global ScaleV
+global ThetaScale
 global v
 
 %changed notation to horizontal and vertical, x and y in plane of vehicle
 VScaled = primal.states(1,:) ; 
 HScaled = primal.states(2,:) ; 
 
-theta  = primal.controls(1,:); %
+theta  = primal.controls(1,:)/ThetaScale; %
 
 % %=========================================================================================
 
