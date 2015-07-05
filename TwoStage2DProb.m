@@ -17,7 +17,7 @@ Vf = 6000.;
 % Vf = 6000.;
 
 H0 = 0.;
-Hf = 400000.;
+Hf = 700000.;
 % 
 % V0 = 0.; % Keep initial values zero
 % Vf = 8000.;
@@ -38,7 +38,7 @@ Hf = 400000.;
 % How can I scale so that H and V are scaled differently... Maybe need to
 % scale velocity separately
 global ScaleH
-ScaleH =  Hf / 400000; %  Horizontal Scale
+ScaleH =  Hf / 700000; %  Horizontal Scale
 global ScaleV
 ScaleV =  Vf / 6000; %  Vertical Scale
 
@@ -122,7 +122,7 @@ Brac_1.bounds       = bounds;
 % Node Definition ====================================================
 
 
-algorithm.nodes		= [300];	
+algorithm.nodes		= [500];	
 
 
 global nodes
@@ -172,6 +172,7 @@ global dfuel
 dfuel
 
 global StartingV
+StartingV = 15000;
 V = primal.states(1,:)*ScaleV + StartingV; 
 
 H = primal.states(2,:)*ScaleH ; 
