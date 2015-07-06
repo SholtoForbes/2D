@@ -40,14 +40,14 @@ Hf = 700000.;
 global ScaleH
 ScaleH =  Hf / 700000; %  Horizontal Scale
 global ScaleV
-ScaleV =  Vf / 6000; %  Vertical Scale
+ScaleV =  Vf / 5500; %  Vertical Scale
 
 HfScaled = Hf / ScaleH;
 VfScaled = Vf / ScaleV;
 
 
 global ThetaScale
-ThetaScale = 1;
+ThetaScale = 2;
 %========================================================
 
 %---------------------------------------
@@ -55,10 +55,10 @@ ThetaScale = 1;
 %---------------------------------------
 
 VL = -1.;
-VU = 2*VfScaled;
+VU = 1.2*VfScaled;
 
 HL = -1.;
-HU = 2*HfScaled;
+HU = 1.2*HfScaled;
 
 
 bounds.lower.states = [VL ; HL];
@@ -69,8 +69,8 @@ bounds.upper.states = [VU ; HU];
 % thetaL = -1.;
 % thetaU = 1.5;
 
-thetaL = -.1; % CHANGED THIS, NEED TO WATCH THAT ITS NOT OVERCONSTRAINING
-thetaU = .3;
+thetaL = 0.; % CHANGED THIS, NEED TO WATCH THAT ITS NOT OVERCONSTRAINING
+thetaU = .1;
 
 bounds.lower.controls = [thetaL];
 bounds.upper.controls = [thetaU]; 
@@ -81,7 +81,7 @@ bounds.upper.controls = [thetaU];
 %------------------
 % time bounds, this is unscaled
 t0	    = 0;
-tfMax 	= Hf/1000*2;   % swag for max tf; DO NOT set to Inf even for time-free problems
+tfMax 	= Hf/1500;   % swag for max tf; DO NOT set to Inf even for time-free problems
 % remember to set higher than Vmax bounds min time
 
 % MULTI STAGE
@@ -97,8 +97,6 @@ bounds.upper.time	= [t0; tfMax];
 
 bounds.lower.events = [V0;  VfScaled; H0; HfScaled];
 
-
-% bounds.lower.events = [V0;  VfScaled; H0; HfScaled];
 
 
 bounds.upper.events = bounds.lower.events;      % equality event function bounds
@@ -122,7 +120,7 @@ Brac_1.bounds       = bounds;
 % Node Definition ====================================================
 
 
-algorithm.nodes		= [150];	
+algorithm.nodes		= [100];	
 
 
 global nodes
@@ -133,8 +131,8 @@ nodes = algorithm.nodes;
 
 %  Guess =================================================================
 
-% tfGuess = tfMax;
-tfGuess = 9.7; % this needs to be close to make sure solution stays withing Out_Force bounds
+tfGuess = tfMax;
+% tfGuess = 9.7; % this needs to be close to make sure solution stays withing Out_Force bounds
 
 
 guess.states(1,:) = [0, VfScaled]; %v

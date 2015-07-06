@@ -143,7 +143,7 @@ a = ((Thrust - (- Fd + g*sin(theta(1:end-1)))) ./ m ); % acceleration
 
 % Velocity ----------------------------------------------------------------
 v = zeros(1,nodes);
-v(1) = 1864.13; % gives exacly 50kPa
+v(1) = 1800;
 for i=2:nodes
     
     v(i) = a(i-1) * dt_array(i-1) + v(i-1);  % Velocity calculated stepwise
@@ -156,11 +156,10 @@ end
 % making the efficiency only reliant on a specific dynamic pressure is
 % nonsensical
 
-% Efficiency = 1;
-
+Efficiency = 1;
+% Efficiency = 1 + Vabs(1:end-1)/100000000;
 % Efficiency = (-(q(1:end)-50000.).^2 + 300000^2)/300000^2.;
-
-Efficiency = (-(q(1:end)-50000.).^2 + 100000^2)/100000^2.;
+%  Efficiency = (-(Vabs(1:end-1)-25000.).^2 + 300000^2)/300000^2.;
 
 %Fuel rate of change
 Fueldt = Thrust ./ Efficiency; % Temporary fuel rate of change solution, directly equated to thrust (should give correct efficiency result, but cannot analyse total fuel change accurately)
