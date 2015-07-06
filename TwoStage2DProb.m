@@ -122,7 +122,7 @@ Brac_1.bounds       = bounds;
 % Node Definition ====================================================
 
 
-algorithm.nodes		= [100];	
+algorithm.nodes		= [150];	
 
 
 global nodes
@@ -172,7 +172,7 @@ global dfuel
 dfuel
 
 global StartingV
-StartingV = 15000;
+StartingV = 27000;
 V = primal.states(1,:)*ScaleV + StartingV; 
 
 H = primal.states(2,:)*ScaleH ; 

@@ -65,7 +65,7 @@ Out_force = dlmread('out_force.txt');
 Atmosphere = dlmread('atmosphere.txt');
 
 % Calculate ablsolute height
-StartingV = 15000; % THIS NEEDS TO BE CHANGED FOR VARIABLE HEIGHT
+StartingV = 27000; % THIS NEEDS TO BE CHANGED FOR VARIABLE HEIGHT
 
 Vabs = V + StartingV;
 
@@ -133,7 +133,7 @@ My = spline(M_array, My_array, M)  ;
 % Thrust(1:nodes-1) =  - Fd(1:nodes-1) + g*sin(theta(1:nodes-1))+ 200; % This thrust is created so that there is constant acceleration
 % end
 
-Thrust(1:nodes-1) =  80000;
+Thrust(1:nodes-1) =  130000;
 
 % Acceleration ------------------------------------------------------------
 a = ((Thrust - (- Fd + g*sin(theta(1:end-1)))) ./ m ); % acceleration 
