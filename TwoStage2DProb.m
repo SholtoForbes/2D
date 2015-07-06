@@ -122,7 +122,7 @@ Brac_1.bounds       = bounds;
 % Node Definition ====================================================
 
 
-algorithm.nodes		= [500];	
+algorithm.nodes		= [100];	
 
 
 global nodes
@@ -190,6 +190,7 @@ global M
 global v_array
 v_array
 global m
+global q
 
 figure(1)
 
@@ -206,6 +207,10 @@ subplot(3,4,5)
 plot(t(1:end-1), M)
 title('M')
 
+subplot(3,4,6)
+plot(t(1:end-1), q)
+title('q')
+
 subplot(3,4,7)
 plot(t, theta)
 title('theta')
@@ -215,14 +220,12 @@ plot(t(1:end-1), m)
 title('mass')
 
 
-lam1 = dual.dynamics(1,:);
-
 subplot(3,4,9);
-plot(t, lam1);
+plot(t, dual.dynamics);
 title('costates')
 xlabel('time');
 ylabel('costates');
-legend('\lambda_1');
+legend('\lambda_1', '\lambda_2');
 
 subplot(3,4,10)
 H = dual.Hamiltonian(1,:);
