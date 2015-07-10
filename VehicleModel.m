@@ -1,4 +1,6 @@
-function [dfuel, v, m, q, M, v_array] = VehicleModel(time, theta, V, H, nodes)
+function [dfuel, Fueldt, a, m, q, M, Fd] = VehicleModel(time, theta, V, H, v, nodes)
+% function [dfuel, v, m, q, M, v_array] = VehicleModel(time, theta, V, H, nodes)
+
 
 % =======================================================
 % Vehicle Model
@@ -15,7 +17,9 @@ dV_array = V(2:end)-V(1:end-1); % Vertical position change between each node pt
 
 dH_array = H(2:end)-H(1:end-1); % horizontal position change between each node pt
 
-v_array = sqrt(dV_array.^2 + dH_array.^2) ./ dt_array; % calculate velocity array using 'previous iteration'
+%velocity primal
+v_array = v;
+% v_array = sqrt(dV_array.^2 + dH_array.^2) ./ dt_array; % calculate velocity array using 'previous iteration'
 
 
 %neglecting AoA, fixed reference frame
@@ -45,8 +49,12 @@ mdot = 0.;
 
 m = zeros(1,nodes-1);
 m(1) = 5000; 
-for i = 2:nodes-1
+% for i = 2:nodes-1
+%velocity primal
+for i = 2:nodes
     m(i) = m(i-1) + mdot*dt_array(i-1);
+    
+    
 end
     
 end
@@ -86,13 +94,15 @@ My_array = [305002.235162 , 256125.242712 , 196654.950117 ];
 
 % Calculating Dynamic Pressure
 
-q = 0.5 * rho(1:end-1) .* (v_array .^2);
-
-
+% q = 0.5 * rho(1:end-1) .* (v_array .^2);
+%velocity primal
+q = 0.5 * rho .* (v_array .^2);
 
 % Calculating Mach No (Descaled)
 
-M = v_array./c(1:end-1) ;
+% M = v_array./c(1:end-1) ;
+%velocity primal
+M = v_array./c;
 
 % For each alpha, spline force results for current dynamic pressure and
 % Mach no
@@ -133,22 +143,25 @@ My = spline(M_array, My_array, M)  ;
 % Thrust(1:nodes-1) =  - Fd(1:nodes-1) + g*sin(theta(1:nodes-1))+ 200; % This thrust is created so that there is constant acceleration
 % end
 
-Thrust(1:nodes-1) =  130000;
+% Thrust(1:nodes-1) =  130000;
+%velocity primal
+Thrust(1:nodes) =  180000;
 
 % Acceleration ------------------------------------------------------------
-a = ((Thrust - (- Fd + g*sin(theta(1:end-1)))) ./ m ); % acceleration 
+% a = ((Thrust - (- Fd + g*sin(theta(1:end-1)))) ./ m ); % acceleration 
+%velocity primal
+a = ((Thrust - (- Fd + g*sin(theta))) ./ m ); % acceleration
+% a = Thrust./Thrust * 4.5; %test constant acceleration
 
-
-
-
+%velocity primal
 % Velocity ----------------------------------------------------------------
-v = zeros(1,nodes);
-v(1) = 1864.13; % gives exacly 50kPa
-for i=2:nodes
-    
-    v(i) = a(i-1) * dt_array(i-1) + v(i-1);  % Velocity calculated stepwise
-    
-end
+% v = zeros(1,nodes);
+% v(1) = 1864.13; % gives exacly 50kPa
+% for i=2:nodes
+%     
+%     v(i) = a(i-1) * dt_array(i-1) + v(i-1);  % Velocity calculated stepwise
+%     
+% end
 
 %===========================================================================
 % Efficiency
@@ -160,12 +173,16 @@ end
 
 % Efficiency = (-(q(1:end)-50000.).^2 + 300000^2)/300000^2.;
 
-Efficiency = (-(q(1:end)-50000.).^2 + 100000^2)/100000^2.;
+% Efficiency = (-(q(1:end)-50000.).^2 + 5000^2)/5000^2.;
+
+Efficiency = gaussmf(q,[30000 50000]);
 
 %Fuel rate of change
 Fueldt = Thrust ./ Efficiency; % Temporary fuel rate of change solution, directly equated to thrust (should give correct efficiency result, but cannot analyse total fuel change accurately)
 
-fuelchange_array = -Fueldt.*dt_array ; %Fuel change over each timestep
+% fuelchange_array = -Fueldt.*dt_array ; %Fuel change over each timestep
+%velocity primal
+fuelchange_array = -Fueldt(1:end-1).*dt_array ;
 
 dfuel = sum(fuelchange_array); %total change in 'fuel' this is negative
 

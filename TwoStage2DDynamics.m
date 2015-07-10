@@ -9,23 +9,29 @@ function XDOT = Brac1Dynamics(primal)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 global ScaleH
 global ScaleV
+global Scalev
 global ThetaScale
-global v
+% global v
+global a
 
 %changed notation to horizontal and vertical, x and y in plane of vehicle
 VScaled = primal.states(1,:) ; 
 HScaled = primal.states(2,:) ; 
 
+%velocity primal
+vScaled = primal.states(3,:) ; 
+vdot = a/Scalev;
+
 theta  = primal.controls(1,:)/ThetaScale; %
 
 % %=========================================================================================
 
-VScaleddot = v.*sin(theta)/ScaleV;
-HScaleddot = v.*cos(theta)/ScaleH;
+VScaleddot = vScaled.*sin(theta)/ScaleV * Scalev;
+HScaleddot = vScaled.*cos(theta)/ScaleH * Scalev;
 
 % %====================================================================
 
 
 %======================================================
-XDOT = [VScaleddot; HScaleddot];
+XDOT = [VScaleddot; HScaleddot; vdot];
 %======================================================
