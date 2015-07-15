@@ -8,16 +8,24 @@ clear all;
 
 % Inputs ============================================
 global MultiStage
-MultiStage = 0; % 0 for no multistage 1 for multi
+MultiStage = 1; % 0 for no multistage 1 for multi
 
 %=============================================== 
 
+if MultiStage == 1
+    V0 = 0.; % Keep initial values zero
+    Vf = 6000.; % Final values here are for guess and bounds, need to be fairly accurate
 
-V0 = 0.; % Keep initial values zero
-Vf = 6000.;
+    H0 = 0.;
+    Hf = 700000.; 
+     
+else
+    V0 = 0.; % Keep initial values zero
+    Vf = 6000.; % Final values here are for guess and bounds, need to be fairly accurate
 
-H0 = 0.;
-Hf = 700000.;
+    H0 = 0.;
+    Hf = 700000.;
+end
 % 
 % V0 = 0.; % Keep initial values zero
 % Vf = 8000.;
@@ -28,9 +36,12 @@ Hf = 700000.;
 
 %VELOCITY PRIMAL
 v0 = 1864.13; % 50kpa q at 27000m
+if MultiStage == 1
+    vf = 3000; 
+else
 % vf = 2979.83; % 50kpa q at 33000m
-vf = 3000;
-
+    vf = 3000;
+end
 
 %dawids results have around 1 degree or under flight path angle
 %===================
@@ -77,10 +88,12 @@ HU = 1.2*HfScaled;
 
 %VELOCITY PRIMAL
 vL = 1500/Scalev;
-vU = 3100/Scalev;
 
-% bounds.lower.states = [VL ; HL];
-% bounds.upper.states = [VU ; HU];
+if MultiStage == 1
+    vU = 3100/Scalev;
+else
+    vU = 3100/Scalev; % This limit must not cause the drag force to exceed the potential thrust of the vehicle, otherwise DIDO will not solve
+end
 
 %VELOCITY PRIMAL
 bounds.lower.states = [VL ; HL; vL];
@@ -101,14 +114,21 @@ bounds.upper.controls = [thetaU];
 % bound the horizon
 %------------------
 % time bounds, this is unscaled
-t0	    = 0;
-tfMax 	= Hf/1500;   % swag for max tf; DO NOT set to Inf even for time-free problems
-% remember to set higher than Vmax bounds min time
 
-% MULTI STAGE
- 
-bounds.lower.time 	= [t0; t0];				
-bounds.upper.time	= [t0; tfMax];
+if MultiStage == 1
+    t0	    = 0;
+    tfMax 	= Hf/1500;   %  max tf; arbitrary
+    
+    bounds.lower.time 	= [t0 ; t0 ; t0];				
+    bounds.upper.time	= [t0 ; tfMax/2 ; tfMax];
+else
+    t0	    = 0;
+    tfMax 	= Hf/1500;   %  max tf; DO NOT set to Inf even for time-free problems % remember to set higher than Vmax bounds min time
+    
+    bounds.lower.time 	= [t0; t0];				
+    bounds.upper.time	= [t0; tfMax];
+end
+
 
 
 %-------------------------------------------
@@ -116,11 +136,12 @@ bounds.upper.time	= [t0; tfMax];
 %-------------------------------------------
 % See events file for definition of events function
 
-% bounds.lower.events = [V0;  VfScaled; H0; HfScaled];
-
-%velocity primal
-bounds.lower.events = [V0;   H0; v0Scaled; vfScaled];
-
+if MultiStage == 1
+    bounds.lower.events = [V0;   H0; v0Scaled; vfScaled; 2500; 2500; 0; 0]; % Including transition velocity 
+else
+% bounds.lower.events = [V0;   H0; v0Scaled; vfScaled; 0];
+    bounds.lower.events = [V0;   H0; v0Scaled; vfScaled];
+end
 
 bounds.upper.events = bounds.lower.events;      % equality event function bounds
 
@@ -141,44 +162,46 @@ Brac_1.bounds       = bounds;
 
 
 % Node Definition ====================================================
-
-
-algorithm.nodes		= [50];	
-
+if MultiStage == 1
+    algorithm.knots.definitions  = {'hard','hard','hard'}; % Redundant statement, but necessary for DIDO to run
+    algorithm.nodes		= [20 20];	
+else
+    algorithm.nodes		= [50];	
+end
 
 global nodes
+
 nodes = algorithm.nodes;
 
 
 %  Guess =================================================================
 
-tfGuess = tfMax;
-% tfGuess = 9.7; % this needs to be close to make sure solution stays withing Out_Force bounds
+tfGuess = tfMax; % this needs to be close to make sure solution stays withing Out_Force bounds
 
+if MultiStage == 1
+    algorithm.knots.locations    = [t0 tfGuess/2 tfGuess];
+    
+    guess.states(1,:) = [0 ,VfScaled]; %v
+    guess.states(2,:) = [0,HfScaled]; %H
 
-% guess.states(1,:) = [0, VfScaled/2 ,VfScaled]; %v
-% guess.states(2,:) = [0, HfScaled/2 ,HfScaled]; %H
-% 
-% %Velocity primal
-% guess.states(3,:) = [v0, (vf-v0)/2, vf]; %H
-% 
-% guess.controls(1,:)    = [atan((Vf-V0)/(Hf-H0)),atan((Vf-V0)/(Hf-H0)),atan((Vf-V0)/(Hf-H0))]*ThetaScale; %a
-% 
-% guess.time        = [t0, tfGuess/2,tfGuess];
+    guess.states(3,:) = [v0, vf]; %H
 
+    guess.controls(1,:)    = [atan((Vf-V0)/(Hf-H0)),atan((Vf-V0)/(Hf-H0))]*ThetaScale; %a
 
+    guess.time        = [t0 ,tfGuess];
+    
+else
 
-guess.states(1,:) = [0 ,VfScaled]; %v
-guess.states(2,:) = [0,HfScaled]; %H
+    guess.states(1,:) = [0 ,VfScaled]; %v
+    guess.states(2,:) = [0,HfScaled]; %H
 
-%Velocity primal
-guess.states(3,:) = [v0, vf]; %H
+    guess.states(3,:) = [v0, vf]; %H
 
-guess.controls(1,:)    = [atan((Vf-V0)/(Hf-H0)),atan((Vf-V0)/(Hf-H0))]*ThetaScale; %a
+    guess.controls(1,:)    = [atan((Vf-V0)/(Hf-H0)),atan((Vf-V0)/(Hf-H0))]*ThetaScale; %a
 
-guess.time        = [t0 ,tfGuess];
+    guess.time        = [t0 ,tfGuess];
 
-
+end
 
 % Tell DIDO the guess.  Note: The guess-free option is not available when
 % using "knots"
@@ -232,11 +255,15 @@ global Fd
 figure(1)
 
 subplot(4,4,[1,4])
+hold on
 plot(H, V)
+plot(H(algorithm.nodes(1)), V(algorithm.nodes(1)), '+', 'MarkerSize', 10, 'MarkerEdgeColor','r')
 title('Trajectory')
 
 subplot(4,4,5)
+hold on
 plot(t, v)
+plot(t(algorithm.nodes(1)), v(algorithm.nodes(1)), '+', 'MarkerSize', 10, 'MarkerEdgeColor','r')
 title('v')
 
 
@@ -249,8 +276,10 @@ plot(t, q)
 title('q')
 
 subplot(4,4,8)
-plot(t, theta)
-title('theta')
+hold on
+plot(t, rad2deg(theta))
+plot(t(algorithm.nodes(1)), rad2deg(theta(algorithm.nodes(1))), '+', 'MarkerSize', 10, 'MarkerEdgeColor','r')
+title('theta (Deg)')
 
 subplot(4,4,9)
 plot(t, m)
@@ -260,18 +289,19 @@ subplot(4,4,10)
 plot(t, Fd)
 title('Drag Force')
 
-subplot(4,4,11);
-plot(t, dual.dynamics);
-title('costates')
-xlabel('time');
-ylabel('costates');
-legend('\lambda_1', '\lambda_2', '\lambda_3');
+if MultiStage == 0 
+    subplot(4,4,11);
+    plot(t, dual.dynamics);
+    title('costates')
+    xlabel('time');
+    ylabel('costates');
+    legend('\lambda_1', '\lambda_2', '\lambda_3');
 
-subplot(4,4,12)
-H = dual.Hamiltonian(1,:);
-plot(t,H);
-title('Hamiltonian')
-
+    subplot(4,4,12)
+    H = dual.Hamiltonian(1,:);
+    plot(t,H);
+    title('Hamiltonian')
+end
 
 % 
 % %------ Forward Simulation -----------

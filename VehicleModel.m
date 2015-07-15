@@ -5,7 +5,14 @@ function [dfuel, Fueldt, a, m, q, M, Fd] = VehicleModel(time, theta, V, H, v, no
 % =======================================================
 % Vehicle Model
 % =======================================================
-MultiStage = 0;
+MultiStage = 1;
+
+
+if MultiStage == 1    
+    nodes_transition = nodes(1);
+    nodes = sum(nodes);
+end
+
 
 %Gravity
 g = 9.81;
@@ -26,37 +33,32 @@ v_array = v;
 
 % VARIABLE MASS TEST
 if MultiStage == 1
+m = zeros(1,nodes-1);
 % define mass flow rates
 mdot1 = 0.;
 mdot2 = 0.;
 
 % Initial stage masses
 m(1) = 5000;
-m(nodes/2+1) = 1200;
+m(nodes_transition+1) = 2500;
 
 % NEED TO CHANGE THIS TO SEPARATE AT A DISTINCT CONDITION
-for i = 2:nodes/2
+for i = 2:nodes_transition
     m(i) = m(i-1) + mdot1*dt_array(i-1);
 end
 
-for i = nodes/2+1:nodes-1
+for i = nodes_transition+2:nodes
     m(i) = m(i-1) + mdot2*dt_array(i-1);
 end
 
 else
-% mdot = -100.;
+% mdot = -1.;
 mdot = 0.; 
-
 m = zeros(1,nodes-1);
 m(1) = 5000; 
-% for i = 2:nodes-1
-%velocity primal
 for i = 2:nodes
     m(i) = m(i-1) + mdot*dt_array(i-1);
-    
-    
-end
-    
+end 
 end
 
 
@@ -66,43 +68,30 @@ end
 
 Iy = 1.; %%%% CHANGE THIS
 
-% import data from force matrix
-Out_force = dlmread('out_force.txt');
+Out_force = dlmread('out_force.txt'); % import data from force matrix
 
-% import data from atmosphere matrix
-Atmosphere = dlmread('atmosphere.txt');
+Atmosphere = dlmread('atmosphere.txt'); % import data from atmosphere matrix
 
-% Calculate ablsolute height
-StartingV = 27000; % THIS NEEDS TO BE CHANGED FOR VARIABLE HEIGHT
+StartingV = 27000; % Calculate ablsolute height % THIS NEEDS TO BE CHANGED FOR VARIABLE HEIGHT
 
-Vabs = V + StartingV;
+Vabs = V + StartingV; % Absolute vertical position
 
-% Calculate speed of sound using atmospheric data
-c = spline( Atmosphere(:,1),  Atmosphere(:,5), Vabs);
+c = spline( Atmosphere(:,1),  Atmosphere(:,5), Vabs); % Calculate speed of sound using atmospheric data
 
-% Calculate density using atmospheric data
-rho = spline( Atmosphere(:,1),  Atmosphere(:,4), Vabs);
+rho = spline( Atmosphere(:,1),  Atmosphere(:,4), Vabs); % Calculate density using atmospheric data
 
 %an initial interpolator for the force values at a fixed Arot, alpha and
 %dynamic pressure (0,  -0.0174532925199 (negative up) , 45000.0)
-
 M_array = [4.5 , 5. , 5.5]; 
 Fd_array = [-36427.6593981 , -42995.3909773 , -50209.1507264];
 Flift_array = [ 26851.676829 , 25865.7310572 , 24420.6025981 ];
 My_array = [305002.235162 , 256125.242712 , 196654.950117 ];
 
+q = 0.5 * rho .* (v_array .^2); % Calculating Dynamic Pressure
 
-% Calculating Dynamic Pressure
+M = v_array./c; % Calculating Mach No (Descaled)
 
-% q = 0.5 * rho(1:end-1) .* (v_array .^2);
-%velocity primal
-q = 0.5 * rho .* (v_array .^2);
 
-% Calculating Mach No (Descaled)
-
-% M = v_array./c(1:end-1) ;
-%velocity primal
-M = v_array./c;
 
 % For each alpha, spline force results for current dynamic pressure and
 % Mach no
@@ -124,66 +113,65 @@ M = v_array./c;
 % AoA
 
 % THRUST AND MOTION ==================================================================
+if MultiStage == 1
+    Fdtemp(1:nodes_transition) = spline(M_array, Fd_array, M(1:nodes_transition));
+    Fd = Fdtemp./(50000./q(1:nodes_transition)); % Modified drag force to include variation with q
+    Fd(nodes_transition+1:nodes) = spline(M_array, Fd_array, M(nodes_transition+1:nodes))/10; % drag after transition
+else
+    Fdtemp = spline(M_array, Fd_array, M);
+    Fd = Fdtemp./(50000./q); % this is an attempt to implement change in drag with q
+    Flift = spline(M_array, Flift_array, M)  ;
+    My = spline(M_array, My_array, M)  ;
+end
 
 
-Fd = spline(M_array, Fd_array, M);
-Flift = spline(M_array, Flift_array, M)  ;
-My = spline(M_array, My_array, M)  ;
-
-
-
-
-%VARIABLE THRUST WITH STAGES ----------------------------------------------
-% if MultiStage == 1
-% % Stage 2 -----------------------------------------------------------------
-% Thrust(1:nodes/2) =  - Fd(1:nodes/2) + g*sin(theta(1:nodes/2))+ 200;
-% % Stage 3 -----------------------------------------------------------------
-% Thrust(nodes/2+1:nodes(1)-1) =  - Fd(nodes/2+1:nodes-1) + g*sin(theta(nodes/2+1:nodes-1)) + 100.;
-% else
-% Thrust(1:nodes-1) =  - Fd(1:nodes-1) + g*sin(theta(1:nodes-1))+ 200; % This thrust is created so that there is constant acceleration
-% end
-
-% Thrust(1:nodes-1) =  130000;
-%velocity primal
-Thrust(1:nodes) =  180000;
+% Thrust 
+if MultiStage == 1
+    Thrust(1:nodes_transition) =  180000;
+    Thrust(nodes_transition+1:nodes) =  180000; 
+else
+    Thrust(1:nodes) =  180000;
+end
 
 % Acceleration ------------------------------------------------------------
-% a = ((Thrust - (- Fd + g*sin(theta(1:end-1)))) ./ m ); % acceleration 
-%velocity primal
+
 a = ((Thrust - (- Fd + g*sin(theta))) ./ m ); % acceleration
 % a = Thrust./Thrust * 4.5; %test constant acceleration
 
-%velocity primal
-% Velocity ----------------------------------------------------------------
-% v = zeros(1,nodes);
-% v(1) = 1864.13; % gives exacly 50kPa
-% for i=2:nodes
-%     
-%     v(i) = a(i-1) * dt_array(i-1) + v(i-1);  % Velocity calculated stepwise
-%     
-% end
-
-%===========================================================================
+%Fuel Cost ===========================================================================
 % Efficiency
 % NOTE DYNAMIC PRESSURE DOES NOT CHANGE DRAG IN FORCE FILE INGO GAVE ME, so
 % making the efficiency only reliant on a specific dynamic pressure is
 % nonsensical
 
-% Efficiency = 1;
-
-% Efficiency = (-(q(1:end)-50000.).^2 + 300000^2)/300000^2.;
-
-% Efficiency = (-(q(1:end)-50000.).^2 + 5000^2)/5000^2.;
-
-Efficiency = gaussmf(q,[30000 50000]);
+if MultiStage == 1
+    Efficiency2 = gaussmf(q(1:nodes_transition),[10000 50000]);
+    Efficiency3 = 1;
+else
+    % Efficiency = 1;
+    Efficiency = gaussmf(q,[5000 50000]);
+end
 
 %Fuel rate of change
-Fueldt = Thrust ./ Efficiency; % Temporary fuel rate of change solution, directly equated to thrust (should give correct efficiency result, but cannot analyse total fuel change accurately)
+if MultiStage == 1
+    Fueldt(1:nodes_transition) = Thrust(1:nodes_transition) ./ Efficiency2;
+    Fueldt(nodes_transition+1:nodes) = Thrust(nodes_transition+1:nodes) ./ Efficiency3;
+else
+    Fueldt = Thrust ./ Efficiency; % Temporary fuel rate of change solution, directly equated to thrust (should give correct efficiency result, but cannot analyse total fuel change accurately)
+end
 
-% fuelchange_array = -Fueldt.*dt_array ; %Fuel change over each timestep
-%velocity primal
 fuelchange_array = -Fueldt(1:end-1).*dt_array ;
 
 dfuel = sum(fuelchange_array); %total change in 'fuel' this is negative
+
+
+
+
+
+
+
+
+
+
 
 

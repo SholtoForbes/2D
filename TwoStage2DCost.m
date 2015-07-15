@@ -37,9 +37,9 @@ global Fd
 g = 9.81;
 
 
-VScaled = primal.states(1,1:nodes(1)) ; % Scaled vertical position
+VScaled = primal.states(1, :) ; % Scaled vertical position
 
-HScaled = primal.states(2,1:nodes(1)) ; % Scaled horizontal position
+HScaled = primal.states(2, :) ; % Scaled horizontal position
 
 %velocity primal
 vScaled = primal.states(3,:) ;
@@ -49,9 +49,9 @@ V = VScaled * ScaleV;
 H = HScaled * ScaleH;
 v = vScaled * Scalev;
 
-theta  = primal.controls(1,1:nodes(1))/ThetaScale; % Velocity angle
+theta  = primal.controls(1, :)/ThetaScale; % Velocity angle
 
-time = primal.nodes(1,1:nodes(1)); % Time
+time = primal.nodes(1, :); % Time
 
 
 
