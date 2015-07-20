@@ -8,7 +8,7 @@ clear all;
 
 % Inputs ============================================
 global MultiStage
-MultiStage = 1; % 0 for no multistage 1 for multi
+MultiStage = 0; % 0 for no multistage 1 for multi
 
 %=============================================== 
 
@@ -104,7 +104,7 @@ bounds.upper.states = [VU ; HU; vU];
 % thetaU = 1.5;
 
 thetaL = -.2; % CHANGED THIS, NEED TO WATCH THAT ITS NOT OVERCONSTRAINING
-thetaU = 0.5;
+thetaU = .5;
 
 bounds.lower.controls = [thetaL];
 bounds.upper.controls = [thetaU]; 
@@ -120,7 +120,7 @@ if MultiStage == 1
     tfMax 	= Hf/1500;   %  max tf; arbitrary
     
     bounds.lower.time 	= [t0 ; t0 ; t0];				
-    bounds.upper.time	= [t0 ; tfMax/2 ; tfMax];
+    bounds.upper.time	= [t0 ; tfMax ; tfMax];
 else
     t0	    = 0;
     tfMax 	= Hf/1500;   %  max tf; DO NOT set to Inf even for time-free problems % remember to set higher than Vmax bounds min time
@@ -180,7 +180,7 @@ tfGuess = tfMax; % this needs to be close to make sure solution stays withing Ou
 
 if MultiStage == 1
     algorithm.knots.locations    = [t0 tfGuess/2 tfGuess];
-    
+%     
     guess.states(1,:) = [0 ,VfScaled]; %v
     guess.states(2,:) = [0,HfScaled]; %H
 
@@ -190,6 +190,16 @@ if MultiStage == 1
 
     guess.time        = [t0 ,tfGuess];
     
+%     guess.states(1,:) = [0 ,VfScaled/2,VfScaled]; %v
+%     guess.states(2,:) = [0,HfScaled/2,HfScaled]; %H
+% 
+%     guess.states(3,:) = [v0, (vf-v0)/2 + v0, vf]; %H
+% 
+%     guess.controls(1,:)    = [atan((Vf-V0)/(Hf-H0)),atan((Vf-V0)/(Hf-H0)),atan((Vf-V0)/(Hf-H0))]*ThetaScale; %a
+
+%     guess.time        = [t0 ,tfGuess/2,tfGuess];
+
+%     guess.time        = [t0 ,50,60];
 else
 
     guess.states(1,:) = [0 ,VfScaled]; %v
@@ -201,6 +211,15 @@ else
 
     guess.time        = [t0 ,tfGuess];
 
+%     guess.states(1,:) = [0 ,VfScaled/2,VfScaled]; %v
+%     guess.states(2,:) = [0,HfScaled/2,HfScaled]; %H
+% 
+%     guess.states(3,:) = [v0, (vf-v0)/2 + v0, vf]; %H
+% 
+%     guess.controls(1,:)    = [atan((Vf-V0)/(Hf-H0)),atan((Vf-V0)/(Hf-H0)),atan((Vf-V0)/(Hf-H0))]*ThetaScale; %a
+% 
+%     guess.time        = [t0 ,tfGuess/2,tfGuess];
+
 end
 
 % Tell DIDO the guess.  Note: The guess-free option is not available when
@@ -209,6 +228,7 @@ end
 algorithm.guess = guess;
 % algorithm.guess = primal_old;
 % %========================
+% algorithm.mode = 'accurate';
 %=====================================================================================
 
 

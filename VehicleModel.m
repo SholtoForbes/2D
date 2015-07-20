@@ -5,7 +5,7 @@ function [dfuel, Fueldt, a, m, q, M, Fd] = VehicleModel(time, theta, V, H, v, no
 % =======================================================
 % Vehicle Model
 % =======================================================
-MultiStage = 1;
+MultiStage = 0;
 
 
 if MultiStage == 1    
@@ -40,7 +40,7 @@ mdot2 = 0.;
 
 % Initial stage masses
 m(1) = 5000;
-m(nodes_transition+1) = 2500;
+m(nodes_transition+1) = 5000;
 
 % NEED TO CHANGE THIS TO SEPARATE AT A DISTINCT CONDITION
 for i = 2:nodes_transition
@@ -116,7 +116,7 @@ M = v_array./c; % Calculating Mach No (Descaled)
 if MultiStage == 1
     Fdtemp(1:nodes_transition) = spline(M_array, Fd_array, M(1:nodes_transition));
     Fd = Fdtemp./(50000./q(1:nodes_transition)); % Modified drag force to include variation with q
-    Fd(nodes_transition+1:nodes) = spline(M_array, Fd_array, M(nodes_transition+1:nodes))/10; % drag after transition
+    Fd(nodes_transition+1:nodes) = spline(M_array, Fd_array, M(nodes_transition+1:nodes)); % drag after transition
 else
     Fdtemp = spline(M_array, Fd_array, M);
     Fd = Fdtemp./(50000./q); % this is an attempt to implement change in drag with q
@@ -145,8 +145,8 @@ a = ((Thrust - (- Fd + g*sin(theta))) ./ m ); % acceleration
 % nonsensical
 
 if MultiStage == 1
-    Efficiency2 = gaussmf(q(1:nodes_transition),[10000 50000]);
-    Efficiency3 = 1;
+    Efficiency2 = gaussmf(q(1:nodes_transition),[5000 50000]);
+    Efficiency3 = gaussmf(q(1:nodes_transition),[5000 50000]);
 else
     % Efficiency = 1;
     Efficiency = gaussmf(q,[5000 50000]);
