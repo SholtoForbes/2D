@@ -82,15 +82,15 @@ HL = -1.;
 HU = 1.2*HfScaled;
 
 
-if Stage == 2
+if Stage ==2
 vL = 1500/Scalev;
 vU = 3100/Scalev; % This limit must not cause the drag force to exceed the potential thrust of the vehicle, otherwise DIDO will not solve
 end
 
-if Stage == 3 
-vL = 2800/Scalev;
-vU = 5100/Scalev; % This limit must not cause the drag force to exceed the potential thrust of the vehicle, otherwise DIDO will not solve
-end
+if Stage  
+vL = 1500/Scalev;
+vU = 3100/Scalev; % This limit must not cause the drag force to exceed the potential thrust of the vehicle, otherwise DIDO will not solve
+
 
 %VELOCITY PRIMAL
 bounds.lower.states = [VL ; HL; vL];
@@ -100,16 +100,8 @@ bounds.upper.states = [VU ; HU; vU];
 % thetaL = -1.;
 % thetaU = 1.5;
 
-if Stage == 2 
-thetaL = -.2; %  NEED TO WATCH THAT THIS IS NOT OVERCONSTRAINING
+thetaL = -.2; % CHANGED THIS, NEED TO WATCH THAT ITS NOT OVERCONSTRAINING
 thetaU = .5;
-end
-
-if Stage == 3 
-thetaL = -.2; 
-thetaU = 1.6;
-end
-
 
 bounds.lower.controls = [thetaL];
 bounds.upper.controls = [thetaU]; 

@@ -18,7 +18,7 @@ global ScaleH
 global ScaleV
 global Scalev
 global ThetaScale
-global MultiStage
+global Stage
 global nodes
 % =======================================================
 % Vehicle Model:
