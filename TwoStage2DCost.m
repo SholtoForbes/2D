@@ -33,6 +33,9 @@ global dfuel
 global a
 global Fd
 
+global communicator
+global communicator_trim
+
 %Gravity
 g = 9.81;
 
@@ -57,11 +60,17 @@ time = primal.nodes(1, :); % Time
 
 % [dfuel, v, m, q, M, v_array] = VehicleModel(time, theta, V, H, nodes);
 %velocity primal
-[dfuel, Fueldt, a, m, q, M, Fd] = VehicleModel(time, theta, V, H, v, nodes);
+[dfuel, Fueldt, a, m, q, M, Fd] = VehicleModel(time, theta, V, H, v, nodes, communicator, communicator_trim);
+
+% THIRD STAGE ======================================================
+
+
+
+
 
 % Define Cost =======================================================
 
-EndpointCost = -dfuel;
+% EndpointCost = -dfuel;
 
 % tf = primal.nodes(end);     
 % EndpointCost = tf;
@@ -69,10 +78,10 @@ EndpointCost = -dfuel;
 % EndpointCost = abs(q-50000);
 
 % It is able to run with no cost at all:
-% EndpointCost = 0;
+EndpointCost = 0;
 
-RunningCost = 0;
+% RunningCost = 0;
 
-% RunningCost =((q-50000).^2+1000000)/1000000; %WORKS
+RunningCost =((q-50000).^2+1000000)/1000000; %WORKS
 
 % RunningCost = Fueldt;

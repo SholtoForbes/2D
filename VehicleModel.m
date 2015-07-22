@@ -1,11 +1,10 @@
-function [dfuel, Fueldt, a, m, q, M, Fd] = VehicleModel(time, theta, V, H, v, nodes)
+function [dfuel, Fueldt, a, m, q, M, Fd] = VehicleModel(time, theta, V, H, v, nodes, communicator, communicator_trim)
 % function [dfuel, v, m, q, M, v_array] = VehicleModel(time, theta, V, H, nodes)
 
 
 % =======================================================
 % Vehicle Model
 % =======================================================
-Stage = 3;
 
 %Gravity
 g = 9.81;
@@ -23,8 +22,6 @@ v_array = v;
 % SECOND STAGE
 %
 %===================================================
-
-if Stage == 2
 
 %neglecting AoA, fixed reference frame
 
@@ -57,9 +54,11 @@ rho = spline( Atmosphere(:,1),  Atmosphere(:,4), Vabs); % Calculate density usin
 %an initial interpolator for the force values at a fixed Arot, alpha and
 %dynamic pressure (0,  -0.0174532925199 (negative up) , 45000.0)
 M_array = [4.5 , 5. , 5.5]; 
-Fd_array = [-36427.6593981 , -42995.3909773 , -50209.1507264];
-Flift_array = [ 26851.676829 , 25865.7310572 , 24420.6025981 ];
-My_array = [305002.235162 , 256125.242712 , 196654.950117 ];
+
+% Placeholder vehicle model values
+% Fd_array = [-36427.6593981 , -42995.3909773 , -50209.1507264];
+% Flift_array = [ 26851.676829 , 25865.7310572 , 24420.6025981 ];
+% My_array = [305002.235162 , 256125.242712 , 196654.950117 ];
 
 q = 0.5 * rho .* (v_array .^2); % Calculating Dynamic Pressure
 
@@ -68,35 +67,39 @@ M = v_array./c; % Calculating Mach No (Descaled)
 % For each alpha, spline force results for current dynamic pressure and
 % Mach no
 
-% This needs to be implemented with a more robust vehicle model, WILL ALL
-% BE NaN for a vehicle model with not enough data
-% for i=1:nodes-1
-% theta_temp = theta(i); 
-% M_temp = M(i);
-% q_temp = q(i);
-% m_temp = m(i);
-%     
-% AoA(i) = OutForce(theta_temp,M_temp,q_temp,m_temp);
-% 
-% end
-% rho
-% q
+Fd = zeros(1,nodes);
+Alpha = zeros(1,nodes);
+for i = 1:nodes
+    S = 60;  % Planform area - this needs to be updated
+    theta_temp = theta(i);
+    M_temp = M(i);
+    q_temp = q(i);
+    m_temp = m(i);
+    
+    [Alpha(i), Fd(i) ,pitchingmoment] = OutForce(theta_temp,M_temp,q_temp,m_temp,S, communicator, communicator_trim);
+end
+
+% Alpha
+% theta
 % M
-% AoA
+% Fd
+
+% Fd = 25000;
+
 
 % THRUST AND MOTION ==================================================================
 
-Fdtemp = spline(M_array, Fd_array, M);
-Fd = Fdtemp./(50000./q); % this is an attempt to implement change in drag with q
-Flift = spline(M_array, Flift_array, M)  ;
-My = spline(M_array, My_array, M)  ;
+% Fdtemp = spline(M_array, Fd_array, M);
+% Fd = Fdtemp./(50000./q); % this is an attempt to implement change in drag with q
+% Flift = spline(M_array, Flift_array, M)  ;
+% My = spline(M_array, My_array, M)  ;
 
 % Thrust 
-Thrust(1:nodes) =  180000;
+Thrust(1:nodes) =  90000;
 
 % Acceleration ------------------------------------------------------------
 
-a = ((Thrust - (- Fd + g*sin(theta))) ./ m ); % acceleration
+a = ((Thrust - (Fd + g*sin(theta))) ./ m ); % acceleration
 
 %Fuel Cost ===========================================================================
 % Efficiency
@@ -114,83 +117,6 @@ fuelchange_array = -Fueldt(1:end-1).*dt_array ;
 dfuel = sum(fuelchange_array); %total change in 'fuel' this is negative
 
 end
-
-
-%===================================================
-%
-% THIRD STAGE
-%
-%===================================================
-
-if Stage == 3
-
-%neglecting AoA, fixed reference frame
-
-% mdot = -1.;
-mdot = 0.; 
-m = zeros(1,nodes-1);
-m(1) = 5000; 
-for i = 2:nodes
-    m(i) = m(i-1) + mdot*dt_array(i-1);
-end 
-
-%======================================================
-% Adding better scramjet dynamics, added 21/4/15
-% communicator matrix is given in terms of forces and moments
-
-Iy = 1.; %%%% CHANGE THIS
-
-Out_force = dlmread('out_force.txt'); % import data from force matrix
-
-Atmosphere = dlmread('atmosphere.txt'); % import data from atmosphere matrix
-
-StartingV = 33000; % Calculate ablsolute height % THIS NEEDS TO BE CHANGED FOR VARIABLE HEIGHT
-
-Vabs = V + StartingV; % Absolute vertical position
-
-c = spline( Atmosphere(:,1),  Atmosphere(:,5), Vabs); % Calculate speed of sound using atmospheric data
-
-rho = spline( Atmosphere(:,1),  Atmosphere(:,4), Vabs); % Calculate density using atmospheric data
-
-%an initial interpolator for the force values at a fixed Arot, alpha and
-%dynamic pressure (0,  -0.0174532925199 (negative up) , 45000.0)
-M_array = [4.5 , 5. , 5.5]; 
-Fd_array = [-36427.6593981 , -42995.3909773 , -50209.1507264];
-Flift_array = [ 26851.676829 , 25865.7310572 , 24420.6025981 ];
-My_array = [305002.235162 , 256125.242712 , 196654.950117 ];
-
-q = 0.5 * rho .* (v_array .^2); % Calculating Dynamic Pressure
-
-M = v_array./c; % Calculating Mach No (Descaled)
-
-% THRUST AND MOTION ==================================================================
-
-Fdtemp = spline(M_array, Fd_array, M);
-Fd = Fdtemp./(50000./q); % this is an attempt to implement change in drag with q
-Flift = spline(M_array, Flift_array, M)  ;
-My = spline(M_array, My_array, M)  ;
-
-% Thrust 
-Thrust(1:nodes) =  180000;
-
-% Acceleration ------------------------------------------------------------
-
-a = ((Thrust - (- Fd + g*sin(theta))) ./ m ); % acceleration
-
-%Fuel Cost ===========================================================================
-
-Efficiency = 1;
-
-%Fuel rate of change
-Fueldt = Thrust ./ Efficiency; % Temporary fuel rate of change solution, directly equated to thrust (should give correct efficiency result, but cannot analyse total fuel change accurately)
-
-fuelchange_array = -Fueldt(1:end-1).*dt_array ;
-
-dfuel = sum(fuelchange_array); %total change in 'fuel' this is negative
-
-end
-
-
 
 
 

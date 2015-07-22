@@ -7,37 +7,22 @@ clear all;
 % global v
 
 % Inputs ============================================
-global Stage
-Stage = 3; % 0 for no multistage 1 for multi
+global communicator
+communicator = importdata('communicator.txt');
+global communicator_trim
+communicator_trim = importdata('communicator_trim.txt');
+
 
 %=============================================== 
 %Second Stage
-if Stage == 2
 V0 = 0.; % Keep initial values zero
 Vf = 6000.; % Final values here are for guess and bounds, need to be fairly accurate
 
 H0 = 0.;
 Hf = 700000.;
-end
 
-% Third Stage
-if Stage == 3
-V0 = 0.; % Keep initial values zero
-Vf = 60000.;
-
-H0 = 0.;
-Hf = 1200000.;
-end
-
-if Stage == 2
 v0 = 1864.13; % 50kpa q at 27000m
 vf = 2979.83; % 50kpa q at 33000m
-end
-
-if Stage == 3
-v0 = 2979.83; 
-vf = 5000.0; 
-end
 
 %dawids results have around 1 degree or under flight path angle
 %===================
@@ -45,7 +30,6 @@ end
 % control factor: omega
 % variable trajectory
 %===================
-
 
 % Scaling ========================================
 
@@ -81,18 +65,9 @@ VU = 1.2*VfScaled;
 HL = -1.;
 HU = 1.2*HfScaled;
 
-
-if Stage == 2
 vL = 1500/Scalev;
 vU = 3100/Scalev; % This limit must not cause the drag force to exceed the potential thrust of the vehicle, otherwise DIDO will not solve
-end
 
-if Stage == 3 
-vL = 2800/Scalev;
-vU = 5100/Scalev; % This limit must not cause the drag force to exceed the potential thrust of the vehicle, otherwise DIDO will not solve
-end
-
-%VELOCITY PRIMAL
 bounds.lower.states = [VL ; HL; vL];
 bounds.upper.states = [VU ; HU; vU];
 
@@ -100,16 +75,8 @@ bounds.upper.states = [VU ; HU; vU];
 % thetaL = -1.;
 % thetaU = 1.5;
 
-if Stage == 2 
 thetaL = -.2; %  NEED TO WATCH THAT THIS IS NOT OVERCONSTRAINING
-thetaU = .5;
-end
-
-if Stage == 3 
-thetaL = -.2; 
-thetaU = 1.6;
-end
-
+thetaU = .3;
 
 bounds.lower.controls = [thetaL];
 bounds.upper.controls = [thetaU]; 

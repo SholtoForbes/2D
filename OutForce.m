@@ -1,4 +1,4 @@
-function Alpha = OutForce(theta,M,q,m)
+function [Alpha, D ,pitchingmoment] = OutForce(theta,M,q,m,S, communicator, communicator_trim)
 
 % Out_force interpolator
 
@@ -13,14 +13,47 @@ function Alpha = OutForce(theta,M,q,m)
 % m = 5000
 gravity = m*9.81;
 
-Out_force = dlmread('out_force.txt'); % Imports from force matrix
 
 
-q_array = Out_force(:,2);
-M_array = Out_force(:,3);
-F_sum =  Out_force(:,8)  - gravity*cos(theta) ;% Sum of v
+M_array = communicator(:,1);
 
-Alpha_array = Out_force(:,5);
+Alpha_array = communicator(:,2);
+ 
+cL_array = communicator(:,3);
+
+L_array = q*S*cL_array;
+
+F_sum =   L_array - gravity*cos(theta); % Array of force sums in velocity perpendicular direction
+
+Alpha = griddata(M_array,F_sum, Alpha_array, M, 0);
 
 
-Alpha = griddata(q_array,M_array,F_sum, Alpha_array, q, M, 0);
+cD_array = communicator(:,4);
+
+cD = griddata(M_array,Alpha_array, cD_array, M, Alpha);
+
+Body_Drag = q*S*cD;
+
+pitchingmoment_array = communicator(:,5);
+
+pitchingmoment = griddata(M_array,Alpha_array, pitchingmoment_array, M, Alpha);
+
+%Calculate Flap Deflection Necessary
+
+Mtrim_array = communicator_trim(:,1);
+
+Alphatrim_array = communicator_trim(:,2);
+
+pitchingmomenttrim_array = communicator_trim(:,4);
+
+Flapdeflection_array = communicator_trim(:,3);
+
+Flap_Drag = griddata(Mtrim_array, Alphatrim_array, pitchingmomenttrim_array, Flapdeflection_array, M, Alpha, -pitchingmoment);
+
+% D = Body_Drag + Flap_Drag;
+
+D = Body_Drag;
+
+
+
+
