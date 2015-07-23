@@ -68,18 +68,27 @@ HU = 1.2*HfScaled;
 vL = 1500/Scalev;
 vU = 3100/Scalev; % This limit must not cause the drag force to exceed the potential thrust of the vehicle, otherwise DIDO will not solve
 
-bounds.lower.states = [VL ; HL; vL];
-bounds.upper.states = [VU ; HU; vU];
+% bounds.lower.states = [VL ; HL; vL];
+% bounds.upper.states = [VU ; HU; vU];
+
+thetaL = -.2; %  NEED TO WATCH THAT THIS IS NOT OVERCONSTRAINING
+thetaU = .3;
+
+bounds.lower.states = [VL ; HL; vL; thetaL];
+bounds.upper.states = [VU ; HU; vU; thetaU];
 
 % control bounds
 % thetaL = -1.;
 % thetaU = 1.5;
 
-thetaL = -.2; %  NEED TO WATCH THAT THIS IS NOT OVERCONSTRAINING
-thetaU = .3;
+% thetaL = -.2; %  NEED TO WATCH THAT THIS IS NOT OVERCONSTRAINING
+% thetaU = .3;
 
-bounds.lower.controls = [thetaL];
-bounds.upper.controls = [thetaU]; 
+thetadotL = -0.1;
+thetadotU = 0.1;
+
+bounds.lower.controls = [thetadotL];
+bounds.upper.controls = [thetadotU]; 
 
 
 %------------------
@@ -143,8 +152,10 @@ guess.states(1,:) = [0 ,VfScaled]; %v
 guess.states(2,:) = [0,HfScaled]; %H
 
 guess.states(3,:) = [v0, vf]; %H
+guess.states(4,:) = [atan((Vf-V0)/(Hf-H0)),atan((Vf-V0)/(Hf-H0))]*ThetaScale; 
 
-guess.controls(1,:)    = [atan((Vf-V0)/(Hf-H0)),atan((Vf-V0)/(Hf-H0))]*ThetaScale; %a
+guess.controls(1,:)    = [0,0]; 
+% guess.controls(1,:)    = [atan((Vf-V0)/(Hf-H0)),atan((Vf-V0)/(Hf-H0))]*ThetaScale; 
 
 guess.time        = [t0 ,tfGuess];
 
@@ -186,7 +197,10 @@ v = primal.states(3,:)*Scalev;
 
 t = primal.nodes;
 
-theta = primal.controls(1,:);
+% theta = primal.controls(1,:);
+
+theta = primal.states(4,:);
+thetadot = primal.controls(1,:);
 
 
 %calculating for interest
@@ -228,6 +242,11 @@ hold on
 plot(t, rad2deg(theta))
 plot(t(algorithm.nodes(1)), rad2deg(theta(algorithm.nodes(1))), '+', 'MarkerSize', 10, 'MarkerEdgeColor','r')
 title('theta (Deg)')
+
+subplot(4,4,13)
+hold on
+plot(t, rad2deg(thetadot))
+title('thetadot (Deg/s)')
 
 subplot(4,4,9)
 plot(t, m)

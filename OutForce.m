@@ -37,20 +37,20 @@ Body_Drag = q*S*cD;
 pitchingmoment_array = communicator(:,5);
 
 pitchingmoment = griddata(M_array,Alpha_array, pitchingmoment_array, M, Alpha);
-
-%Calculate Flap Deflection Necessary
-
-Mtrim_array = communicator_trim(:,1);
-
-Alphatrim_array = communicator_trim(:,2);
-
-pitchingmomenttrim_array = communicator_trim(:,4);
-
-Flapdeflection_array = communicator_trim(:,3);
-
-Flap_Drag = griddata(Mtrim_array, Alphatrim_array, pitchingmomenttrim_array, Flapdeflection_array, M, Alpha, -pitchingmoment);
-
-% D = Body_Drag + Flap_Drag;
+% 
+% %Calculate Flap Deflection Necessary
+% 
+% Mtrim_array = communicator_trim(:,1);
+% 
+% Alphatrim_array = communicator_trim(:,2);
+% 
+% pitchingmomenttrim_array = communicator_trim(:,4);
+% 
+% Flapdeflection_array = communicator_trim(:,3);
+% 
+% Flap_Drag = griddata(Mtrim_array, Alphatrim_array, pitchingmomenttrim_array, Flapdeflection_array, M, Alpha, -pitchingmoment);
+% 
+% % D = Body_Drag + Flap_Drag;
 
 D = Body_Drag;
 

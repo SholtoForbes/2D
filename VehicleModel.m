@@ -67,24 +67,24 @@ M = v_array./c; % Calculating Mach No (Descaled)
 % For each alpha, spline force results for current dynamic pressure and
 % Mach no
 
-Fd = zeros(1,nodes);
-Alpha = zeros(1,nodes);
-for i = 1:nodes
-    S = 60;  % Planform area - this needs to be updated
-    theta_temp = theta(i);
-    M_temp = M(i);
-    q_temp = q(i);
-    m_temp = m(i);
-    
-    [Alpha(i), Fd(i) ,pitchingmoment] = OutForce(theta_temp,M_temp,q_temp,m_temp,S, communicator, communicator_trim);
-end
+% Fd = zeros(1,nodes);
+% Alpha = zeros(1,nodes);
+% for i = 1:nodes
+%     S = 60;  % Planform area - this needs to be updated
+%     theta_temp = theta(i);
+%     M_temp = M(i);
+%     q_temp = q(i);
+%     m_temp = m(i);
+%     
+%     [Alpha(i), Fd(i) ,pitchingmoment] = OutForce(theta_temp,M_temp,q_temp,m_temp,S, communicator, communicator_trim);
+% end
 
 % Alpha
 % theta
 % M
 % Fd
 
-% Fd = 25000;
+Fd = 25000;
 
 
 % THRUST AND MOTION ==================================================================

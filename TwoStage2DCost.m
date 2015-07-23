@@ -52,7 +52,8 @@ V = VScaled * ScaleV;
 H = HScaled * ScaleH;
 v = vScaled * Scalev;
 
-theta  = primal.controls(1, :)/ThetaScale; % Velocity angle
+% theta  = primal.controls(1, :)/ThetaScale; % Velocity angle
+theta  = primal.states(4, :)/ThetaScale; % Velocity angle
 
 time = primal.nodes(1, :); % Time
 
@@ -80,8 +81,10 @@ time = primal.nodes(1, :); % Time
 % It is able to run with no cost at all:
 EndpointCost = 0;
 
+
+
 % RunningCost = 0;
 
-RunningCost =((q-50000).^2+1000000)/1000000; %WORKS
+% RunningCost =((q-50000).^2+1000000)/1000000; %WORKS
 
-% RunningCost = Fueldt;
+RunningCost = Fueldt;

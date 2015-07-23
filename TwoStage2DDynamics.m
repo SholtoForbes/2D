@@ -22,7 +22,11 @@ HScaled = primal.states(2,:) ;
 vScaled = primal.states(3,:) ; 
 vdot = a/Scalev;
 
-theta  = primal.controls(1,:)/ThetaScale; %
+theta = primal.states(4,:) ; 
+
+% theta  = primal.controls(1,:)/ThetaScale; %
+
+thetadot  = primal.controls(1,:); %
 
 % %=========================================================================================
 
@@ -33,5 +37,5 @@ HScaleddot = vScaled.*cos(theta)/ScaleH * Scalev;
 
 
 %======================================================
-XDOT = [VScaleddot; HScaleddot; vdot];
+XDOT = [VScaleddot; HScaleddot; vdot; thetadot];
 %======================================================
