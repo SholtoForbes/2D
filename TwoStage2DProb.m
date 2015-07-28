@@ -8,9 +8,11 @@ clear all;
 
 % Inputs ============================================
 global communicator
-communicator = importdata('communicator.txt');
+% communicator = importdata('communicator.txt');
+communicator = importdata('communicator_extrapolate.txt');
 global communicator_trim
-communicator_trim = importdata('communicator_trim.txt');
+% communicator_trim = importdata('communicator_trim.txt');
+communicator_trim = importdata('communicator_trim_extrapolate.txt');
 
 
 %=============================================== 
@@ -84,8 +86,8 @@ bounds.upper.states = [VU ; HU; vU; thetaU];
 % thetaL = -.2; %  NEED TO WATCH THAT THIS IS NOT OVERCONSTRAINING
 % thetaU = .3;
 
-thetadotL = -0.1;
-thetadotU = 0.1;
+thetadotL = -0.01;
+thetadotU = 0.01;
 
 bounds.lower.controls = [thetadotL];
 bounds.upper.controls = [thetadotU]; 
@@ -213,6 +215,15 @@ global M
 global m
 global q
 global Fd
+global Fueldt
+global Endcost
+
+dt = t(2:end)-t(1:end-1); % Time change between each node pt
+FuelUsed = zeros(1,nodes-1);
+FuelUsed(1) = dt(1)*Fueldt(1);
+for i = 2:nodes-1
+    FuelUsed(i) = dt(i).*Fueldt(i) + FuelUsed(i-1);
+end
 
 figure(1)
 
@@ -256,6 +267,11 @@ subplot(4,4,10)
 plot(t, Fd)
 title('Drag Force')
 
+subplot(4,4,14)
+hold on
+plot(t(1:end-1), FuelUsed)
+bar(t(end), -Endcost)
+title('Fuel and End Cost')
 
 subplot(4,4,11);
 plot(t, dual.dynamics);

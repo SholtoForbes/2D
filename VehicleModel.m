@@ -76,16 +76,21 @@ M = v_array./c; % Calculating Mach No (Descaled)
 %     q_temp = q(i);
 %     m_temp = m(i);
 %     
-%     [Alpha(i), Fd(i) ,pitchingmoment] = OutForce(theta_temp,M_temp,q_temp,m_temp,S, communicator, communicator_trim);
+% %     [Alpha(i), Fd(i) ,pitchingmoment] = OutForce(theta_temp,M_temp,q_temp,m_temp,S, communicator, communicator_trim)
+% %     [Alpha(i), Fd(i)] = OutForce(theta_temp,M_temp,q_temp,m_temp,S, communicator, communicator_trim);
+%     Fd(i) = OutForce(theta_temp,M_temp,q_temp,m_temp,S, communicator, communicator_trim);
 % end
+
+S = 60;  % Planform area - this needs to be updated
+Fd = OutForce(theta,M,q,m,S, communicator, communicator_trim);
 
 % Alpha
 % theta
 % M
-% Fd
+% % Fd
 
-Fd = 25000;
-
+% Fd = 25000;
+% Fd = 36000*q/50000;
 
 % THRUST AND MOTION ==================================================================
 

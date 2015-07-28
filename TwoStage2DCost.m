@@ -32,6 +32,7 @@ global dfuel
 % global v_array
 global a
 global Fd
+global Fueldt
 
 global communicator
 global communicator_trim
@@ -70,21 +71,22 @@ time = primal.nodes(1, :); % Time
 
 
 % Define Cost =======================================================
+global Endcost
 
-% EndpointCost = -dfuel;
+% Endcost = -dfuel;
 
 % tf = primal.nodes(end);     
-% EndpointCost = tf;
-
-% EndpointCost = abs(q-50000);
+% Endcost = tf;
 
 % It is able to run with no cost at all:
-EndpointCost = 0;
+% Endcost = 0;
 
+Endcost = -gaussmf(theta(end),[0.01 0.1]) * 7.7e6;
 
+EndpointCost = Endcost;
 
 % RunningCost = 0;
 
-% RunningCost =((q-50000).^2+1000000)/1000000; %WORKS
+% RunningCost =((q-50000).^2+1000000)/1000000; 
 
 RunningCost = Fueldt;
