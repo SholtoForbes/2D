@@ -115,11 +115,9 @@ bounds.upper.time	= [t0; tfMax];
 
 % bounds.lower.events = [V0;   H0; v0Scaled; vfScaled; 0];
 
-% bounds.lower.events = [V0;   H0; v0Scaled; vfScaled];
+bounds.lower.events = [V0;   H0; v0Scaled; vfScaled];
 
-bounds.lower.events = [H0; v0Scaled; vfScaled];
-
-% bounds.lower.events = [v0Scaled; vfScaled];
+% bounds.lower.events = [H0; v0Scaled; vfScaled];
 
 bounds.upper.events = bounds.lower.events;      % equality event function bounds
 

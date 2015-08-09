@@ -14,27 +14,22 @@ vf = primal.states(3,end);
 % thetaf = primal.controls(end);
 % endpointFunction = zeros(5,1);
 
-% endpointFunction = zeros(4,1);
-endpointFunction = zeros(3,1);
-% endpointFunction = zeros(2,1);
+endpointFunction = zeros(4,1);
+% endpointFunction = zeros(3,1);
 
 %===========================================================
-% endpointFunction(1) = V0;
-% 
-% endpointFunction(2) = H0;
-% 
-% endpointFunction(3) = v0;
-% endpointFunction(4) = vf;
+endpointFunction(1) = V0;
+
+endpointFunction(2) = H0;
+
+endpointFunction(3) = v0;
+endpointFunction(4) = vf;
 % 
 % % endpointFunction(5) = thetaf;
 %-----------------------------------------------------------
-endpointFunction(1) = H0;
-endpointFunction(2) = v0;
-endpointFunction(3) = vf;
-
-
-% endpointFunction(1) = v0;
-% endpointFunction(2) = vf;
+% endpointFunction(1) = H0;
+% endpointFunction(2) = v0;
+% endpointFunction(3) = vf;
 
 
 
