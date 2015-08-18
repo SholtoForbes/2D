@@ -11,10 +11,10 @@ Atmosphere = dlmread('atmosphere.txt'); % import data from atmosphere matrix
 
 wcap = 0.65;
 
-for i = 26000:1000:40000
+for i = 26000:100:40000
     V = i;
 
-    for j = 6:1.:13
+    for j = 6:.1:13
         M = j;
 
         T = spline( Atmosphere(:,1),  Atmosphere(:,2), V); % Calculate speed of sound using atmospheric data

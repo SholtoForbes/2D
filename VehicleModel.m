@@ -2,6 +2,8 @@ function [dfuel, Fueldt, a, m, q, M, Fd] = VehicleModel(time, theta, V, H, v, no
 % function [dfuel, v, m, q, M, v_array] = VehicleModel(time, theta, V, H, nodes)
 
 
+enginedata = dlmread('engineoutput_matrix');
+
 % =======================================================
 % Vehicle Model
 % =======================================================
@@ -101,6 +103,9 @@ Fd = OutForce(theta,M,q,m,S, communicator, communicator_trim);
 
 % Thrust 
 Thrust(1:nodes) =  50000;
+
+% THIS SHOULD WORK WITH MORE ENGINE DATA POINTS
+% Thrust = 4 .* griddata(enginedata(1), enginedata(2), enginedata(3), M, Vabs); % thrust from engine data multiplied by four (4 engines)
 
 % Acceleration ------------------------------------------------------------
 
