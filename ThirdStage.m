@@ -9,19 +9,29 @@ Alt_list = [];
 
 
 % temp = 1;
-for i1 = 270000.:1000.:450000.
+% for i1 = 27000.:1000.:45000.
+%     Alt = i1;
+%     
+%     for i2 = 0:.5:10.
+%         theta = i2; 
+% 
+%         propellant_list = [];
+% %         temp2 = 1;
+%         
+%         %This finds the correct AoA
+%         for i3 = 0.0:.5:20.0
+
+for i1 = 26000.:1000.:40000.
     Alt = i1;
     
-    for i2 = 0:.5:10.
+    for i2 = 0:.2:15.
         theta = i2; 
 
         propellant_list = [];
 %         temp2 = 1;
         
         %This finds the correct AoA
-        for i3 = 0.0:.5:20.0
-
-            
+        for i3 = 0.0:.1:20.0  
             AoA = i3;
 
 
