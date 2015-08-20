@@ -86,8 +86,8 @@ bounds.upper.states = [VU ; HU; vU; thetaU];
 % thetaL = -.2; %  NEED TO WATCH THAT THIS IS NOT OVERCONSTRAINING
 % thetaU = .3;
 
-thetadotL = -0.01;
-thetadotU = 0.01;
+thetadotL = -0.15;
+thetadotU = 0.15;
 
 bounds.lower.controls = [thetadotL];
 bounds.upper.controls = [thetadotU]; 
@@ -221,6 +221,7 @@ global q
 global Fd
 global Fueldt
 global Endcost
+global Thrust
 
 dt = t(2:end)-t(1:end-1); % Time change between each node pt
 FuelUsed = zeros(1,nodes-1);
@@ -289,11 +290,21 @@ H = dual.Hamiltonian(1,:);
 plot(t,H);
 title('Hamiltonian')
 
+subplot(4,4,15)
+plot(t, Thrust)
+title('Thrust (N)')
+
+Isp = Thrust./Fueldt;
+
+subplot(4,4,16)
+plot(t, Isp)
+title('Isp')
+
 
 % 
 % %------ Forward Simulation -----------
 % 
-% % need to replace this with CADAC
+% % potentially need to replace this with CADAC
 % 
 % % Import Controls, Time and Initial States
 % % these are the only things carried over from the PS method

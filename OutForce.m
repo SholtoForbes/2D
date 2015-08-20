@@ -1,4 +1,4 @@
-function [D ] = OutForce(theta,M,q,m,S, communicator, communicator_trim)
+function [D, Alpha] = OutForce(theta,M,q,m,S, communicator, communicator_trim)
 % function [Alpha, D ,pitchingmoment] = OutForce(theta,M,q,m,S, communicator, communicator_trim)
 % Out_force interpolator
 

@@ -33,6 +33,7 @@ global dfuel
 global a
 global Fd
 global Fueldt
+global Thrust
 
 global communicator
 global communicator_trim
@@ -62,7 +63,7 @@ time = primal.nodes(1, :); % Time
 
 % [dfuel, v, m, q, M, v_array] = VehicleModel(time, theta, V, H, nodes);
 %velocity primal
-[dfuel, Fueldt, a, m, q, M, Fd] = VehicleModel(time, theta, V, H, v, nodes, communicator, communicator_trim);
+[dfuel, Fueldt, a, m, q, M, Fd, Thrust] = VehicleModel(time, theta, V, H, v, nodes, communicator, communicator_trim);
 
 % THIRD STAGE ======================================================
 
@@ -79,17 +80,18 @@ global Endcost
 % Endcost = tf;
 
 % It is able to run with no cost at all:
-% Endcost = 0;
+Endcost = 0;
 
-Endcost = -gaussmf(theta(end),[0.01 0.1]) * 7.7e6;
+% Endcost = -gaussmf(theta(end),[0.01 0.1]) * 7.7e6;
 
 EndpointCost = Endcost;
 
 % RunningCost = 0;
 
-% RunningCost =((q-50000).^2+1000000)/1000000; 
+% RunningCost =((q-50000).^2+1000000)/1000000; %this works
+RunningCost =((q-50000).^2+500000)/500000;
 
-% RunningCost = -gaussmf(q,[1000 50000]);
+% RunningCost = -gaussmf(q,[1000 50000]); this doesnt work
 
-RunningCost = Fueldt;
+% RunningCost = Fueldt;
 % 
