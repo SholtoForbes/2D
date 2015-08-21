@@ -41,7 +41,7 @@ end
 
 Iy = 1.; %%%% CHANGE THIS
 
-Out_force = dlmread('out_force.txt'); % import data from force matrix
+% Out_force = dlmread('out_force.txt'); % import data from force matrix
 
 Atmosphere = dlmread('atmosphere.txt'); % import data from atmosphere matrix
 
@@ -104,7 +104,11 @@ S = 60;  % Planform area - this needs to be updated
 % Thrust 
 % Thrust(1:nodes) =  50000;
 
-Thrust = 4 .* griddata(enginedata(:,1), enginedata(:,2), enginedata(:,3), M, Alpha); % thrust from engine data multiplied by four (4 engines)
+% Efficiency = rho./(50000*2./v_array.^2); % linear q efficiency 
+Efficiency = 1;
+
+Thrust = griddata(enginedata(:,1), enginedata(:,2), enginedata(:,3), M, Alpha).*Efficiency; % thrust from engine data 
+% Thrust = griddata(enginedata(:,1), enginedata(:,2), enginedata(:,3), M, Alpha);
 % Thrust(1:nodes) =  200000;
 
 % Acceleration ------------------------------------------------------------
@@ -117,12 +121,15 @@ a = ((Thrust - (Fd + g*sin(theta))) ./ m ); % acceleration
 % making the efficiency only reliant on a specific dynamic pressure is
 % nonsensical
 
-Efficiency = gaussmf(q,[10000 50000]);
+% Efficiency = gaussmf(q,[10000 50000]); this efficiency is other way round
+% than above
+
 
 %Fuel rate of change
 % Fueldt = Thrust ./ Efficiency; % Temporary fuel rate of change solution, directly equated to thrust (should give correct efficiency result, but cannot analyse total fuel change accurately)
 
-Fueldt = 4 .* griddata(enginedata(:,1), enginedata(:,2), enginedata(:,4), M, Alpha); % mass flow rate from engine data
+Fueldt = griddata(enginedata(:,1), enginedata(:,2), enginedata(:,4), M, Alpha); % mass flow rate from engine data
+% Fueldt = griddata(enginedata(:,1), enginedata(:,2), enginedata(:,4), M, Alpha)./ Efficiency;
 
 fuelchange_array = -Fueldt(1:end-1).*dt_array ;
 

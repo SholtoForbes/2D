@@ -89,9 +89,9 @@ EndpointCost = Endcost;
 % RunningCost = 0;
 
 % RunningCost =((q-50000).^2+1000000)/1000000; %this works
-RunningCost =((q-50000).^2+500000)/500000;
+% RunningCost =((q-50000).^2+500000)/500000;
 
 % RunningCost = -gaussmf(q,[1000 50000]); this doesnt work
 
-% RunningCost = Fueldt;
+RunningCost = Fueldt;
 % 

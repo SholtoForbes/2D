@@ -18,7 +18,7 @@ communicator_trim = importdata('communicator_trim_extrapolate.txt');
 %=============================================== 
 %Second Stage
 V0 = 0.; % Keep initial values zero
-Vf = 6000.; % Final values here are for guess and bounds, need to be fairly accurate
+Vf = 13000.; % Final values here are for guess and bounds, need to be fairly accurate
 
 H0 = 0.;
 Hf = 700000.;
@@ -62,7 +62,7 @@ ThetaScale = 1.;
 %---------------------------------------
 
 VL = -1.;
-VU = 1.2*VfScaled;
+VU = 1.0*VfScaled; % makes this exactly 40000
 
 HL = -1.;
 HU = 1.2*HfScaled;
@@ -74,7 +74,7 @@ vU = 3100/Scalev; % This limit must not cause the drag force to exceed the poten
 % bounds.upper.states = [VU ; HU; vU];
 
 thetaL = -.2; %  NEED TO WATCH THAT THIS IS NOT OVERCONSTRAINING
-thetaU = .3;
+thetaU = 0.5;
 
 bounds.lower.states = [VL ; HL; vL; thetaL];
 bounds.upper.states = [VU ; HU; vU; thetaU];
@@ -141,7 +141,7 @@ Brac_1.bounds       = bounds;
 
 % Node Definition ====================================================
 
-algorithm.nodes		= [60];	
+algorithm.nodes		= [80];	
 
 
 global nodes
