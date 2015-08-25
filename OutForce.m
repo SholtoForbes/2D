@@ -21,7 +21,7 @@ Body_Drag = q*S.*cD;
 
 Alpha = griddata(M_array,cL_array, Alpha_array, M, cL_search);
 
-pitchingmoment_array = communicator(:,5);
+pitchingmoment_array = communicator(:,6);
 
 pitchingmoment = griddata(M_array,Alpha_array, pitchingmoment_array, M, Alpha);
 

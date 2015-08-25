@@ -66,10 +66,13 @@ time = primal.nodes(1, :); % Time
 [dfuel, Fueldt, a, m, q, M, Fd, Thrust] = VehicleModel(time, theta, V, H, v, nodes, communicator, communicator_trim);
 
 % THIRD STAGE ======================================================
+% NEED TO WATCH THIS, IT CAN EXTRAPOLATE BUT IT DOESNT DO IT WELL
 
+ThirdStageData = dlmread('thirdstage.dat');
 
+ThirdStageFuelSpline = scatteredInterpolant(ThirdStageData(:,1),ThirdStageData(:,2),ThirdStageData(:,3));
 
-
+ThirdStageFuelCost = ThirdStageFuelSpline(theta(end), V(end));
 
 % Define Cost =======================================================
 global Endcost
@@ -83,6 +86,8 @@ global Endcost
 Endcost = 0;
 
 % Endcost = -gaussmf(theta(end),[0.01 0.1]) * 7.7e6;
+
+% Endcost = ThirdStageFuelCost;
 
 EndpointCost = Endcost;
 

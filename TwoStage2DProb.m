@@ -17,8 +17,8 @@ communicator_trim = importdata('communicator_trim_extrapolate.txt');
 
 %=============================================== 
 %Second Stage
-V0 = 0.; % Keep initial values zero
-Vf = 13000.; % Final values here are for guess and bounds, need to be fairly accurate
+V0 = 15000.; % Keep initial values zero
+Vf = 40000.; % Final values here are for guess and bounds, need to be fairly accurate
 
 H0 = 0.;
 Hf = 700000.;
@@ -193,7 +193,7 @@ global dfuel
 dfuel
 
 global StartingV
-StartingV = 27000;
+StartingV = 0;
 V = primal.states(1,:)*ScaleV + StartingV; 
 
 H = primal.states(2,:)*ScaleH ; 

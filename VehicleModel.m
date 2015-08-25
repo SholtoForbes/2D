@@ -45,7 +45,7 @@ Iy = 1.; %%%% CHANGE THIS
 
 Atmosphere = dlmread('atmosphere.txt'); % import data from atmosphere matrix
 
-StartingV = 27000; % Calculate ablsolute height % THIS NEEDS TO BE CHANGED FOR VARIABLE HEIGHT
+StartingV = 0; % Calculate ablsolute height % THIS NEEDS TO BE CHANGED FOR VARIABLE HEIGHT
 
 Vabs = V + StartingV; % Absolute vertical position
 
@@ -104,12 +104,16 @@ S = 60;  % Planform area - this needs to be updated
 % Thrust 
 % Thrust(1:nodes) =  50000;
 
-% Efficiency = rho./(50000*2./v_array.^2); % linear q efficiency 
-Efficiency = 1;
+Efficiency = rho./(50000*2./v_array.^2); % linear q efficiency 
+% Efficiency = 1;
 
-Thrust = griddata(enginedata(:,1), enginedata(:,2), enginedata(:,3), M, Alpha).*Efficiency; % thrust from engine data 
+% Thrust = griddata(enginedata(:,1), enginedata(:,2), enginedata(:,3), M, Alpha).*Efficiency; % thrust from engine data 
 % Thrust = griddata(enginedata(:,1), enginedata(:,2), enginedata(:,3), M, Alpha);
 % Thrust(1:nodes) =  200000;
+
+ThrustF= scatteredInterpolant(enginedata(:,1),enginedata(:,2),enginedata(:,3)); %test extrapolator for engine data
+% Thrust = ThrustF(M,Alpha).*Efficiency;
+Thrust = ThrustF(M,Alpha).*Efficiency;
 
 % Acceleration ------------------------------------------------------------
 
@@ -117,9 +121,6 @@ a = ((Thrust - (Fd + g*sin(theta))) ./ m ); % acceleration
 
 %Fuel Cost ===========================================================================
 % Efficiency
-% NOTE DYNAMIC PRESSURE DOES NOT CHANGE DRAG IN FORCE FILE INGO GAVE ME, so
-% making the efficiency only reliant on a specific dynamic pressure is
-% nonsensical
 
 % Efficiency = gaussmf(q,[10000 50000]); this efficiency is other way round
 % than above
@@ -128,7 +129,11 @@ a = ((Thrust - (Fd + g*sin(theta))) ./ m ); % acceleration
 %Fuel rate of change
 % Fueldt = Thrust ./ Efficiency; % Temporary fuel rate of change solution, directly equated to thrust (should give correct efficiency result, but cannot analyse total fuel change accurately)
 
-Fueldt = griddata(enginedata(:,1), enginedata(:,2), enginedata(:,4), M, Alpha); % mass flow rate from engine data
+FuelF= scatteredInterpolant(enginedata(:,1),enginedata(:,2),enginedata(:,4)); %test extrapolator for engine data
+% Fueldt = FuelF(M,Alpha);
+Fueldt = FuelF(M,Alpha);
+
+% Fueldt = griddata(enginedata(:,1), enginedata(:,2), enginedata(:,4), M, Alpha); % mass flow rate from engine data
 % Fueldt = griddata(enginedata(:,1), enginedata(:,2), enginedata(:,4), M, Alpha)./ Efficiency;
 
 fuelchange_array = -Fueldt(1:end-1).*dt_array ;
