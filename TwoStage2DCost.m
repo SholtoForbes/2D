@@ -103,4 +103,4 @@ EndpointCost = Endcost;
 % RunningCost = Fueldt;
 % 
 
-RunningCost = mfuel;
+RunningCost = -mfuel;
