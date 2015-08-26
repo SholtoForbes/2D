@@ -76,8 +76,15 @@ vU = 3100/Scalev; % This limit must not cause the drag force to exceed the poten
 thetaL = -.2; %  NEED TO WATCH THAT THIS IS NOT OVERCONSTRAINING
 thetaU = 0.5;
 
-bounds.lower.states = [VL ; HL; vL; thetaL];
-bounds.upper.states = [VU ; HU; vU; thetaU];
+% bounds.lower.states = [VL ; HL; vL; thetaL];
+% bounds.upper.states = [VU ; HU; vU; thetaU];
+
+
+mL = 0;
+mU = 994; % from dawids thesis baseline vehicle
+
+bounds.lower.states = [VL ; HL; vL; thetaL; mL];
+bounds.upper.states = [VU ; HU; vU; thetaU; mU];
 
 % control bounds
 % thetaL = -1.;
@@ -121,6 +128,8 @@ bounds.lower.events = [H0; v0Scaled; vfScaled];
 
 % bounds.lower.events = [v0Scaled; vfScaled];
 
+bounds.lower.events = [H0; v0Scaled; vfScaled; mU];
+
 bounds.upper.events = bounds.lower.events;      % equality event function bounds
 
 
@@ -159,6 +168,8 @@ guess.states(2,:) = [0,HfScaled]; %H
 
 guess.states(3,:) = [v0, vf]; %H
 guess.states(4,:) = [atan((Vf-V0)/(Hf-H0)),atan((Vf-V0)/(Hf-H0))]*ThetaScale; 
+
+guess.states(5,:) = [mU, mU/2];
 
 guess.controls(1,:)    = [0,0]; 
 % guess.controls(1,:)    = [atan((Vf-V0)/(Hf-H0)),atan((Vf-V0)/(Hf-H0))]*ThetaScale; 

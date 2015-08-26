@@ -57,13 +57,15 @@ v = vScaled * Scalev;
 % theta  = primal.controls(1, :)/ThetaScale; % Velocity angle
 theta  = primal.states(4, :)/ThetaScale; % Velocity angle
 
+m = primal.states(5,:) ;
+
 time = primal.nodes(1, :); % Time
 
 
 
 % [dfuel, v, m, q, M, v_array] = VehicleModel(time, theta, V, H, nodes);
 %velocity primal
-[dfuel, Fueldt, a, m, q, M, Fd, Thrust] = VehicleModel(time, theta, V, H, v, nodes, communicator, communicator_trim);
+[dfuel, Fueldt, a, q, M, Fd, Thrust] = VehicleModel(time, theta, V, H, v, m, nodes, communicator, communicator_trim);
 
 % THIRD STAGE ======================================================
 % NEED TO WATCH THIS, IT CAN EXTRAPOLATE BUT IT DOESNT DO IT WELL

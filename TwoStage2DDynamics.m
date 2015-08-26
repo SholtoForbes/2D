@@ -13,6 +13,7 @@ global Scalev
 global ThetaScale
 % global v
 global a
+global Fueldt
 
 %changed notation to horizontal and vertical, x and y in plane of vehicle
 VScaled = primal.states(1,:) ; 
@@ -23,6 +24,8 @@ vScaled = primal.states(3,:) ;
 vdot = a/Scalev;
 
 theta = primal.states(4,:) ; 
+
+mdot = -Fueldt ; 
 
 % theta  = primal.controls(1,:)/ThetaScale; %
 
@@ -37,5 +40,5 @@ HScaleddot = vScaled.*cos(theta)/ScaleH * Scalev;
 
 
 %======================================================
-XDOT = [VScaleddot; HScaleddot; vdot; thetadot];
+XDOT = [VScaleddot; HScaleddot; vdot; thetadot; mdot];
 %======================================================
