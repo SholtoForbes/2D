@@ -1,8 +1,8 @@
-function [dfuel, Fueldt, a, q, M, Fd, Thrust] = VehicleModel(time, theta, V, H, v, mfuel, nodes, communicator, communicator_trim)
+function [dfuel, Fueldt, a, q, M, Fd, Thrust] = VehicleModel(time, theta, V, H, v, mfuel, nodes, ThrustF_spline, FuelF_spline, Alpha_spline, Cd_spline)
 % function [dfuel, v, m, q, M, v_array] = VehicleModel(time, theta, V, H, nodes)
 
 
-enginedata = dlmread('engineoutput_matrix');
+
 
 % =======================================================
 % Vehicle Model
@@ -71,24 +71,18 @@ q = 0.5 * rho .* (v_array .^2); % Calculating Dynamic Pressure
 M = v_array./c; % Calculating Mach No (Descaled)
 
 S = 60;  % Planform area - this needs to be updated, but i think this should be rather close for drag calc
-[Fd, Alpha] = OutForce(theta,M,q,m,S, communicator, communicator_trim);
+[Fd, Alpha] = OutForce(theta,M,q,m,S, Alpha_spline, Cd_spline);
 
 
 % THRUST AND MOTION ==================================================================
 
-% Thrust 
 % Thrust(1:nodes) =  50000;
 
 Efficiency = rho./(50000*2./v_array.^2); % linear q efficiency, this is not exactly right
 % Efficiency = 1;
 
-% Thrust = griddata(enginedata(:,1), enginedata(:,2), enginedata(:,3), M, Alpha).*Efficiency; % thrust from engine data 
-% Thrust = griddata(enginedata(:,1), enginedata(:,2), enginedata(:,3), M, Alpha);
 % Thrust(1:nodes) =  200000;
-
-ThrustF= scatteredInterpolant(enginedata(:,1),enginedata(:,2),enginedata(:,3)); %test extrapolator for engine data
-% Thrust = ThrustF(M,Alpha).*Efficiency;
-Thrust = ThrustF(M,Alpha).*Efficiency;
+Thrust = ThrustF_spline(M,Alpha).*Efficiency;
 
 % Acceleration ------------------------------------------------------------
 
@@ -104,9 +98,9 @@ a = ((Thrust - (Fd + g*sin(theta))) ./ m ); % acceleration
 %Fuel rate of change
 % Fueldt = Thrust ./ Efficiency; % Temporary fuel rate of change solution, directly equated to thrust (should give correct efficiency result, but cannot analyse total fuel change accurately)
 
-FuelF= scatteredInterpolant(enginedata(:,1),enginedata(:,2),enginedata(:,4)); %test extrapolator for engine data
+
 % Fueldt = FuelF(M,Alpha);
-Fueldt = FuelF(M,Alpha);
+Fueldt = FuelF_spline(M,Alpha);
 
 % Fueldt = griddata(enginedata(:,1), enginedata(:,2), enginedata(:,4), M, Alpha); % mass flow rate from engine data
 % Fueldt = griddata(enginedata(:,1), enginedata(:,2), enginedata(:,4), M, Alpha)./ Efficiency;

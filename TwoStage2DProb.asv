@@ -18,16 +18,16 @@ enginedata = dlmread('engineoutput_matrix');
 
 % Create interpolating splines
 global Cd_spline
-Cd_spline = scatteredInterpolant(communicator(:,1),communicator(:,3),communicator(:,4)); % find Cd given M, Cl
+Cd_spline = scatteredInterpolant(communicator(:,1),communicator(:,3),communicator(:,4)); % find Cd given Cl
 
 global Alpha_spline 
-Alpha_spline = scatteredInterpolant(communicator(:,1),communicator(:,3),communicator(:,2)); % find AoA given M, Cl
+Cl_spline = scatteredInterpolant(communicator(:,1),communicator(:,3),communicator(:,3));
 
 
 
-global ThrustF_spline
+global ThrustF
 ThrustF_spline= scatteredInterpolant(enginedata(:,1),enginedata(:,2),enginedata(:,3)); %interpolator for engine data (also able to extrapolate badly)
-global FuelF_spline
+global FuelF
 FuelF_spline= scatteredInterpolant(enginedata(:,1),enginedata(:,2),enginedata(:,4)); %interpolator for engine data
 
 

@@ -35,8 +35,11 @@ global Fd
 global Fueldt
 global Thrust
 
-global communicator
-global communicator_trim
+global ThrustF_spline
+global FuelF_spline
+
+global Alpha_spline 
+global Cd_spline 
 
 %Gravity
 g = 9.81;
@@ -65,7 +68,7 @@ time = primal.nodes(1, :); % Time
 
 % [dfuel, v, m, q, M, v_array] = VehicleModel(time, theta, V, H, nodes);
 %velocity primal
-[dfuel, Fueldt, a, q, M, Fd, Thrust] = VehicleModel(time, theta, V, H, v, mfuel, nodes, communicator, communicator_trim);
+[dfuel, Fueldt, a, q, M, Fd, Thrust] = VehicleModel(time, theta, V, H, v, mfuel, nodes, ThrustF_spline, FuelF_spline, Alpha_spline, Cd_spline);
 
 % THIRD STAGE ======================================================
 % NEED TO WATCH THIS, IT CAN EXTRAPOLATE BUT IT DOESNT DO IT WELL
