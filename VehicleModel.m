@@ -1,4 +1,4 @@
-function [dfuel, Fueldt, a, q, M, Fd, Thrust] = VehicleModel(time, theta, V, H, v, m, nodes, communicator, communicator_trim)
+function [dfuel, Fueldt, a, q, M, Fd, Thrust] = VehicleModel(time, theta, V, H, v, mfuel, nodes, communicator, communicator_trim)
 % function [dfuel, v, m, q, M, v_array] = VehicleModel(time, theta, V, H, nodes)
 
 
@@ -18,6 +18,10 @@ dV_array = V(2:end)-V(1:end-1); % Vertical position change between each node pt
 dH_array = H(2:end)-H(1:end-1); % horizontal position change between each node pt
 
 v_array = v;
+
+mstruct = 8755.1 - 994; % mass of everything but fuel from dawids work
+
+m = mfuel + mstruct;
 
 %===================================================
 %

@@ -80,11 +80,11 @@ thetaU = 0.5;
 % bounds.upper.states = [VU ; HU; vU; thetaU];
 
 
-mL = 0;
-mU = 994; % from dawids thesis baseline vehicle
+mfuelL = 0;
+mfuelU = 994; % from dawids thesis baseline vehicle
 
-bounds.lower.states = [VL ; HL; vL; thetaL; mL];
-bounds.upper.states = [VU ; HU; vU; thetaU; mU];
+bounds.lower.states = [VL ; HL; vL; thetaL; mfuelL];
+bounds.upper.states = [VU ; HU; vU; thetaU; mfuelU];
 
 % control bounds
 % thetaL = -1.;
@@ -128,7 +128,7 @@ bounds.lower.events = [H0; v0Scaled; vfScaled];
 
 % bounds.lower.events = [v0Scaled; vfScaled];
 
-bounds.lower.events = [H0; v0Scaled; vfScaled; mU];
+bounds.lower.events = [H0; v0Scaled; vfScaled; mfuelU];
 
 bounds.upper.events = bounds.lower.events;      % equality event function bounds
 
@@ -169,7 +169,7 @@ guess.states(2,:) = [0,HfScaled]; %H
 guess.states(3,:) = [v0, vf]; %H
 guess.states(4,:) = [atan((Vf-V0)/(Hf-H0)),atan((Vf-V0)/(Hf-H0))]*ThetaScale; 
 
-guess.states(5,:) = [mU, mU/2];
+guess.states(5,:) = [mfuelU, mfuelU/2];
 
 guess.controls(1,:)    = [0,0]; 
 % guess.controls(1,:)    = [atan((Vf-V0)/(Hf-H0)),atan((Vf-V0)/(Hf-H0))]*ThetaScale; 
@@ -227,7 +227,6 @@ thetadot = primal.controls(1,:);
 global M
 % global v_array
 % v_array
-global m
 global q
 global Fd
 global Fueldt
@@ -276,8 +275,8 @@ plot(t, rad2deg(thetadot))
 title('thetadot (Deg/s)')
 
 subplot(4,4,9)
-plot(t, m)
-title('mass')
+plot(t, mfuel)
+title('fuel mass')
 
 subplot(4,4,10)
 plot(t, Fd)
