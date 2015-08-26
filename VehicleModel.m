@@ -70,7 +70,7 @@ q = 0.5 * rho .* (v_array .^2); % Calculating Dynamic Pressure
 
 M = v_array./c; % Calculating Mach No (Descaled)
 
-S = 60;  % Planform area - this needs to be updated
+S = 60;  % Planform area - this needs to be updated, but i think this should be rather close for drag calc
 [Fd, Alpha] = OutForce(theta,M,q,m,S, communicator, communicator_trim);
 
 

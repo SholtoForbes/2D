@@ -100,5 +100,7 @@ EndpointCost = Endcost;
 
 % RunningCost = -gaussmf(q,[1000 50000]); this doesnt work
 
-RunningCost = Fueldt;
+% RunningCost = Fueldt;
 % 
+
+RunningCost = mfuel;
