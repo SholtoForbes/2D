@@ -11,8 +11,8 @@ clear all;
 % communicator = importdata('communicator.txt');
 communicator = importdata('communicator_extrapolate.txt');
 
-% communicator_trim = importdata('communicator_trim.txt');
-communicator_trim = importdata('communicator_trim_extrapolate.txt');
+communicator_trim = importdata('communicator_trim.txt');
+% communicator_trim = importdata('communicator_trim_extrapolate.txt');
 
 enginedata = dlmread('engineoutput_matrix');
 
@@ -23,7 +23,17 @@ Cd_spline = scatteredInterpolant(communicator(:,1),communicator(:,3),communicato
 global Alpha_spline 
 Alpha_spline = scatteredInterpolant(communicator(:,1),communicator(:,3),communicator(:,2)); % find AoA given M, Cl
 
+global pitchingmoment_spline 
+pitchingmoment_spline = scatteredInterpolant(communicator(:,1),communicator(:,3),communicator(:,6));
 
+global flapdeflection_spline
+flapdeflection_spline = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,3));
+
+global flapdrag_spline
+flapdrag_spline = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,5),communicator_trim(:,3));
+
+global flaplift_spline
+flaplift_spline = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,6),communicator_trim(:,3));
 
 global ThrustF_spline
 ThrustF_spline= scatteredInterpolant(enginedata(:,1),enginedata(:,2),enginedata(:,3)); %interpolator for engine data (also able to extrapolate badly)
@@ -96,11 +106,14 @@ thetaU = 0.5;
 % bounds.upper.states = [VU ; HU; vU; thetaU];
 
 
-mfuelL = 0;
-mfuelU = 994; % from dawids thesis baseline vehicle
+mfuelL = -3000;
+mfuelU = 994*2; % from dawids thesis baseline vehicle
 
-bounds.lower.states = [VL ; HL; vL; thetaL; mfuelL];
-bounds.upper.states = [VU ; HU; vU; thetaU; mfuelU];
+% bounds.lower.states = [VL ; HL; vL; thetaL; mfuelL];
+% bounds.upper.states = [VU ; HU; vU; thetaU; mfuelU];
+
+bounds.lower.states = [VL ; vL; thetaL; mfuelL];
+bounds.upper.states = [VU ; vU; thetaU; mfuelU];
 
 % control bounds
 % thetaL = -1.;
@@ -140,11 +153,13 @@ bounds.upper.time	= [t0; tfMax];
 
 % bounds.lower.events = [V0;   H0; v0Scaled; vfScaled];
 
-bounds.lower.events = [H0; v0Scaled; vfScaled];
+% bounds.lower.events = [H0; v0Scaled; vfScaled];
 
 % bounds.lower.events = [v0Scaled; vfScaled];
 
-bounds.lower.events = [H0; v0Scaled; vfScaled; mfuelU];
+% bounds.lower.events = [H0; v0Scaled; vfScaled; mfuelU];
+
+bounds.lower.events = [v0Scaled; vfScaled; mfuelU];
 
 bounds.upper.events = bounds.lower.events;      % equality event function bounds
 
@@ -166,7 +181,7 @@ Brac_1.bounds       = bounds;
 
 % Node Definition ====================================================
 
-algorithm.nodes		= [60];	
+algorithm.nodes		= [70];	
 
 
 global nodes
@@ -180,12 +195,12 @@ tfGuess = tfMax; % this needs to be close to make sure solution stays withing Ou
 
 
 guess.states(1,:) = [0 ,VfScaled]; %v
-guess.states(2,:) = [0,HfScaled]; %H
+% guess.states(2,:) = [0,HfScaled]; %H
 
-guess.states(3,:) = [v0, vf]; %H
-guess.states(4,:) = [atan((Vf-V0)/(Hf-H0)),atan((Vf-V0)/(Hf-H0))]*ThetaScale; 
+guess.states(2,:) = [v0, vf]; %H
+guess.states(3,:) = [atan((Vf-V0)/(Hf-H0)),atan((Vf-V0)/(Hf-H0))]*ThetaScale; 
 
-guess.states(5,:) = [mfuelU, mfuelU/2];
+guess.states(4,:) = [mfuelU, mfuelU/2];
 
 guess.controls(1,:)    = [0,0]; 
 % guess.controls(1,:)    = [atan((Vf-V0)/(Hf-H0)),atan((Vf-V0)/(Hf-H0))]*ThetaScale; 
@@ -220,22 +235,27 @@ runTime = cputime-tStart
 global dfuel
 dfuel
 
-global StartingV
-StartingV = 0;
-V = primal.states(1,:)*ScaleV + StartingV; 
+% global StartingV
+% StartingV = 0;
+% V = primal.states(1,:)*ScaleV + StartingV; 
 
-H = primal.states(2,:)*ScaleH ; 
+V = primal.states(1,:);
+
+
+
+% H = primal.states(2,:)*ScaleH ; 
 
 %velocity primal
-v = primal.states(3,:)*Scalev;
+v = primal.states(2,:)*Scalev;
 
 t = primal.nodes;
 
 % theta = primal.controls(1,:);
 
-theta = primal.states(4,:);
+theta = primal.states(3,:);
 thetadot = primal.controls(1,:);
 
+mfuel = primal.states(4,:);
 
 %calculating for interest
 % c = 300.; % this will need to be brought into line with vehicle model
@@ -255,6 +275,13 @@ FuelUsed = zeros(1,nodes-1);
 FuelUsed(1) = dt(1)*Fueldt(1);
 for i = 2:nodes-1
     FuelUsed(i) = dt(i).*Fueldt(i) + FuelUsed(i-1);
+end
+
+
+% figure out horizontal motion
+H(1) = 0;
+for i = 1:nodes-1
+H(i+1) = v(i)*(t(i+1) - t(i))*cos(theta(i)) + H(i);
 end
 
 figure(1)
@@ -302,7 +329,7 @@ title('Drag Force')
 subplot(4,4,14)
 hold on
 plot(t(1:end-1), FuelUsed)
-bar(t(end), -Endcost)
+bar(t(end), Endcost)
 title('Fuel and End Cost')
 
 subplot(4,4,11);

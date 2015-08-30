@@ -1,4 +1,4 @@
-function [dfuel, Fueldt, a, q, M, Fd, Thrust] = VehicleModel(time, theta, V, H, v, mfuel, nodes, ThrustF_spline, FuelF_spline, Alpha_spline, Cd_spline)
+function [dfuel, Fueldt, a, q, M, Fd, Thrust] = VehicleModel(time, theta, V, v, mfuel, nodes, ThrustF_spline, FuelF_spline, Alpha_spline, Cd_spline, pitchingmoment_spline ,flapdeflection_spline,flapdrag_spline,flaplift_spline)
 % function [dfuel, v, m, q, M, v_array] = VehicleModel(time, theta, V, H, nodes)
 
 
@@ -13,9 +13,9 @@ g = 9.81;
 
 dt_array = time(2:end)-time(1:end-1); % Time change between each node pt
 
-dV_array = V(2:end)-V(1:end-1); % Vertical position change between each node pt
-
-dH_array = H(2:end)-H(1:end-1); % horizontal position change between each node pt
+% dV_array = V(2:end)-V(1:end-1); % Vertical position change between each node pt
+% 
+% dH_array = H(2:end)-H(1:end-1); % horizontal position change between each node pt
 
 v_array = v;
 
@@ -59,7 +59,7 @@ rho = spline( Atmosphere(:,1),  Atmosphere(:,4), Vabs); % Calculate density usin
 
 %an initial interpolator for the force values at a fixed Arot, alpha and
 %dynamic pressure (0,  -0.0174532925199 (negative up) , 45000.0)
-M_array = [4.5 , 5. , 5.5]; 
+% M_array = [4.5 , 5. , 5.5]; 
 
 % Placeholder vehicle model values
 % Fd_array = [-36427.6593981 , -42995.3909773 , -50209.1507264];
@@ -71,14 +71,15 @@ q = 0.5 * rho .* (v_array .^2); % Calculating Dynamic Pressure
 M = v_array./c; % Calculating Mach No (Descaled)
 
 S = 60;  % Planform area - this needs to be updated, but i think this should be rather close for drag calc
-[Fd, Alpha] = OutForce(theta,M,q,m,S, Alpha_spline, Cd_spline);
+[Fd, Alpha] = OutForce(theta,M,q,m,S, Alpha_spline, Cd_spline, pitchingmoment_spline ,flapdeflection_spline,flapdrag_spline,flaplift_spline);
 
 
 % THRUST AND MOTION ==================================================================
 
 % Thrust(1:nodes) =  50000;
 
-Efficiency = rho./(50000*2./v_array.^2); % linear q efficiency, this is not exactly right
+% Efficiency = rho./(50000*2./v_array.^2); % linear rho efficiency, scaled to rho at 50000kpa, this is not exactly right
+Efficiency = q./50000; % linear q efficiency
 % Efficiency = 1;
 
 % Thrust(1:nodes) =  200000;
@@ -100,7 +101,7 @@ a = ((Thrust - (Fd + g*sin(theta))) ./ m ); % acceleration
 
 
 % Fueldt = FuelF(M,Alpha);
-Fueldt = FuelF_spline(M,Alpha);
+Fueldt = FuelF_spline(M,Alpha).*Efficiency;
 
 % Fueldt = griddata(enginedata(:,1), enginedata(:,2), enginedata(:,4), M, Alpha); % mass flow rate from engine data
 % Fueldt = griddata(enginedata(:,1), enginedata(:,2), enginedata(:,4), M, Alpha)./ Efficiency;
