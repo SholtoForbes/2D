@@ -269,6 +269,8 @@ global Fd
 global Fueldt
 global Endcost
 global Thrust
+global flapdeflection
+global Alpha
 
 dt = t(2:end)-t(1:end-1); % Time change between each node pt
 FuelUsed = zeros(1,nodes-1);
@@ -286,75 +288,81 @@ end
 
 figure(1)
 
-subplot(4,4,[1,4])
+subplot(5,5,[1,5])
 hold on
 plot(H, V)
 plot(H(algorithm.nodes(1)), V(algorithm.nodes(1)), '+', 'MarkerSize', 10, 'MarkerEdgeColor','r')
 title('Trajectory')
 
-subplot(4,4,5)
+subplot(5,5,6)
 hold on
 plot(t, v)
 plot(t(algorithm.nodes(1)), v(algorithm.nodes(1)), '+', 'MarkerSize', 10, 'MarkerEdgeColor','r')
 title('v')
 
 
-subplot(4,4,6)
+subplot(5,5,7)
 plot(t, M)
 title('M')
 
-subplot(4,4,7)
+subplot(5,5,8)
 plot(t, q)
 title('q')
 
-subplot(4,4,8)
+subplot(5,5,9)
 hold on
 plot(t, rad2deg(theta))
 plot(t(algorithm.nodes(1)), rad2deg(theta(algorithm.nodes(1))), '+', 'MarkerSize', 10, 'MarkerEdgeColor','r')
 title('theta (Deg)')
 
-subplot(4,4,13)
+subplot(5,5,13)
 hold on
 plot(t, rad2deg(thetadot))
 title('thetadot (Deg/s)')
 
-subplot(4,4,9)
+subplot(5,5,19)
 plot(t, mfuel)
 title('fuel mass')
 
-subplot(4,4,10)
+subplot(5,5,10)
 plot(t, Fd)
 title('Drag Force')
 
-subplot(4,4,14)
+subplot(5,5,14)
 hold on
 plot(t(1:end-1), FuelUsed)
 bar(t(end), Endcost)
 title('Fuel and End Cost')
 
-subplot(4,4,11);
+subplot(5,5,11);
 plot(t, dual.dynamics);
 title('costates')
 xlabel('time');
 ylabel('costates');
 legend('\lambda_1', '\lambda_2', '\lambda_3');
 
-subplot(4,4,12)
+subplot(5,5,12)
 H = dual.Hamiltonian(1,:);
 plot(t,H);
 title('Hamiltonian')
 
-subplot(4,4,15)
+subplot(5,5,15)
 plot(t, Thrust)
 title('Thrust (N)')
 
 Isp = Thrust./Fueldt;
 
-subplot(4,4,16)
+subplot(5,5,16)
 plot(t, Isp)
 title('Isp')
 
+subplot(5,5,17)
+plot(t, flapdeflection)
+title('flapdeflection')
 
+subplot(5,5,18)
+plot(t, Alpha)
+title('Alpha')
 % 
 % %------ Forward Simulation -----------
 % 

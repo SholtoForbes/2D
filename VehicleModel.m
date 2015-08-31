@@ -1,4 +1,4 @@
-function [dfuel, Fueldt, a, q, M, Fd, Thrust] = VehicleModel(time, theta, V, v, mfuel, nodes, ThrustF_spline, FuelF_spline, Alpha_spline, Cd_spline, pitchingmoment_spline ,flapdeflection_spline,flapdrag_spline,flaplift_spline)
+function [dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha] = VehicleModel(time, theta, V, v, mfuel, nodes, ThrustF_spline, FuelF_spline, Alpha_spline, Cd_spline, pitchingmoment_spline ,flapdeflection_spline,flapdrag_spline,flaplift_spline)
 % function [dfuel, v, m, q, M, v_array] = VehicleModel(time, theta, V, H, nodes)
 
 
@@ -70,8 +70,8 @@ q = 0.5 * rho .* (v_array .^2); % Calculating Dynamic Pressure
 
 M = v_array./c; % Calculating Mach No (Descaled)
 
-S = 60;  % Planform area - this needs to be updated, but i think this should be rather close for drag calc
-[Fd, Alpha] = OutForce(theta,M,q,m,S, Alpha_spline, Cd_spline, pitchingmoment_spline ,flapdeflection_spline,flapdrag_spline,flaplift_spline);
+A = 60;  % Reference area - this needs to be updated, but i think this should be rather close. I think reference are is same for both lift and drag calc, with AoA consideration built in
+[Fd, Alpha, flapdeflection] = OutForce(theta,M,q,m,A, Alpha_spline, Cd_spline, pitchingmoment_spline ,flapdeflection_spline,flapdrag_spline,flaplift_spline);
 
 
 % THRUST AND MOTION ==================================================================
