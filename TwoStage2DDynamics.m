@@ -17,13 +17,15 @@ global Fueldt
 
 %changed notation to horizontal and vertical, x and y in plane of vehicle
 VScaled = primal.states(1,:) ; 
-HScaled = primal.states(2,:) ; 
+% HScaled = primal.states(2,:) ; 
 
 %velocity primal
-vScaled = primal.states(3,:) ; 
+% vScaled = primal.states(3,:) ; 
+vScaled = primal.states(2,:) ; 
 vdot = a/Scalev;
 
-theta = primal.states(4,:) ; 
+theta = primal.states(3,:) ; 
+% theta = primal.states(4,:) ; 
 
 mfueldot = -Fueldt ; 
 
@@ -34,11 +36,12 @@ thetadot  = primal.controls(1,:); %
 % %=========================================================================================
 
 VScaleddot = vScaled.*sin(theta)/ScaleV * Scalev;
-HScaleddot = vScaled.*cos(theta)/ScaleH * Scalev;
+% HScaleddot = vScaled.*cos(theta)/ScaleH * Scalev;
 
 % %====================================================================
 
 
 %======================================================
-XDOT = [VScaleddot; HScaleddot; vdot; thetadot; mfueldot];
+% XDOT = [VScaleddot; HScaleddot; vdot; thetadot; mfueldot];
+XDOT = [VScaleddot;vdot; thetadot; mfueldot];
 %======================================================

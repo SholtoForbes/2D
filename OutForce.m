@@ -1,4 +1,4 @@
-function [D, Alpha] = OutForce(theta,M,q,m,S, Alpha_spline, Cd_spline)
+function [D, Alpha] = OutForce(theta,M,q,m,S, Alpha_spline, Cd_spline, pitchingmoment_spline ,flapdeflection_spline,flapdrag_spline,flaplift_spline)
 % function [Alpha, D ,pitchingmoment] = OutForce(theta,M,q,m,S, communicator, communicator_trim)
 % Out_force interpolator
 
@@ -17,25 +17,26 @@ Alpha = Alpha_spline(M, cL_search);
 
 % pitchingmoment = griddata(M_array,Alpha_array, pitchingmoment_array, M, Alpha);
 
+body_pitchingmoment = pitchingmoment_spline(M, cL_search);
+
+
 % 
 % % 
 %Calculate Flap Deflection Necessary
 
-% Mtrim_array = communicator_trim(:,1);
-% 
-% Alphatrim_array = communicator_trim(:,2);
-% 
-% pitchingmomenttrim_array = communicator_trim(:,4);
-% 
-% Flapdeflection_array = communicator_trim(:,3);
-% 
 % Flap_Drag = griddata(Mtrim_array, Alphatrim_array, pitchingmomenttrim_array, Flapdeflection_array, M, Alpha, -pitchingmoment);
 % SHOULD USE SCATTEREDINTERPOLANT FOR THIS
 
+pitchingmoment_search = -body_pitchingmoment;
 
-% D = Body_Drag + Flap_Drag;
+flapdeflection = flapdeflection_spline(M,Alpha,pitchingmoment_search);
+Flap_Drag = flapdrag_spline(M,Alpha,pitchingmoment_search);
+Flap_lift = flaplift_spline(M,Alpha,pitchingmoment_search);
 
-D = Body_Drag;
+
+D = Body_Drag + Flap_Drag;
+
+% D = Body_Drag;
 
 
 

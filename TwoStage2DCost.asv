@@ -41,12 +41,6 @@ global FuelF_spline
 global Alpha_spline 
 global Cd_spline 
 
-
-global pitchingmoment_spline 
-global flapdeflection_spline
-global flapdrag_spline
-global flaplift_spline
-
 %Gravity
 g = 9.81;
 
@@ -60,7 +54,7 @@ vScaled = primal.states(2,:) ;
 
 %Descaling
 V = VScaled * ScaleV;
-% H = HScaled * ScaleH;
+H = HScaled * ScaleH;
 v = vScaled * Scalev;
 
 % theta  = primal.controls(1, :)/ThetaScale; % Velocity angle
@@ -74,16 +68,16 @@ time = primal.nodes(1, :); % Time
 
 % [dfuel, v, m, q, M, v_array] = VehicleModel(time, theta, V, H, nodes);
 %velocity primal
-[dfuel, Fueldt, a, q, M, Fd, Thrust] = VehicleModel(time, theta, V, v, mfuel, nodes, ThrustF_spline, FuelF_spline, Alpha_spline, Cd_spline, pitchingmoment_spline ,flapdeflection_spline,flapdrag_spline,flaplift_spline);
+[dfuel, Fueldt, a, q, M, Fd, Thrust] = VehicleModel(time, theta, V, v, mfuel, nodes, ThrustF_spline, FuelF_spline, Alpha_spline, Cd_spline);
 
 % THIRD STAGE ======================================================
 % NEED TO WATCH THIS, IT CAN EXTRAPOLATE BUT IT DOESNT DO IT WELL
 
-% ThirdStageData = dlmread('thirdstage.dat');
-% 
-% ThirdStageFuelSpline = scatteredInterpolant(ThirdStageData(:,1),ThirdStageData(:,2),ThirdStageData(:,3));
-% 
-% ThirdStageFuelCost = ThirdStageFuelSpline(theta(end), V(end));
+ThirdStageData = dlmread('thirdstage.dat');
+
+ThirdStageFuelSpline = scatteredInterpolant(ThirdStageData(:,1),ThirdStageData(:,2),ThirdStageData(:,3));
+
+ThirdStageFuelCost = ThirdStageFuelSpline(theta(end), V(end));
 
 % Define Cost =======================================================
 global Endcost
@@ -96,7 +90,7 @@ global Endcost
 % It is able to run with no cost at all:
 % Endcost = 0;
 
-Endcost = 2000 - mfuel(end); % change 2000 to whatever mU is
+Endcost = 2000 - mfuel(end); % change 2000 to whatever mU
 
 % Endcost = -gaussmf(theta(end),[0.01 0.1]) * 7.7e6;
 
