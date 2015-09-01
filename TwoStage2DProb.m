@@ -8,8 +8,8 @@ clear all;
 
 % Inputs ============================================
 
+communicator = importdata('communicatornew.txt');
 % communicator = importdata('communicator.txt');
-communicator = importdata('communicator.txt');
 
 communicator_trim = importdata('communicator_trim.txt');
 % communicator_trim = importdata('communicator_trim_extrapolate.txt');
@@ -25,6 +25,7 @@ Alpha_spline = scatteredInterpolant(communicator(:,1),communicator(:,3),communic
 
 global pitchingmoment_spline 
 pitchingmoment_spline = scatteredInterpolant(communicator(:,1),communicator(:,3),communicator(:,11));
+% pitchingmoment_spline = scatteredInterpolant(communicator(:,1),communicator(:,3),communicator(:,6));
 
 global flapdeflection_spline
 flapdeflection_spline = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,3));

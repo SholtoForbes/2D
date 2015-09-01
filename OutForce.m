@@ -32,10 +32,10 @@ flapdeflection = flapdeflection_spline(M,Alpha,pitchingmoment_search);
 Flap_Drag = flapdrag_spline(M,Alpha,pitchingmoment_search);
 % Flap_lift = flaplift_spline(M,Alpha,pitchingmoment_search);
 
+% 
+% D = Body_Drag + Flap_Drag;
 
-D = Body_Drag + Flap_Drag;
-
-% D = Body_Drag;
+D = Body_Drag;
 
 
 

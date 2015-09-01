@@ -110,7 +110,8 @@ EndpointCost = Endcost;
 % RunningCost = 0;
 
 % RunningCost =((q-80000).^2+2000000)/2000000;
-RunningCost =((q-50000).^2+2000000)/2000000; % if a cost does not work, try loosening it 
+RunningCost =((q-50000).^2+4000000)/4000000; % if a cost does not work, try loosening it 
+% RunningCost =((q-50000).^2+2000000)/2000000; % if a cost does not work, try loosening it 
 % RunningCost =((q-50000).^2+1000000)/1000000; 
 % RunningCost =((q-50000).^2+500000)/500000;
 
