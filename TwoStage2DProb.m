@@ -42,6 +42,24 @@ global FuelF_spline
 FuelF_spline= scatteredInterpolant(enginedata(:,1),enginedata(:,2),enginedata(:,4)); %interpolator for engine data
 
 
+
+% testing flap lift + lift coefficient combined spline
+
+% Cl_spline = scatteredInterpolant(communicator(:,1),communicator(:,2),communicator(:,3)); %find cl given M, AoA
+% flaplift_spline_2 = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,3),communicator_trim(:,6)); %find flap lift, given M, AoA, flap deflection
+% 
+% liftarray = [];
+% for j = 6:1:12 % M
+%     for k = 1:0.2:7 %AoA
+%         for l = -20:1:20 %flap deflection
+%             liftarray(end+1,1) = j;
+%             liftarray(end,2) = k;
+%             liftarray(end,3) = l;
+%             liftarray(end,4) = Cl_spline(j,k)*60 + flaplift_spline_2(j,k,l)/50000; % lift array including reference area and q modification, to be set equal to lift/q
+%         end
+%     end
+% end
+
 %=============================================== 
 %Second Stage
 V0 = 15000.; % Keep initial values zero
