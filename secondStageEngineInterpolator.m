@@ -1,6 +1,6 @@
 %2ndStageEngineInterpolator
 
-% this runs the file EngineData.exe which takes input of Mach, T and p and
+% this runs the file EngineData.exe which takes input of Mach, T and p (behind initial shock, given in communicator matrix) and
 % produces output of thrust force (N) and fuel usage (kg/s).
 
 delete input
@@ -23,6 +23,7 @@ for i = 6:1.:13
 
         Tshock = griddata(com(:,1), com(:,2), com(:,6), M, AoA);
         
+        %write input file
         input = fopen('input','w');
 
         inputstring = [num2str(Mshock,'%10.4e') ' ' num2str(Tshock,'%10.4e') ' ' num2str(pshock,'%10.4e') ' ' num2str(wcap,'%10.4e')];
@@ -31,11 +32,16 @@ for i = 6:1.:13
 
         fclose('all');
 
+        %run program, this exe was created in fortran silverfrost, takes
+        %'input', gives 'output'
         system(['EngineData.exe']);
         % !EngineData.exe
 
+        
+        %this reads the output for thrust and fuel use 
         output_temp = dlmread('output');
 
+        %write to file
         engineoutput_matrix = fopen('engineoutput_matrix','a+');
 
         outputstring = [num2str(M,'%10.4e') ' ' num2str(AoA,'%10.4e') ' ' num2str(output_temp(1),'%10.4e') ' ' num2str(output_temp(2),'%10.4e') '\r\n'];

@@ -35,20 +35,17 @@ global Fd
 global Fueldt
 global Thrust
 
-global ThrustF_spline
-global FuelF_spline
-
-global Alpha_spline 
-global Cd_spline 
-
-
-global pitchingmoment_spline 
-global flapdeflection_spline
-global flapdrag_spline
-global flaplift_spline
-
 global flapdeflection
 global Alpha
+
+
+global AoA_spline
+global flapdeflection_spline
+global Dragq_spline
+
+
+global ThrustF_spline
+global FuelF_spline
 
 %Gravity
 g = 9.81;
@@ -77,7 +74,7 @@ time = primal.nodes(1, :); % Time
 
 % [dfuel, v, m, q, M, v_array] = VehicleModel(time, theta, V, H, nodes);
 %velocity primal
-[dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha] = VehicleModel(time, theta, V, v, mfuel, nodes, ThrustF_spline, FuelF_spline, Alpha_spline, Cd_spline, pitchingmoment_spline ,flapdeflection_spline,flapdrag_spline,flaplift_spline);
+[dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha] = VehicleModel(time, theta, V, v, mfuel, nodes,AoA_spline,flapdeflection_spline,Dragq_spline,ThrustF_spline,FuelF_spline);
 
 % THIRD STAGE ======================================================
 % NEED TO WATCH THIS, IT CAN EXTRAPOLATE BUT IT DOESNT DO IT WELL
@@ -110,8 +107,8 @@ EndpointCost = Endcost;
 % RunningCost = 0;
 
 % RunningCost =((q-80000).^2+2000000)/2000000;
-RunningCost =((q-50000).^2+4000000)/4000000; % if a cost does not work, try loosening it 
-% RunningCost =((q-50000).^2+2000000)/2000000; % if a cost does not work, try loosening it 
+% RunningCost =((q-50000).^2+4000000)/4000000; % if a cost does not work, try loosening it 
+RunningCost =((q-50000).^2+2000000)/2000000; % if a cost does not work, try loosening it 
 % RunningCost =((q-50000).^2+1000000)/1000000; 
 % RunningCost =((q-50000).^2+500000)/500000;
 

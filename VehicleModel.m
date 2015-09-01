@@ -1,4 +1,4 @@
-function [dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha] = VehicleModel(time, theta, V, v, mfuel, nodes, ThrustF_spline, FuelF_spline, Alpha_spline, Cd_spline, pitchingmoment_spline ,flapdeflection_spline,flapdrag_spline,flaplift_spline)
+function [dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha] = VehicleModel(time, theta, V, v, mfuel, nodes,AoA_spline,flapdeflection_spline,Dragq_spline,ThrustF_spline,FuelF_spline)
 % function [dfuel, v, m, q, M, v_array] = VehicleModel(time, theta, V, H, nodes)
 
 
@@ -19,7 +19,7 @@ dt_array = time(2:end)-time(1:end-1); % Time change between each node pt
 
 v_array = v;
 
-mstruct = 8755.1 - 994; % mass of everything but fuel from dawids work
+mstruct = 8755.1 - mfuel(1); % mass of everything but fuel from dawids work
 
 m = mfuel + mstruct;
 
@@ -57,21 +57,11 @@ c = spline( Atmosphere(:,1),  Atmosphere(:,5), Vabs); % Calculate speed of sound
 
 rho = spline( Atmosphere(:,1),  Atmosphere(:,4), Vabs); % Calculate density using atmospheric data
 
-%an initial interpolator for the force values at a fixed Arot, alpha and
-%dynamic pressure (0,  -0.0174532925199 (negative up) , 45000.0)
-% M_array = [4.5 , 5. , 5.5]; 
-
-% Placeholder vehicle model values
-% Fd_array = [-36427.6593981 , -42995.3909773 , -50209.1507264];
-% Flift_array = [ 26851.676829 , 25865.7310572 , 24420.6025981 ];
-% My_array = [305002.235162 , 256125.242712 , 196654.950117 ];
-
 q = 0.5 * rho .* (v_array .^2); % Calculating Dynamic Pressure
 
 M = v_array./c; % Calculating Mach No (Descaled)
 
-A = 60;  % Reference area - this needs to be updated, but i think this should be rather close. I think reference are is same for both lift and drag calc, with AoA consideration built in
-[Fd, Alpha, flapdeflection] = OutForce(theta,M,q,m,A, Alpha_spline, Cd_spline, pitchingmoment_spline ,flapdeflection_spline,flapdrag_spline,flaplift_spline);
+[Fd, Alpha, flapdeflection] = OutForce(theta,M,q,m,AoA_spline,flapdeflection_spline,Dragq_spline);
 
 
 % THRUST AND MOTION ==================================================================

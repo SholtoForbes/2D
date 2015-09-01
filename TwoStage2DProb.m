@@ -14,27 +14,15 @@ communicator = importdata('communicatornew.txt');
 communicator_trim = importdata('communicator_trim.txt');
 % communicator_trim = importdata('communicator_trim_extrapolate.txt');
 
-enginedata = dlmread('engineoutput_matrix');
-
-% Create interpolating splines
-global Cd_spline
-Cd_spline = scatteredInterpolant(communicator(:,1),communicator(:,3),communicator(:,4)); % find Cd given M, Cl
-
-global Alpha_spline 
-Alpha_spline = scatteredInterpolant(communicator(:,1),communicator(:,3),communicator(:,2)); % find AoA given M, Cl
-
-global pitchingmoment_spline 
-pitchingmoment_spline = scatteredInterpolant(communicator(:,1),communicator(:,3),communicator(:,11));
-% pitchingmoment_spline = scatteredInterpolant(communicator(:,1),communicator(:,3),communicator(:,6));
-
+%this produces simple splines for vehicle data
+global AoA_spline
 global flapdeflection_spline
-flapdeflection_spline = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,3));
+global Dragq_spline
+[AoA_spline, flapdeflection_spline, Dragq_spline] = LiftForceInterp(communicator,communicator_trim);
 
-global flapdrag_spline
-flapdrag_spline = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,5));
 
-global flaplift_spline
-flaplift_spline = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,6));
+%engine splines for thrust and fuel usage
+enginedata = dlmread('engineoutput_matrix');
 
 global ThrustF_spline
 ThrustF_spline= scatteredInterpolant(enginedata(:,1),enginedata(:,2),enginedata(:,3)); %interpolator for engine data (also able to extrapolate badly)
@@ -42,23 +30,6 @@ global FuelF_spline
 FuelF_spline= scatteredInterpolant(enginedata(:,1),enginedata(:,2),enginedata(:,4)); %interpolator for engine data
 
 
-
-% testing flap lift + lift coefficient combined spline
-
-% Cl_spline = scatteredInterpolant(communicator(:,1),communicator(:,2),communicator(:,3)); %find cl given M, AoA
-% flaplift_spline_2 = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,3),communicator_trim(:,6)); %find flap lift, given M, AoA, flap deflection
-% 
-% liftarray = [];
-% for j = 6:1:12 % M
-%     for k = 1:0.2:7 %AoA
-%         for l = -20:1:20 %flap deflection
-%             liftarray(end+1,1) = j;
-%             liftarray(end,2) = k;
-%             liftarray(end,3) = l;
-%             liftarray(end,4) = Cl_spline(j,k)*60 + flaplift_spline_2(j,k,l)/50000; % lift array including reference area and q modification, to be set equal to lift/q
-%         end
-%     end
-% end
 
 %=============================================== 
 %Second Stage
@@ -126,7 +97,7 @@ thetaU = 0.5;
 
 
 mfuelL = -3000;
-mfuelU = 994*2; % from dawids thesis baseline vehicle
+mfuelU = 2000; % 
 
 % bounds.lower.states = [VL ; HL; vL; thetaL; mfuelL];
 % bounds.upper.states = [VU ; HU; vU; thetaU; mfuelU];
