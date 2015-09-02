@@ -21,14 +21,14 @@ V = primal.states(1,:) ;
 v = primal.states(2,:) ; 
 vdot = a;
 
-% theta = primal.states(3,:) ; 
+theta = primal.states(3,:) ; 
 % theta = primal.states(4,:) ; 
 
 mfueldot = -Fueldt ; 
 
-theta  = primal.controls(1,:); %
+% theta  = primal.controls(1,:); %
 
-% thetadot  = primal.controls(1,:); %
+thetadot  = primal.controls(1,:); %
 
 % %=========================================================================================
 
@@ -40,6 +40,6 @@ Vdot = v.*sin(theta);
 
 %======================================================
 
-% XDOT = [Vdot;vdot; thetadot; mfueldot];
-XDOT = [Vdot;vdot; mfueldot];
+XDOT = [Vdot;vdot; thetadot; mfueldot];
+% XDOT = [Vdot;vdot; mfueldot];
 %======================================================

@@ -50,15 +50,15 @@ V = primal.states(1, :) ; % Scaled vertical position
 %velocity primal
 v = primal.states(2,:) ;
 
-% theta  = primal.states(3, :); % Velocity angle
+theta  = primal.states(3, :); % Velocity angle
 
-% mfuel = primal.states(4,:) ;
-mfuel = primal.states(3,:) ;
+mfuel = primal.states(4,:) ;
+% mfuel = primal.states(3,:) ;
 
 
 time = primal.nodes(1, :); % Time
 
-theta  = primal.controls(1, :);
+% theta  = primal.controls(1, :);
 
 [dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha] = VehicleModel(time, theta, V, v, mfuel, nodes,AoA_spline,flapdeflection_spline,Dragq_spline,ThrustF_spline,FuelF_spline);
 
