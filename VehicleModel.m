@@ -19,7 +19,7 @@ dt_array = time(2:end)-time(1:end-1); % Time change between each node pt
 
 v_array = v;
 
-mstruct = 8755.1 - mfuel(1); % mass of everything but fuel from dawids work
+mstruct = 8755.1 - 994; % mass of everything but fuel from dawids work
 
 m = mfuel + mstruct;
 
@@ -29,23 +29,10 @@ m = mfuel + mstruct;
 %
 %===================================================
 
-%neglecting AoA, fixed reference frame
-
-% mdot = -1.;
-% mdot = 0.; 
-% m = zeros(1,nodes-1);
-% m(1) = 5000; 
-% for i = 2:nodes
-%     m(i) = m(i-1) + mdot*dt_array(i-1);
-% end 
-
 %======================================================
 % Adding better scramjet dynamics, added 21/4/15
 % communicator matrix is given in terms of forces and moments
 
-Iy = 1.; %%%% CHANGE THIS
-
-% Out_force = dlmread('out_force.txt'); % import data from force matrix
 
 Atmosphere = dlmread('atmosphere.txt'); % import data from atmosphere matrix
 

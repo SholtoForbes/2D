@@ -49,28 +49,6 @@ vf = 2979.83; % 50kpa q at 33000m
 % variable trajectory
 %===================
 
-% Scaling ========================================
-
-% How can I scale so that H and V are scaled differently... Maybe need to
-% scale velocity separately
-global ScaleH
-% ScaleH =  Hf / 700000; %  Horizontal Scale
-ScaleH = 1.;
-global ScaleV
-% ScaleV =  Vf / 6000; %  Vertical Scale
-ScaleV = 1.;
-
-global Scalev
-Scalev = 1.;
-
-HfScaled = Hf / ScaleH;
-VfScaled = Vf / ScaleV;
-v0Scaled = v0 / Scalev;
-vfScaled = vf / Scalev;
-
-
-global ThetaScale
-ThetaScale = 1.;
 %========================================================
 
 %---------------------------------------
@@ -78,13 +56,13 @@ ThetaScale = 1.;
 %---------------------------------------
 
 VL = -1.;
-VU = 1.0*VfScaled; % makes this exactly 40000
+VU = 1.0*Vf; % makes this exactly 40000
 
 HL = -1.;
-HU = 1.2*HfScaled;
+HU = 1.2*Hf;
 
-vL = 1500/Scalev;
-vU = 3100/Scalev; % This limit must not cause the drag force to exceed the potential thrust of the vehicle, otherwise DIDO will not solve
+vL = 1500;
+vU = 3100; % This limit must not cause the drag force to exceed the potential thrust of the vehicle, otherwise DIDO will not solve
 
 % bounds.lower.states = [VL ; HL; vL];
 % bounds.upper.states = [VU ; HU; vU];
@@ -149,7 +127,7 @@ bounds.upper.time	= [t0; tfMax];
 
 % bounds.lower.events = [H0; v0Scaled; vfScaled; mfuelU];
 
-bounds.lower.events = [v0Scaled; vfScaled; mfuelU];
+bounds.lower.events = [v0; vf; mfuelU];
 
 bounds.upper.events = bounds.lower.events;      % equality event function bounds
 
@@ -171,7 +149,7 @@ Brac_1.bounds       = bounds;
 
 % Node Definition ====================================================
 
-algorithm.nodes		= [70];	
+algorithm.nodes		= [90];	
 
 
 global nodes
@@ -184,11 +162,11 @@ nodes = algorithm.nodes;
 tfGuess = tfMax; % this needs to be close to make sure solution stays withing Out_Force bounds
 
 
-guess.states(1,:) = [0 ,VfScaled]; %v
+guess.states(1,:) = [0 ,Vf]; %v
 % guess.states(2,:) = [0,HfScaled]; %H
 
 guess.states(2,:) = [v0, vf]; %H
-guess.states(3,:) = [atan((Vf-V0)/(Hf-H0)),atan((Vf-V0)/(Hf-H0))]*ThetaScale; 
+guess.states(3,:) = [atan((Vf-V0)/(Hf-H0)),atan((Vf-V0)/(Hf-H0))]; 
 
 guess.states(4,:) = [mfuelU, mfuelU/2];
 
@@ -225,18 +203,9 @@ runTime = cputime-tStart
 global dfuel
 dfuel
 
-% global StartingV
-% StartingV = 0;
-% V = primal.states(1,:)*ScaleV + StartingV; 
-
 V = primal.states(1,:);
 
-
-
-% H = primal.states(2,:)*ScaleH ; 
-
-%velocity primal
-v = primal.states(2,:)*Scalev;
+v = primal.states(2,:);
 
 t = primal.nodes;
 

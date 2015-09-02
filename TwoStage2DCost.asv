@@ -44,13 +44,24 @@ global Dragq_spline
 global ThrustF_spline
 global FuelF_spline
 
+%Gravity
+g = 9.81;
 
-V = primal.states(1, :) ; % Scaled vertical position
+
+VScaled = primal.states(1, :) ; % Scaled vertical position
+
+% HScaled = primal.states(2, :) ; % Scaled horizontal position
 
 %velocity primal
-v = primal.states(2,:) ;
+vScaled = primal.states(2,:) ;
 
-theta  = primal.states(3, :); % Velocity angle
+%Descaling
+V = VScaled * ScaleV;
+% H = HScaled * ScaleH;
+v = vScaled * Scalev;
+
+% theta  = primal.controls(1, :)/ThetaScale; % Velocity angle
+theta  = primal.states(3, :)/ThetaScale; % Velocity angle
 
 mfuel = primal.states(4,:) ;
 
@@ -58,6 +69,8 @@ time = primal.nodes(1, :); % Time
 
 
 
+% [dfuel, v, m, q, M, v_array] = VehicleModel(time, theta, V, H, nodes);
+%velocity primal
 [dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha] = VehicleModel(time, theta, V, v, mfuel, nodes,AoA_spline,flapdeflection_spline,Dragq_spline,ThrustF_spline,FuelF_spline);
 
 % THIRD STAGE ======================================================
@@ -68,8 +81,6 @@ time = primal.nodes(1, :); % Time
 % ThirdStageFuelSpline = scatteredInterpolant(ThirdStageData(:,1),ThirdStageData(:,2),ThirdStageData(:,3));
 % 
 % ThirdStageFuelCost = ThirdStageFuelSpline(theta(end), V(end));
-
-
 
 % Define Cost =======================================================
 global Endcost
