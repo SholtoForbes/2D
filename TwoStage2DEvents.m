@@ -14,7 +14,8 @@ V0 = primal.states(1,1);
 v0 = primal.states(2,1);        
 vf = primal.states(2,end);
 
-mfuel0 = primal.states(4,1);
+% mfuel0 = primal.states(4,1);
+mfuel0 = primal.states(3,1);
 
 % thetaf = primal.controls(end);
 % endpointFunction = zeros(5,1);

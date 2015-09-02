@@ -80,21 +80,30 @@ mfuelU = 2000; %
 % bounds.lower.states = [VL ; HL; vL; thetaL; mfuelL];
 % bounds.upper.states = [VU ; HU; vU; thetaU; mfuelU];
 
-bounds.lower.states = [VL ; vL; thetaL; mfuelL];
-bounds.upper.states = [VU ; vU; thetaU; mfuelU];
+% bounds.lower.states = [VL ; vL; thetaL; mfuelL];
+% bounds.upper.states = [VU ; vU; thetaU; mfuelU];
+
+bounds.lower.states = [VL ; vL; mfuelL];
+bounds.upper.states = [VU ; vU; mfuelU];
 
 % control bounds
 % thetaL = -1.;
 % thetaU = 1.5;
 
-% thetaL = -.2; %  NEED TO WATCH THAT THIS IS NOT OVERCONSTRAINING
-% thetaU = .3;
+thetaL = -.5; %  NEED TO WATCH THAT THIS IS NOT OVERCONSTRAINING
+thetaU = .5;
 
-thetadotL = -0.15;
-thetadotU = 0.15;
+bounds.lower.controls = [thetaL];
+bounds.upper.controls = [thetaU]; 
 
-bounds.lower.controls = [thetadotL];
-bounds.upper.controls = [thetadotU]; 
+
+% thetadotL = -0.15;
+% thetadotU = 0.15;
+% 
+% bounds.lower.controls = [thetadotL];
+% bounds.upper.controls = [thetadotU]; 
+
+
 
 
 %------------------
@@ -166,12 +175,13 @@ guess.states(1,:) = [0 ,Vf]; %v
 % guess.states(2,:) = [0,HfScaled]; %H
 
 guess.states(2,:) = [v0, vf]; %H
-guess.states(3,:) = [atan((Vf-V0)/(Hf-H0)),atan((Vf-V0)/(Hf-H0))]; 
+% guess.states(3,:) = [atan((Vf-V0)/(Hf-H0)),atan((Vf-V0)/(Hf-H0))]; 
 
-guess.states(4,:) = [mfuelU, mfuelU/2];
+% guess.states(4,:) = [mfuelU, mfuelU/2];
+guess.states(3,:) = [mfuelU, mfuelU/2];
 
-guess.controls(1,:)    = [0,0]; 
-% guess.controls(1,:)    = [atan((Vf-V0)/(Hf-H0)),atan((Vf-V0)/(Hf-H0))]*ThetaScale; 
+% guess.controls(1,:)    = [0,0]; 
+guess.controls(1,:)    = [atan((Vf-V0)/(Hf-H0)),atan((Vf-V0)/(Hf-H0))]; 
 
 guess.time        = [t0 ,tfGuess];
 
@@ -211,10 +221,15 @@ t = primal.nodes;
 
 % theta = primal.controls(1,:);
 
-theta = primal.states(3,:);
-thetadot = primal.controls(1,:);
+% theta = primal.states(3,:);
+% thetadot = primal.controls(1,:);
+% 
+% mfuel = primal.states(4,:);
 
-mfuel = primal.states(4,:);
+
+theta = primal.controls(1,:);
+
+mfuel = primal.states(3,:);
 
 %calculating for interest
 % c = 300.; % this will need to be brought into line with vehicle model
@@ -274,10 +289,10 @@ plot(t, rad2deg(theta))
 plot(t(algorithm.nodes(1)), rad2deg(theta(algorithm.nodes(1))), '+', 'MarkerSize', 10, 'MarkerEdgeColor','r')
 title('theta (Deg)')
 
-subplot(5,5,13)
-hold on
-plot(t, rad2deg(thetadot))
-title('thetadot (Deg/s)')
+% subplot(5,5,13)
+% hold on
+% plot(t, rad2deg(thetadot))
+% title('thetadot (Deg/s)')
 
 subplot(5,5,19)
 plot(t, mfuel)
