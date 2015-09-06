@@ -34,7 +34,7 @@ endpointFunction = zeros(3,1);
 % 
 % % endpointFunction(5) = thetaf;
 %-----------------------------------------------------------
-% endpointFunction(1) = H0;
+% endpointFunction(1) = V0;
 % endpointFunction(2) = v0;
 % endpointFunction(3) = vf;
 % endpointFunction(4) = mfuel0;

@@ -67,7 +67,7 @@ vU = 3100; % This limit must not cause the drag force to exceed the potential th
 % bounds.lower.states = [VL ; HL; vL];
 % bounds.upper.states = [VU ; HU; vU];
 
-thetaL = -1.6; %  NEED TO WATCH THAT THIS IS NOT OVERCONSTRAINING
+thetaL = -.2; %  NEED TO WATCH THAT THIS IS NOT OVERCONSTRAINING
 thetaU = 1.6;
 
 % bounds.lower.states = [VL ; HL; vL; thetaL];
@@ -97,8 +97,8 @@ bounds.upper.states = [VU ; vU; thetaU; mfuelU];
 % bounds.upper.controls = [thetaU]; 
 
 
-thetadotL = -1.15;
-thetadotU = 1.15;
+thetadotL = -0.05;
+thetadotU = 0.05;
 
 bounds.lower.controls = [thetadotL];
 bounds.upper.controls = [thetadotU]; 
@@ -134,7 +134,7 @@ bounds.upper.time	= [t0; tfMax];
 
 % bounds.lower.events = [v0Scaled; vfScaled];
 
-% bounds.lower.events = [H0; v0Scaled; vfScaled; mfuelU];
+% bounds.lower.events = [V0; v0; vf; mfuelU];
 
 bounds.lower.events = [v0; vf; mfuelU];
 
