@@ -21,7 +21,9 @@ Alt_list = [];
 %         %This finds the correct AoA
 %         for i3 = 0.0:.5:20.0
 
-for i1 = 15000.:1000.:26000.
+% for i1 = 39000.:1000.:40000.
+    
+    i1 = 40000;
     Alt = i1;
     
     for i2 = 0:.2:15.
@@ -166,6 +168,6 @@ for i1 = 15000.:1000.:26000.
         
         close all
     end
-end
+% end
 
 fclose('all');

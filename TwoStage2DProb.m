@@ -34,7 +34,7 @@ FuelF_spline= scatteredInterpolant(enginedata(:,1),enginedata(:,2),enginedata(:,
 %=============================================== 
 %Second Stage
 V0 = 15000.; % Keep initial values zero
-Vf = 40000.; % Final values here are for guess and bounds, need to be fairly accurate
+Vf = 38000.; % Final values here are for guess and bounds, need to be fairly accurate
 
 H0 = 0.;
 Hf = 700000.;
@@ -67,8 +67,11 @@ vU = 3100; % This limit must not cause the drag force to exceed the potential th
 % bounds.lower.states = [VL ; HL; vL];
 % bounds.upper.states = [VU ; HU; vU];
 
-thetaL = -.2; %  NEED TO WATCH THAT THIS IS NOT OVERCONSTRAINING
-thetaU = 1.6;
+% thetaL = -.2; %  NEED TO WATCH THAT THIS IS NOT OVERCONSTRAINING
+% thetaU = 1.6;
+
+thetaL = 0.0; %  NEED TO WATCH THAT THIS IS NOT OVERCONSTRAINING
+thetaU = 0.26; %15 degrees
 
 % bounds.lower.states = [VL ; HL; vL; thetaL];
 % bounds.upper.states = [VU ; HU; vU; thetaU];
@@ -97,8 +100,11 @@ bounds.upper.states = [VU ; vU; thetaU; mfuelU];
 % bounds.upper.controls = [thetaU]; 
 
 
-thetadotL = -0.05;
-thetadotU = 0.05;
+% thetadotL = -0.05;
+% thetadotU = 0.05;
+
+thetadotL = -0.02;
+thetadotU = 0.02;
 
 bounds.lower.controls = [thetadotL];
 bounds.upper.controls = [thetadotU]; 
@@ -158,7 +164,7 @@ Brac_1.bounds       = bounds;
 
 % Node Definition ====================================================
 
-algorithm.nodes		= [90];	
+algorithm.nodes		= [120];	
 
 
 global nodes
@@ -316,15 +322,15 @@ ylabel('costates');
 legend('\lambda_1', '\lambda_2', '\lambda_3');
 
 subplot(5,5,12)
-H = dual.Hamiltonian(1,:);
-plot(t,H);
+Hamiltonian = dual.Hamiltonian(1,:);
+plot(t,Hamiltonian);
 title('Hamiltonian')
 
 subplot(5,5,15)
 plot(t, Thrust)
 title('Thrust (N)')
 
-Isp = Thrust./Fueldt;
+Isp = Thrust./Fueldt./9.81;
 
 subplot(5,5,16)
 plot(t, Isp)
@@ -337,6 +343,81 @@ title('flapdeflection')
 subplot(5,5,18)
 plot(t, Alpha)
 title('Alpha')
+
+
+
+figure(2)
+subplot(2,6,[1,6])
+hold on
+plot(H, V,'Color','k')
+
+title('Trajectory')
+xlabel('Horizontal Position (m)')
+ylabel('Vertical Position (m)')
+
+for i = 1:floor(t(end)/30)
+    [j,k] = min(abs(t-30*i));
+    str = strcat(num2str(round(t(k))), 's');
+    text(H(k),V(k),str,'VerticalAlignment','top', 'FontSize', 10);
+    
+    plot(H(k), V(k), '+', 'MarkerSize', 10, 'MarkerEdgeColor','k')
+end
+
+plot(H(end), V(end), 'o', 'MarkerSize', 10, 'MarkerEdgeColor','k')
+text(H(end),V(end),'Third Stage Transition Point','VerticalAlignment','top', 'FontSize', 10);
+
+thirdstageexample_H = [0+H(end) (H(end)/100)+H(end) 2*(H(end)/100)+H(end) 3*(H(end)/100)+H(end) 4*(H(end)/100)+H(end) 5*(H(end)/100)+H(end)]; %makes a small sample portion of an arbitrary third stage trajectory for example
+thirdstageexample_V = [0+V(end) ((V(end)-V(1))/100)+V(end) 2*((V(end)-V(1))/100)+V(end) 3*((V(end)-V(1))/100)+V(end) 4*((V(end)-V(1))/100)+V(end) 5*((V(end)-V(1))/100)+V(end)];
+plot(thirdstageexample_H, thirdstageexample_V, 'LineStyle', '--','Color','k');
+
+hold on
+subplot(2,6,[7,9])
+xlabel('time (s)')
+
+hold on
+ax1 = gca; % current axes
+
+
+line(t, rad2deg(theta),'Parent',ax1,'Color','k', 'LineStyle','-')
+
+line(t, M,'Parent',ax1,'Color','k', 'LineStyle','--')
+
+
+
+line(t, v./(10^3),'Parent',ax1,'Color','k', 'LineStyle','-.')
+
+
+line(t, q./(10^4),'Parent',ax1,'Color','k', 'LineStyle',':', 'lineWidth', 2.0)
+
+
+legend(ax1,  'Trajectory Angle (degrees)', 'Mach no', 'Velocity (m/s x 10^3)', 'Dynamic Pressure (Pa x 10^4)')
+
+
+subplot(2,6,[10,12])
+xlabel('time (s)')
+ax2 = gca;
+
+line(t, Alpha,'Parent',ax2,'Color','k', 'LineStyle','-')
+
+line(t, flapdeflection,'Parent',ax2,'Color','k', 'LineStyle','--')
+
+
+line(t, mfuel./(10^2),'Parent',ax2,'Color','k', 'LineStyle','-.')
+
+
+line(t, Isp./(10^2),'Parent',ax2,'Color','k', 'LineStyle',':', 'lineWidth', 2.0)
+
+
+
+legend(ax2, 'AoA (degrees)','Flap Deflection (degrees)', 'Fuel Mass (kg x 10^2)', 'Isp (s x 10^2)')
+
+
+% hold on
+% subplot(2,5,[6,10])
+% plot(t, Alpha)
+
+
+
 % 
 % %------ Forward Simulation -----------
 % 

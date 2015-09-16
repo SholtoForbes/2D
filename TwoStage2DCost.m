@@ -69,8 +69,10 @@ time = primal.nodes(1, :); % Time
 % 
 % ThirdStageFuelSpline = scatteredInterpolant(ThirdStageData(:,1),ThirdStageData(:,2),ThirdStageData(:,3));
 % 
-% ThirdStageFuelCost = ThirdStageFuelSpline(theta(end), V(end));
+% ThirdStageFuelCost = ThirdStageFuelSpline(rad2deg(theta(end)), V(end));
 
+
+ThirdStageFuelCost = 50*(-theta(end)+15)/15 + 50*(-V(end)+37000)/37000;%arbitrary fuel cost for third stage
 
 
 % Define Cost =======================================================
@@ -85,7 +87,7 @@ global Endcost
 % Endcost = 0;
 
 Endcost = 2000 - mfuel(end); % change 2000 to whatever mU is
-% Endcost =  -mfuel(end) + ThirdStageFuelCost;
+% Endcost =  2000-mfuel(end) + ThirdStageFuelCost;
 
 % Endcost = -gaussmf(theta(end),[0.01 0.1]) * 7.7e6;
 
