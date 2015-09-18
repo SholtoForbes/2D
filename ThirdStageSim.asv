@@ -8,9 +8,9 @@ Starting_Altitude = 33000; %m
 
 Starting_Theta = .1; %rad
 
-HelioSync_Altitude = 566.89 + 6371; %Same as Dawids
+HelioSync_Altitude = 566.89*10^3; %Same as Dawids
 
-Orbital_Velocity_f = sqrt(398600/(566.89 + 6371))*10^3; %Calculating the necessary orbital velocity with altitude in km
+Orbital_Velocity_f = sqrt(398600/566.89)*10^3; %Calculating the necessary orbital velocity with altitude in km
 
 maxturnratepos = deg2rad(7)/80; %rad/s these are from dawids glasgow paper, need to figure out where these come from
 maxturnrateneg = -deg2rad(7)/110; %rad/s
@@ -22,7 +22,7 @@ A = pi*(0.9/2)^2;
 %define starting condtions
 t(1) = 0.;
 
-dt = .7; %time step
+dt = .1; %time step
 
 v(1) = 3000;
 
@@ -36,7 +36,7 @@ i=1;
 
 %
 Thrust = 50000;
-m = 1750; %vehicle mass, less 1100kg fuel (to match Dawids glasgow paper)
+m = 1900; %vehicle mass, less 1100kg fuel (to match Dawids glasgow paper)
 
 
 mdot = 14.71; %fuel mass flow rate from dawid
@@ -157,19 +157,18 @@ end
 %Hohmann Transfer, from Dawid (3i)
 % mu = 3.987*10^14;
 mu = 398600;
-Rearth = 6371; %radius of earth
 
-v12 = sqrt(mu / (Alt(end)/10^3 + Rearth))*10^3 - v(end)
+v12 = sqrt(mu / (Alt(end)/10^3))*10^3 - v(end);
 
-v23 = sqrt(mu / (Alt(end)/10^3+ Rearth))*(sqrt(2*HelioSync_Altitude/((Alt(end)/10^3 + Rearth)+HelioSync_Altitude))-1)*10^3
+v23 = sqrt(mu / (Alt(end)/10^3))*(sqrt(2*HelioSync_Altitude/((Alt(end)/10^3)+HelioSync_Altitude))-1)*10^3;
 
-v34 = sqrt(mu / HelioSync_Altitude)*(1 - sqrt(2*(Alt(end)/10^3 + Rearth)/((Alt(end)/10^3 + Rearth)+HelioSync_Altitude)))*10^3
+v34 = sqrt(mu / HelioSync_Altitude)*(1 - sqrt(2*(Alt(end)/10^3)/((Alt(end)/10^3)+HelioSync_Altitude)))*10^3;
 
 dvtot = v12 + v23 + v34;
 
 %as this is happening in a vacuum we can compute while delta v at once for
-%fuel usage, tsiolkovsky rocket equation. this should have gravity maybe
-m = m - 302.8; %release of heat shield, from dawids glasgow paper
+%fuel usage, tsiolkovsky rocket equation. this should have gravity
+m = m - 
 
 g = 9.81;
 
@@ -177,9 +176,6 @@ Isp = 350; %s
 
 m2 = m/(exp(v12/(Isp*g)))
 
-m3 = m2/(exp(v23/(Isp*g)))
-
-m4 = m3/(exp(v34/(Isp*g)))
 
 plot(Hor, Alt)
 
