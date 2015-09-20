@@ -1,12 +1,42 @@
 clear all
 
+time1 = cputime;
+
 Atmosphere = dlmread('atmosphere.txt');
 
 %Simulating the Third Stage Rocket Trajectory
 
-Starting_Altitude = 33000; %m
+% Starting_Altitude = 33000; %m
+% 
+% Starting_Theta = .1; %rad
 
-Starting_Theta = .1; %rad
+iteration = 1;
+
+for k = 20000:1000:50000
+    for j = -.5:.05:0.8
+        
+        Starting_Altitude = k;
+        Starting_Theta = j;
+        
+        
+   
+
+        c = [];
+        CD = [];
+        CL = [];
+        M = [];
+        CN = [];
+        CA = [];
+        v = [];
+        rho = [];
+        t= [];
+        theta = [];
+        Alt = [];
+        mfuel = [];
+        Hor = [];
+
+
+        
 
 HelioSync_Altitude = 566.89 + 6371; %Same as Dawids
 
@@ -22,7 +52,7 @@ A = pi*(0.9/2)^2;
 %define starting condtions
 t(1) = 0.;
 
-dt = .7; %time step
+dt = .5; %time step
 
 v(1) = 3000;
 
@@ -64,6 +94,10 @@ CL(1) = CN*cos(Alpha) - CA*sin(Alpha);
 
 while mfuel(i) > 0;
     t(i+1) = t(i) + dt;
+    
+    if t > 160
+        m = 1750 - 302.8; %release of heat shield, from dawids glasgow paper
+    end
     
     Alt(i+1) = Alt(i) + v(i)*sin(Theta(i))*dt;
     
@@ -114,6 +148,10 @@ while Theta(i) > 0;
 
     t(i+1) = t(i) + dt;
     
+    if t > 160
+        m = 1750 - 302.8; %release of heat shield, from dawids glasgow paper
+    end
+    
     Alt(i+1) = Alt(i) + v(i)*sin(Theta(i))*dt;
     
     Hor(i+1) = Hor(i) + v(i)*cos(Theta(i))*dt; 
@@ -159,27 +197,47 @@ end
 mu = 398600;
 Rearth = 6371; %radius of earth
 
-v12 = sqrt(mu / (Alt(end)/10^3 + Rearth))*10^3 - v(end)
+v12 = sqrt(mu / (Alt(end)/10^3 + Rearth))*10^3 - v(end);
 
-v23 = sqrt(mu / (Alt(end)/10^3+ Rearth))*(sqrt(2*HelioSync_Altitude/((Alt(end)/10^3 + Rearth)+HelioSync_Altitude))-1)*10^3
+v23 = sqrt(mu / (Alt(end)/10^3+ Rearth))*(sqrt(2*HelioSync_Altitude/((Alt(end)/10^3 + Rearth)+HelioSync_Altitude))-1)*10^3;
 
-v34 = sqrt(mu / HelioSync_Altitude)*(1 - sqrt(2*(Alt(end)/10^3 + Rearth)/((Alt(end)/10^3 + Rearth)+HelioSync_Altitude)))*10^3
+v34 = sqrt(mu / HelioSync_Altitude)*(1 - sqrt(2*(Alt(end)/10^3 + Rearth)/((Alt(end)/10^3 + Rearth)+HelioSync_Altitude)))*10^3;
 
 dvtot = v12 + v23 + v34;
 
 %as this is happening in a vacuum we can compute while delta v at once for
 %fuel usage, tsiolkovsky rocket equation. this should have gravity maybe
-m = m - 302.8; %release of heat shield, from dawids glasgow paper
+
 
 g = 9.81;
 
 Isp = 350; %s
 
-m2 = m/(exp(v12/(Isp*g)))
+m2 = m/(exp(v12/(Isp*g)));
 
-m3 = m2/(exp(v23/(Isp*g)))
+m3 = m2/(exp(v23/(Isp*g)));
 
-m4 = m3/(exp(v34/(Isp*g)))
+m4 = m3/(exp(v34/(Isp*g)));
 
-plot(Hor, Alt)
+mpayload = m4 - 347.4; % subtract structural mass from Dawids glasgow paper
 
+% plot(Hor, Alt)
+
+% payload_matrix(iteration,1) = Starting_Altitude ;
+% payload_matrix(iteration,2) = Starting_Theta ;
+% payload_matrix(iteration,3) = mpayload;
+
+thirdstage = fopen('thirdstage.dat','a+');
+        
+thirdstage_results = [num2str(Starting_Altitude,'%10.4e') ' ' num2str(Starting_Theta,'%10.4e') ' ' num2str(mpayload,'%10.4e') '\r\n'] ;
+        
+fprintf(thirdstage,thirdstage_results);
+
+
+iteration = iteration + 1;
+ end
+end
+
+
+
+% time = cputime - time1

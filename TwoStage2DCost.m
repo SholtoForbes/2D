@@ -43,6 +43,9 @@ global Dragq_spline
 
 global ThrustF_spline
 global FuelF_spline
+global i
+
+i = i+1; %count no of iterations
 
 
 V = primal.states(1, :) ; % Scaled vertical position
