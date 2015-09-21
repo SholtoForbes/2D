@@ -223,21 +223,25 @@ mpayload = m4 - 347.4; % subtract structural mass from Dawids glasgow paper
 
 % plot(Hor, Alt)
 
-% payload_matrix(iteration,1) = Starting_Altitude ;
-% payload_matrix(iteration,2) = Starting_Theta ;
-% payload_matrix(iteration,3) = mpayload;
+payload_matrix(iteration,1) = Starting_Altitude ;
+payload_matrix(iteration,2) = Starting_Theta ;
+payload_matrix(iteration,3) = mpayload;
 
-thirdstage = fopen('thirdstage.dat','a+');
-        
-thirdstage_results = [num2str(Starting_Altitude,'%10.4e') ' ' num2str(Starting_Theta,'%10.4e') ' ' num2str(mpayload,'%10.4e') '\r\n'] ;
-        
-fprintf(thirdstage,thirdstage_results);
+
+% thirdstage = fopen('thirdstage.dat','a+');
+%         
+% thirdstage_results = [num2str(Starting_Altitude,'%10.4e') ' ' num2str(Starting_Theta,'%10.4e') ' ' num2str(mpayload,'%10.4e') '\r\n'] ;
+%         
+% fprintf(thirdstage,thirdstage_results);
+
 
 
 iteration = iteration + 1;
  end
 end
 
+        
+dlmwrite('thirdstage.dat', payload_matrix,'delimiter','\t')
 
 
 % time = cputime - time1

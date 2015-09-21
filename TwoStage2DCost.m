@@ -45,6 +45,7 @@ global ThrustF_spline
 global FuelF_spline
 global i
 
+
 i = i+1; %count no of iterations
 
 
@@ -68,18 +69,20 @@ time = primal.nodes(1, :); % Time
 % THIRD STAGE ======================================================
 % NEED TO WATCH THIS, IT CAN EXTRAPOLATE BUT IT DOESNT DO IT WELL
 
-% ThirdStageData = dlmread('thirdstage.dat');
-% 
-% ThirdStageFuelSpline = scatteredInterpolant(ThirdStageData(:,1),ThirdStageData(:,2),ThirdStageData(:,3));
-% 
-% ThirdStageFuelCost = ThirdStageFuelSpline(rad2deg(theta(end)), V(end));
+ThirdStageData = dlmread('thirdstage.dat');
+
+ThirdStagePayloadSpline = scatteredInterpolant(ThirdStageData(:,1),ThirdStageData(:,2),ThirdStageData(:,3));
+
+global ThirdStagePayloadMass
+ThirdStagePayloadMass = ThirdStagePayloadSpline(V(end), theta(end));
 
 
-ThirdStageFuelCost = 50*(-theta(end)+15)/15 + 50*(-V(end)+37000)/37000;%arbitrary fuel cost for third stage
+% ThirdStageFuelCost = 50*(-theta(end)+15)/15 + 50*(-V(end)+37000)/37000;%arbitrary fuel cost for third stage
 
 
 % Define Cost =======================================================
-global Endcost
+
+
 
 % Endcost = -dfuel;
 
@@ -89,8 +92,8 @@ global Endcost
 % It is able to run with no cost at all:
 % Endcost = 0;
 
-Endcost = 2000 - mfuel(end); % change 2000 to whatever mU is
-% Endcost =  2000-mfuel(end) + ThirdStageFuelCost;
+% Endcost = 2000 - mfuel(end); % change 2000 to whatever mU is
+Endcost =  - mfuel(end) - ThirdStagePayloadMass;
 
 % Endcost = -gaussmf(theta(end),[0.01 0.1]) * 7.7e6;
 

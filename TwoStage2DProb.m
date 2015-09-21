@@ -70,8 +70,10 @@ vU = 3100; % This limit must not cause the drag force to exceed the potential th
 % thetaL = -.2; %  NEED TO WATCH THAT THIS IS NOT OVERCONSTRAINING
 % thetaU = 1.6;
 
-thetaL = 0.0; %  NEED TO WATCH THAT THIS IS NOT OVERCONSTRAINING
-thetaU = 0.26; %15 degrees
+thetaL = -0.1; %  NEED TO WATCH THAT THIS IS NOT OVERCONSTRAINING
+% thetaU = 0.26; %15 degrees
+thetaU = 0.4; 
+
 
 % bounds.lower.states = [VL ; HL; vL; thetaL];
 % bounds.upper.states = [VU ; HU; vU; thetaU];
@@ -256,6 +258,7 @@ global Endcost
 global Thrust
 global flapdeflection
 global Alpha
+global ThirdStagePayloadMass
 
 dt = t(2:end)-t(1:end-1); % Time change between each node pt
 FuelUsed = zeros(1,nodes-1);
@@ -416,6 +419,9 @@ line(t, Isp./(10^2),'Parent',ax2,'Color','k', 'LineStyle',':', 'lineWidth', 2.0)
 
 legend(ax2, 'AoA (degrees)','Flap Deflection (degrees)', 'Fuel Mass (kg x 10^2)', 'Isp (s x 10^2)')
 
+
+mTextBox = uicontrol('style','text');
+set(mTextBox,'String','Second Stage Fuel Used:',num2str(mfuel(end)),'Payload Mass:', num2str(ThirdStagePayloadMass));
 
 % hold on
 % subplot(2,5,[6,10])
