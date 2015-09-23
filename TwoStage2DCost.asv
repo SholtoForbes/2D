@@ -65,7 +65,7 @@ time = primal.nodes(1, :); % Time
 
 % THIRD STAGE ======================================================
 % NEED TO WATCH THIS, IT CAN EXTRAPOLATE BUT IT DOESNT DO IT WELL
-
+cput
 ThirdStageData = dlmread('thirdstage.dat');
 
 ThirdStagePayloadSpline = scatteredInterpolant(ThirdStageData(:,1),ThirdStageData(:,2),ThirdStageData(:,3));
@@ -101,9 +101,9 @@ EndpointCost = Endcost;
 % RunningCost = 0;
 
 % RunningCost =((q-80000).^2+2000000)/2000000;
-RunningCost =((q-50000).^2+4000000)/4000000; % if a cost does not work, try loosening it 
+% RunningCost =((q-50000).^2+4000000)/4000000; % if a cost does not work, try loosening it 
 % RunningCost =((q-50000).^2+2000000)/2000000; % if a cost does not work, try loosening it 
-% RunningCost =((q-50000).^2+1000000)/1000000; 
+RunningCost =((q-50000).^2+1000000)/1000000; 
 % RunningCost =((q-50000).^2+500000)/500000;
 
 % RunningCost = -gaussmf(q,[1000 50000]); this doesnt work

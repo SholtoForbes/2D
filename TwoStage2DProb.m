@@ -33,8 +33,8 @@ FuelF_spline= scatteredInterpolant(enginedata(:,1),enginedata(:,2),enginedata(:,
 
 %=============================================== 
 %Second Stage
-V0 = 15000.; % Keep initial values zero
-Vf = 38000.; % Final values here are for guess and bounds, need to be fairly accurate
+V0 = 20000.; % Keep initial values zero
+Vf = 40000.; % Final values here are for guess and bounds, need to be fairly accurate
 
 H0 = 0.;
 Hf = 700000.;
@@ -56,7 +56,7 @@ vf = 2979.83; % 50kpa q at 33000m
 %---------------------------------------
 
 VL = -1.;
-VU = 1.0*Vf; % makes this exactly 40000
+VU = 1.0*Vf; 
 
 HL = -1.;
 HU = 1.2*Hf;
@@ -70,9 +70,10 @@ vU = 3100; % This limit must not cause the drag force to exceed the potential th
 % thetaL = -.2; %  NEED TO WATCH THAT THIS IS NOT OVERCONSTRAINING
 % thetaU = 1.6;
 
-thetaL = -0.1; %  NEED TO WATCH THAT THIS IS NOT OVERCONSTRAINING
-% thetaU = 0.26; %15 degrees
-thetaU = 0.4; 
+% thetaL = -0.1; %  NEED TO WATCH THAT THIS IS NOT OVERCONSTRAINING
+thetaL = 0.;
+thetaU = 0.26; %15 degrees
+% thetaU = 0.4; 
 
 
 % bounds.lower.states = [VL ; HL; vL; thetaL];
@@ -166,7 +167,7 @@ Brac_1.bounds       = bounds;
 
 % Node Definition ====================================================
 
-algorithm.nodes		= [120];	
+algorithm.nodes		= [90];	
 
 
 global nodes
@@ -206,8 +207,6 @@ algorithm.guess = guess;
 
 
 % count
-global i
-i=1;
 
 % Call dido
 % =====================================================================
@@ -217,7 +216,7 @@ runTime = cputime-tStart
 % ===================================================================
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-i
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %          OUTPUT             %
@@ -254,7 +253,7 @@ global M
 global q
 global Fd
 global Fueldt
-global Endcost
+
 global Thrust
 global flapdeflection
 global Alpha
@@ -319,8 +318,8 @@ title('Drag Force')
 subplot(5,5,14)
 hold on
 plot(t(1:end-1), FuelUsed)
-bar(t(end), Endcost)
-title('Fuel and End Cost')
+bar(t(end), ThirdStagePayloadMass)
+title('Fuel and Payload Mass')
 
 subplot(5,5,11);
 plot(t, dual.dynamics);
@@ -372,10 +371,15 @@ for i = 1:floor(t(end)/30)
 end
 
 plot(H(end), V(end), 'o', 'MarkerSize', 10, 'MarkerEdgeColor','k')
+
+
 text(H(end),V(end),'Third Stage Transition Point','VerticalAlignment','top', 'FontSize', 10);
 
-thirdstageexample_H = [0+H(end) (H(end)/100)+H(end) 2*(H(end)/100)+H(end) 3*(H(end)/100)+H(end) 4*(H(end)/100)+H(end) 5*(H(end)/100)+H(end)]; %makes a small sample portion of an arbitrary third stage trajectory for example
-thirdstageexample_V = [0+V(end) ((V(end)-V(1))/100)+V(end) 2*((V(end)-V(1))/100)+V(end) 3*((V(end)-V(1))/100)+V(end) 4*((V(end)-V(1))/100)+V(end) 5*((V(end)-V(1))/100)+V(end)];
+dim = [.65 .45 .2 .2];
+annotation('textbox',dim,'string',{['Payload Mass: ', num2str(ThirdStagePayloadMass), ' kg'],['Second Stage Fuel Used: ' num2str(2000 - mfuel(end)) ' kg']},'FitBoxToText','on');  
+
+thirdstageexample_H = [0+H(end) (H(end)-H(end - 1))+H(end) 20*(H(end)-H(end - 1))+H(end) 40*(H(end)-H(end - 1))+H(end) 60*(H(end)-H(end - 1))+H(end) 80*(H(end)-H(end - 1))+H(end)]; %makes a small sample portion of an arbitrary third stage trajectory for example
+thirdstageexample_V = [0+V(end) (V(end)-V(end - 1))+V(end) 20*((V(end)-V(end -1)))+V(end) 40*((V(end)-V(end -1)))+V(end) 60*((V(end)-V(end -1)))+V(end) 80*((V(end)-V(end -1)))+V(end)];
 plot(thirdstageexample_H, thirdstageexample_V, 'LineStyle', '--','Color','k');
 
 hold on
@@ -420,8 +424,6 @@ line(t, Isp./(10^2),'Parent',ax2,'Color','k', 'LineStyle',':', 'lineWidth', 2.0)
 legend(ax2, 'AoA (degrees)','Flap Deflection (degrees)', 'Fuel Mass (kg x 10^2)', 'Isp (s x 10^2)')
 
 
-mTextBox = uicontrol('style','text');
-set(mTextBox,'String','Second Stage Fuel Used:',num2str(mfuel(end)),'Payload Mass:', num2str(ThirdStagePayloadMass));
 
 % hold on
 % subplot(2,5,[6,10])
