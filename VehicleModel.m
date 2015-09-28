@@ -1,4 +1,4 @@
-function [dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha] = VehicleModel(time, theta, V, v, mfuel, nodes,AoA_spline,flapdeflection_spline,Dragq_spline,ThrustF_spline,FuelF_spline)
+function [dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha, heating_rate] = VehicleModel(time, theta, V, v, mfuel, nodes,AoA_spline,flapdeflection_spline,Dragq_spline,ThrustF_spline,FuelF_spline)
 % function [dfuel, v, m, q, M, v_array] = VehicleModel(time, theta, V, H, nodes)
 
 
@@ -61,7 +61,8 @@ Efficiency2 = q./50000.*(-(q-50000).^4.*6.25e-19 + 1);% test of quadratic dropof
 % Efficiency = 1;
 
 % Thrust(1:nodes) =  200000;
-Thrust = ThrustF_spline(M,Alpha).*Efficiency2;
+% Thrust = ThrustF_spline(M,Alpha).*Efficiency2;
+Thrust = ThrustF_spline(M,Alpha).*Efficiency;
 
 % Acceleration ------------------------------------------------------------
 
@@ -87,6 +88,16 @@ Fueldt = FuelF_spline(M,Alpha).*Efficiency;
 fuelchange_array = -Fueldt(1:end-1).*dt_array ;
 
 dfuel = sum(fuelchange_array); %total change in 'fuel' this is negative
+
+
+
+
+%-heating---------------------------
+kappa = 1.7415e-4;
+Rn = 1; %effective nose radius (m) (need to change this, find actual value)
+
+heating_rate = kappa*sqrt(rho./Rn).*v_array.^3; %watts
+
 
 end
 

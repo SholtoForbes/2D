@@ -259,6 +259,8 @@ global flapdeflection
 global Alpha
 global ThirdStagePayloadMass
 
+global heating_rate
+
 dt = t(2:end)-t(1:end-1); % Time change between each node pt
 FuelUsed = zeros(1,nodes-1);
 FuelUsed(1) = dt(1)*Fueldt(1);
@@ -401,8 +403,9 @@ line(t, v./(10^3),'Parent',ax1,'Color','k', 'LineStyle','-.')
 
 line(t, q./(10^4),'Parent',ax1,'Color','k', 'LineStyle',':', 'lineWidth', 2.0)
 
+line(t, heating_rate./(10^4),'Parent',ax1,'Color','k', 'LineStyle',':', 'lineWidth', 2.0)
 
-legend(ax1,  'Trajectory Angle (degrees)', 'Mach no', 'Velocity (m/s x 10^3)', 'Dynamic Pressure (Pa x 10^4)')
+legend(ax1,  'Trajectory Angle (degrees)', 'Mach no', 'Velocity (m/s x 10^3)', 'Dynamic Pressure (Pa x 10^4)', 'heating rate (kw x 10)')
 
 
 subplot(2,6,[10,12])

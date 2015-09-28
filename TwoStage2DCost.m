@@ -44,6 +44,7 @@ global Dragq_spline
 global ThrustF_spline
 global FuelF_spline
 
+global heating_rate
 
 
 V = primal.states(1, :) ; % Scaled vertical position
@@ -61,7 +62,7 @@ time = primal.nodes(1, :); % Time
 
 % theta  = primal.controls(1, :);
 
-[dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha] = VehicleModel(time, theta, V, v, mfuel, nodes,AoA_spline,flapdeflection_spline,Dragq_spline,ThrustF_spline,FuelF_spline);
+[dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha, heating_rate] = VehicleModel(time, theta, V, v, mfuel, nodes,AoA_spline,flapdeflection_spline,Dragq_spline,ThrustF_spline,FuelF_spline);
 
 % THIRD STAGE ======================================================
 % NEED TO WATCH THIS, IT CAN EXTRAPOLATE BUT IT DOESNT DO IT WELL
@@ -87,10 +88,10 @@ ThirdStagePayloadMass = ThirdStagePayloadSpline(V(end), theta(end));
 % Endcost = tf;
 
 % It is able to run with no cost at all:
-Endcost = 0;
+% Endcost = 0;
 
 % Endcost = 2000 - mfuel(end); % change 2000 to whatever mU is
-% Endcost =  - mfuel(end) - ThirdStagePayloadMass;
+Endcost =  - mfuel(end) - ThirdStagePayloadMass;
 
 % Endcost = -gaussmf(theta(end),[0.01 0.1]) * 7.7e6;
 
@@ -98,10 +99,10 @@ Endcost = 0;
 
 EndpointCost = Endcost;
 
-% RunningCost = 0;
+RunningCost = 0;
 
 % RunningCost =((q-80000).^2+2000000)/2000000;
-RunningCost =((q-50000).^2+4000000)/4000000; % if a cost does not work, try loosening it 
+% RunningCost =((q-50000).^2+4000000)/4000000; % if a cost does not work, try loosening it 
 % RunningCost =((q-50000).^2+2000000)/2000000; % if a cost does not work, try loosening it 
 % RunningCost =((q-50000).^2+1000000)/1000000; 
 % RunningCost =((q-50000).^2+500000)/500000;
