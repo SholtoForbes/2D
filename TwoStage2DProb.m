@@ -64,9 +64,6 @@ HU = 1.2*Hf;
 vL = 1500;
 vU = 3100; % This limit must not cause the drag force to exceed the potential thrust of the vehicle, otherwise DIDO will not solve
 
-% bounds.lower.states = [VL ; HL; vL];
-% bounds.upper.states = [VU ; HU; vU];
-
 % thetaL = -.2; %  NEED TO WATCH THAT THIS IS NOT OVERCONSTRAINING
 % thetaU = 1.6;
 
@@ -76,32 +73,16 @@ thetaU = 0.26; %15 degrees
 % thetaU = 0.4; 
 
 
-% bounds.lower.states = [VL ; HL; vL; thetaL];
-% bounds.upper.states = [VU ; HU; vU; thetaU];
-
-
 mfuelL = -3000;
 mfuelU = 2000; % 
 
-% bounds.lower.states = [VL ; HL; vL; thetaL; mfuelL];
-% bounds.upper.states = [VU ; HU; vU; thetaU; mfuelU];
+QL = 0;
+QU = 50*10^6; %joules, estimate
 
-bounds.lower.states = [VL ; vL; thetaL; mfuelL];
-bounds.upper.states = [VU ; vU; thetaU; mfuelU];
-
-% bounds.lower.states = [VL ; vL; mfuelL];
-% bounds.upper.states = [VU ; vU; mfuelU];
+bounds.lower.states = [VL ; vL; thetaL; mfuelL; QL];
+bounds.upper.states = [VU ; vU; thetaU; mfuelU; QU];
 
 % control bounds
-% thetaL = -1.;
-% thetaU = 1.5;
-
-% thetaL = -.3; %  NEED TO WATCH THAT THIS IS NOT OVERCONSTRAINING
-% thetaU = .3;
-
-% bounds.lower.controls = [thetaL];
-% bounds.upper.controls = [thetaU]; 
-
 
 % thetadotL = -0.05;
 % thetadotU = 0.05;
@@ -134,18 +115,8 @@ bounds.upper.time	= [t0; tfMax];
 %-------------------------------------------
 % See events file for definition of events function
 
-
-% bounds.lower.events = [V0;   H0; v0Scaled; vfScaled; 0];
-
-% bounds.lower.events = [V0;   H0; v0Scaled; vfScaled];
-
-% bounds.lower.events = [H0; v0Scaled; vfScaled];
-
-% bounds.lower.events = [v0Scaled; vfScaled];
-
-% bounds.lower.events = [V0; v0; vf; mfuelU];
-
-bounds.lower.events = [v0; vf; mfuelU];
+% bounds.lower.events = [v0; vf; mfuelU];
+bounds.lower.events = [v0; vf; mfuelU; QL];
 
 bounds.upper.events = bounds.lower.events;      % equality event function bounds
 
@@ -181,16 +152,17 @@ tfGuess = tfMax; % this needs to be close to make sure solution stays withing Ou
 
 
 guess.states(1,:) = [0 ,Vf]; %v
-% guess.states(2,:) = [0,HfScaled]; %H
 
 guess.states(2,:) = [v0, vf]; %H
 guess.states(3,:) = [atan((Vf-V0)/(Hf-H0)),atan((Vf-V0)/(Hf-H0))]; 
 
 guess.states(4,:) = [mfuelU, mfuelU/2];
-% guess.states(3,:) = [mfuelU, mfuelU/2];
+
+guess.states(5,:) = [0, 40*10^6];
+
 
 guess.controls(1,:)    = [0,0]; 
-% guess.controls(1,:)    = [atan((Vf-V0)/(Hf-H0)),atan((Vf-V0)/(Hf-H0))]; 
+
 
 guess.time        = [t0 ,tfGuess];
 
@@ -237,6 +209,8 @@ theta = primal.states(3,:);
 thetadot = primal.controls(1,:);
 % 
 mfuel = primal.states(4,:);
+
+Q = primal.states(5,:);
 
 
 % theta = primal.controls(1,:);
@@ -404,6 +378,8 @@ line(t, v./(10^3),'Parent',ax1,'Color','k', 'LineStyle','-.')
 line(t, q./(10^4),'Parent',ax1,'Color','k', 'LineStyle',':', 'lineWidth', 2.0)
 
 line(t, heating_rate./(10^4),'Parent',ax1,'Color','k', 'LineStyle',':', 'lineWidth', 2.0)
+
+line(t, Q./(10^6),'Parent',ax1,'Color','k', 'LineStyle','-', 'lineWidth', 2.0)
 
 legend(ax1,  'Trajectory Angle (degrees)', 'Mach no', 'Velocity (m/s x 10^3)', 'Dynamic Pressure (Pa x 10^4)', 'heating rate (kw x 10)')
 
