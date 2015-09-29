@@ -77,10 +77,10 @@ mfuelL = -3000;
 mfuelU = 2000; % 
 
 QL = 0;
-QU = 50*10^6; %joules, estimate
+QU = 100*10^6; %joules, estimate
 
-bounds.lower.states = [VL ; vL; thetaL; mfuelL; QL];
-bounds.upper.states = [VU ; vU; thetaU; mfuelU; QU];
+bounds.lower.states = [VL ; vL; thetaL; mfuelL];
+bounds.upper.states = [VU ; vU; thetaU; mfuelU];
 
 % control bounds
 
@@ -115,8 +115,8 @@ bounds.upper.time	= [t0; tfMax];
 %-------------------------------------------
 % See events file for definition of events function
 
-% bounds.lower.events = [v0; vf; mfuelU];
-bounds.lower.events = [v0; vf; mfuelU; QL];
+bounds.lower.events = [v0; vf; mfuelU];
+% bounds.lower.events = [v0; vf; mfuelU; QL];
 
 bounds.upper.events = bounds.lower.events;      % equality event function bounds
 
@@ -158,7 +158,7 @@ guess.states(3,:) = [atan((Vf-V0)/(Hf-H0)),atan((Vf-V0)/(Hf-H0))];
 
 guess.states(4,:) = [mfuelU, mfuelU/2];
 
-guess.states(5,:) = [0, 40*10^6];
+% guess.states(5,:) = [0, 40*10^6];
 
 
 guess.controls(1,:)    = [0,0]; 
@@ -210,7 +210,7 @@ thetadot = primal.controls(1,:);
 % 
 mfuel = primal.states(4,:);
 
-Q = primal.states(5,:);
+% Q = primal.states(5,:);
 
 
 % theta = primal.controls(1,:);
@@ -379,7 +379,7 @@ line(t, q./(10^4),'Parent',ax1,'Color','k', 'LineStyle',':', 'lineWidth', 2.0)
 
 line(t, heating_rate./(10^4),'Parent',ax1,'Color','k', 'LineStyle',':', 'lineWidth', 2.0)
 
-line(t, Q./(10^6),'Parent',ax1,'Color','k', 'LineStyle','-', 'lineWidth', 2.0)
+% line(t, Q./(10^6),'Parent',ax1,'Color','k', 'LineStyle','-', 'lineWidth', 2.0)
 
 legend(ax1,  'Trajectory Angle (degrees)', 'Mach no', 'Velocity (m/s x 10^3)', 'Dynamic Pressure (Pa x 10^4)', 'heating rate (kw x 10)')
 
