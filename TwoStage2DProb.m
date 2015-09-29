@@ -122,6 +122,10 @@ bounds.upper.events = bounds.lower.events;      % equality event function bounds
 
 
 
+bounds.lower.path = [QL];
+bounds.upper.path = [QU]; 
+
+
 % PATH BOUNDS IF NECESSARY
 
 
@@ -130,7 +134,8 @@ bounds.upper.events = bounds.lower.events;      % equality event function bounds
 %============================================
 Brac_1.cost 		= 'TwoStage2DCost';
 Brac_1.dynamics	    = 'TwoStage2DDynamics';
-Brac_1.events		= 'TwoStage2DEvents';		
+Brac_1.events		= 'TwoStage2DEvents';	
+Brac_1.path         = 'TwoStage2DPath';
 %Path file optional	
 
 Brac_1.bounds       = bounds;
@@ -211,6 +216,8 @@ thetadot = primal.controls(1,:);
 mfuel = primal.states(4,:);
 
 % Q = primal.states(5,:);
+
+Q = primal.path;
 
 
 % theta = primal.controls(1,:);
@@ -379,7 +386,7 @@ line(t, q./(10^4),'Parent',ax1,'Color','k', 'LineStyle',':', 'lineWidth', 2.0)
 
 line(t, heating_rate./(10^4),'Parent',ax1,'Color','k', 'LineStyle',':', 'lineWidth', 2.0)
 
-% line(t, Q./(10^6),'Parent',ax1,'Color','k', 'LineStyle','-', 'lineWidth', 2.0)
+line(t, Q./(10^6),'Parent',ax1,'Color','k', 'LineStyle','-', 'lineWidth', 2.0)
 
 legend(ax1,  'Trajectory Angle (degrees)', 'Mach no', 'Velocity (m/s x 10^3)', 'Dynamic Pressure (Pa x 10^4)', 'heating rate (kw x 10)')
 
