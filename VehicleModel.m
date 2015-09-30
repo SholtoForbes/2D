@@ -81,7 +81,7 @@ end
 % Efficiency = q./50000; % linear q efficiency, this isnt really efficiency in fuel, scales fuel use as well.... more like thrust scaling
 % Efficiency2 = q./50000.*(-(q-50000).^4.*6.25e-19 + 1);% test of quadratic dropoff (0.9 at 70kpa), used only for thrust (fuel will still use linear efficiency)
 % Efficiency = atan(q/5000)/pi*2;
-Efficiency = -((q-50000)./50000).^2 + 1;
+Efficiency = -((q-50000)./50000).^2 + 1; % this is an assumption of how the engine behaves
 
 % Thrust(1:nodes) =  200000;
 % Thrust = ThrustF_spline(M,Alpha).*Efficiency2;
