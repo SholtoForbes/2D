@@ -77,7 +77,8 @@ mfuelL = -3000;
 mfuelU = 2000; % 
 
 QL = 0;
-QU = 100*10^6; %joules, estimate
+% QU = 100*10^6; %joules, estimate
+QU = 50*10^6; %this should limit the max heat
 
 bounds.lower.states = [VL ; vL; thetaL; mfuelL];
 bounds.upper.states = [VU ; vU; thetaU; mfuelU];
@@ -122,8 +123,8 @@ bounds.upper.events = bounds.lower.events;      % equality event function bounds
 
 
 
-bounds.lower.path = [QL];
-bounds.upper.path = [QU]; 
+% bounds.lower.path = [QL];
+% bounds.upper.path = [QU]; 
 
 
 % PATH BOUNDS IF NECESSARY
@@ -135,7 +136,7 @@ bounds.upper.path = [QU];
 Brac_1.cost 		= 'TwoStage2DCost';
 Brac_1.dynamics	    = 'TwoStage2DDynamics';
 Brac_1.events		= 'TwoStage2DEvents';	
-Brac_1.path         = 'TwoStage2DPath';
+% Brac_1.path         = 'TwoStage2DPath';
 %Path file optional	
 
 Brac_1.bounds       = bounds;
@@ -156,10 +157,12 @@ nodes = algorithm.nodes;
 tfGuess = tfMax; % this needs to be close to make sure solution stays withing Out_Force bounds
 
 
-guess.states(1,:) = [0 ,Vf]; %v
+guess.states(1,:) = [0 ,Vf]; %V
+% guess.states(1,:) = [25000 ,25000]; %V
 
-guess.states(2,:) = [v0, vf]; %H
+guess.states(2,:) = [v0, vf]; %v
 guess.states(3,:) = [atan((Vf-V0)/(Hf-H0)),atan((Vf-V0)/(Hf-H0))]; 
+% guess.states(3,:) = [0,0]; 
 
 guess.states(4,:) = [mfuelU, mfuelU/2];
 
@@ -217,9 +220,6 @@ mfuel = primal.states(4,:);
 
 % Q = primal.states(5,:);
 
-Q = primal.path;
-
-
 % theta = primal.controls(1,:);
 
 % mfuel = primal.states(3,:);
@@ -241,6 +241,7 @@ global Alpha
 global ThirdStagePayloadMass
 
 global heating_rate
+global Q
 
 dt = t(2:end)-t(1:end-1); % Time change between each node pt
 FuelUsed = zeros(1,nodes-1);
@@ -384,11 +385,11 @@ line(t, v./(10^3),'Parent',ax1,'Color','k', 'LineStyle','-.')
 
 line(t, q./(10^4),'Parent',ax1,'Color','k', 'LineStyle',':', 'lineWidth', 2.0)
 
-line(t, heating_rate./(10^4),'Parent',ax1,'Color','k', 'LineStyle',':', 'lineWidth', 2.0)
+line(t, heating_rate./(10^5),'Parent',ax1,'Color','k', 'LineStyle',':', 'lineWidth', 2.0)
 
-line(t, Q./(10^6),'Parent',ax1,'Color','k', 'LineStyle','-', 'lineWidth', 2.0)
+line(t, Q./(10^7),'Parent',ax1,'Color','k', 'LineStyle','-', 'lineWidth', 2.0)
 
-legend(ax1,  'Trajectory Angle (degrees)', 'Mach no', 'Velocity (m/s x 10^3)', 'Dynamic Pressure (Pa x 10^4)', 'heating rate (kw x 10)')
+legend(ax1,  'Trajectory Angle (degrees)', 'Mach no', 'Velocity (m/s x 10^3)', 'Dynamic Pressure (Pa x 10^4)', 'heating rate (kw x 100)', 'Q (Mj x 10)')
 
 
 subplot(2,6,[10,12])

@@ -45,6 +45,7 @@ global ThrustF_spline
 global FuelF_spline
 
 global heating_rate
+global Q
 
 
 V = primal.states(1, :) ; % Scaled vertical position
@@ -62,7 +63,7 @@ time = primal.nodes(1, :); % Time
 
 % theta  = primal.controls(1, :);
 
-[dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha, heating_rate] = VehicleModel(time, theta, V, v, mfuel, nodes,AoA_spline,flapdeflection_spline,Dragq_spline,ThrustF_spline,FuelF_spline);
+[dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha, heating_rate, Q] = VehicleModel(time, theta, V, v, mfuel, nodes,AoA_spline,flapdeflection_spline,Dragq_spline,ThrustF_spline,FuelF_spline);
 
 % THIRD STAGE ======================================================
 % NEED TO WATCH THIS, IT CAN EXTRAPOLATE BUT IT DOESNT DO IT WELL
