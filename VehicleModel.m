@@ -77,11 +77,11 @@ end
 
 % Thrust(1:nodes) =  50000;
 
-% Efficiency = rho./(50000*2./v_array.^2); % linear rho efficiency, scaled to rho at 50000kpa, this is not exactly right
+Efficiency = rho./(50000*2./v_array.^2); % linear rho efficiency, scaled to rho at 50000kpa, this is not exactly right
 % Efficiency = q./50000; % linear q efficiency, this isnt really efficiency in fuel, scales fuel use as well.... more like thrust scaling
 % Efficiency2 = q./50000.*(-(q-50000).^4.*6.25e-19 + 1);% test of quadratic dropoff (0.9 at 70kpa), used only for thrust (fuel will still use linear efficiency)
 % Efficiency = atan(q/5000)/pi*2;
-Efficiency = -((q-50000)./50000).^2 + 1; % this is an assumption of how the engine behaves
+% Efficiency = -((q-50000)./50000).^2 + 1; % this is an assumption of how the engine behaves
 
 % Thrust(1:nodes) =  200000;
 % Thrust = ThrustF_spline(M,Alpha).*Efficiency2;
@@ -95,10 +95,10 @@ Efficiency = -((q-50000)./50000).^2 + 1; % this is an assumption of how the engi
 % Efficiency
 
 % Fueldt = FuelF(M,Alpha);
-% Fueldt = FuelF_spline(M,Alpha).*Efficiency;
-Fueldt = FuelF_spline(M,Alpha);
+Fueldt = FuelF_spline(M,Alpha).*Efficiency;
+% Fueldt = FuelF_spline(M,Alpha);
 
-Isp = ThrustF_spline(M,Alpha)./FuelF_spline(M,Alpha).*Efficiency;
+Isp = ThrustF_spline(M,Alpha)./FuelF_spline(M,Alpha);
 
 % Fueldt(1:nodes) = 4; % arbitrary
 

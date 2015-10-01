@@ -74,7 +74,7 @@ time = primal.nodes(1, :); % Time
 
 global ThirdStagePayloadMass
 % ThirdStagePayloadMass = ThirdStagePayloadSpline(V(end), theta(end));
-ThirdStagePayloadMass = ThirdStagePayloadSpline(V(end), theta(end), v(end));
+ThirdStagePayloadMass = ThirdStagePayloadSpline(V(end), theta(end), );
 
 % ThirdStageFuelCost = 50*(-theta(end)+15)/15 + 50*(-V(end)+37000)/37000;%arbitrary fuel cost for third stage
 

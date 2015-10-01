@@ -12,8 +12,10 @@ Atmosphere = dlmread('atmosphere.txt');
 
 iteration = 1;
 
-for k = 20000:1000:50000
-    for j = -.5:.05:0.8
+for k = 20000:1000:40000
+for j = -.2:.05:0.3
+for u = 2000:100:3500
+[k j u]
         
         Starting_Altitude = k;
         Starting_Theta = j;
@@ -54,7 +56,7 @@ t(1) = 0.;
 
 dt = .5; %time step
 
-v(1) = 3000;
+v(1) = u;
 
 Theta(1) = Starting_Theta;
 
@@ -223,9 +225,10 @@ mpayload = m4 - 347.4; % subtract structural mass from Dawids glasgow paper
 
 % plot(Hor, Alt)
 
-payload_matrix(iteration,1) = Starting_Altitude ;
-payload_matrix(iteration,2) = Starting_Theta ;
-payload_matrix(iteration,3) = mpayload;
+payload_matrix(iteration,1) = k ;
+payload_matrix(iteration,2) = j ;
+payload_matrix(iteration,3) = u ;
+payload_matrix(iteration,4) = mpayload;
 
 
 % thirdstage = fopen('thirdstage.dat','a+');
@@ -239,7 +242,7 @@ payload_matrix(iteration,3) = mpayload;
 iteration = iteration + 1;
  end
 end
-
+end
         
 dlmwrite('thirdstage.dat', payload_matrix,'delimiter','\t')
 

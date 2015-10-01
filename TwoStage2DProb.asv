@@ -31,12 +31,6 @@ FuelF_spline= scatteredInterpolant(enginedata(:,1),enginedata(:,2),enginedata(:,
 
 
 
-ThirdStageData = dlmread('thirdstage.dat');
-global ThirdStagePayloadSpline
-% ThirdStagePayloadSpline = scatteredInterpolant(ThirdStageData(:,1),ThirdStageData(:,2),ThirdStageData(:,3));
-
-ThirdStagePayloadSpline = scatteredInterpolant(ThirdStageData(:,1),ThirdStageData(:,2),ThirdStageData(:,3),ThirdStageData(:,4));
-
 %=============================================== 
 %Second Stage
 V0 = 20000.; % Keep initial values zero
@@ -73,8 +67,8 @@ vU = 3100; % This limit must not cause the drag force to exceed the potential th
 % thetaL = -.2; %  NEED TO WATCH THAT THIS IS NOT OVERCONSTRAINING
 % thetaU = 1.6;
 
-thetaL = -0.1; %  NEED TO WATCH THAT THIS IS NOT OVERCONSTRAINING
-% thetaL = 0.;
+% thetaL = -0.1; %  NEED TO WATCH THAT THIS IS NOT OVERCONSTRAINING
+thetaL = 0.;
 % thetaU = 0.26; %15 degrees
 thetaU = 0.26/2;
 % thetaU = 0.4; 
@@ -85,16 +79,10 @@ mfuelU = 2000; %
 
 QL = 0;
 % QU = 100*10^6; %joules, estimate
-% QU = 50*10^6; %this should limit the max heat, this is arbitrary, based on previous results
-% QU = 30*10^6;
-QU = 10*10^6;
+QU = 50*10^6; %this should limit the max heat
 
-
-% bounds.lower.states = [VL ; vL; thetaL; mfuelL];
-% bounds.upper.states = [VU ; vU; thetaU; mfuelU];
-
-bounds.lower.states = [VL ; vL; thetaL; mfuelL; QL];
-bounds.upper.states = [VU ; vU; thetaU; mfuelU; QU*1.2];
+bounds.lower.states = [VL ; vL; thetaL; mfuelL];
+bounds.upper.states = [VU ; vU; thetaU; mfuelU];
 
 % control bounds
 
@@ -130,7 +118,7 @@ bounds.upper.time	= [t0; tfMax];
 % See events file for definition of events function
 
 % bounds.lower.events = [v0; vf; mfuelU];
-bounds.lower.events = [v0; mfuelU; QL; QU];
+bounds.lower.events = [v0; vf; mfuelU; QL; QU];
 
 bounds.upper.events = bounds.lower.events;      % equality event function bounds
 
@@ -179,7 +167,7 @@ guess.states(3,:) = [atan((Vf-V0)/(Hf-H0)),atan((Vf-V0)/(Hf-H0))];
 
 guess.states(4,:) = [mfuelU, mfuelU/2];
 
-guess.states(5,:) = [0, 50*10^6];
+guess.states(5,:) = [0, 40*10^6];
 
 
 guess.controls(1,:)    = [0,0]; 
@@ -400,7 +388,7 @@ line(t, q./(10^4),'Parent',ax1,'Color','k', 'LineStyle',':', 'lineWidth', 2.0)
 
 % line(t, heating_rate./(10^5),'Parent',ax1,'Color','k', 'LineStyle',':', 'lineWidth', 2.0)
 % 
-line(t, Q./(10^7),'Parent',ax1,'Color','k', 'LineStyle','-', 'lineWidth', 2.0)
+% line(t, Q./(10^7),'Parent',ax1,'Color','k', 'LineStyle','-', 'lineWidth', 2.0)
 
 legend(ax1,  'Trajectory Angle (degrees)', 'Mach no', 'Velocity (m/s x 10^3)', 'Dynamic Pressure (Pa x 10^4)', 'heating rate (kw x 100)', 'Q (Mj x 10)')
 

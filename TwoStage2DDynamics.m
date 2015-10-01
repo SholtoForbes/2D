@@ -22,7 +22,7 @@ vdot = a;
 
 theta = primal.states(3,:) ; 
 
-% Qdot = heating_rate;
+Qdot = heating_rate;
 
 
 mfueldot = -Fueldt ; 
@@ -41,6 +41,6 @@ Vdot = v.*sin(theta);
 
 %======================================================
 
-XDOT = [Vdot;vdot; thetadot; mfueldot];
-% XDOT = [Vdot;vdot; thetadot; mfueldot; Qdot];
+% XDOT = [Vdot;vdot; thetadot; mfueldot];
+XDOT = [Vdot;vdot; thetadot; mfueldot; Qdot];
 %======================================================
