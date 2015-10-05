@@ -12,7 +12,7 @@ Atmosphere = dlmread('atmosphere.txt');
 
 iteration = 1;
 
-for k = 20000:1000:60000
+for k = 20000:1000:40000
 for j = -.2:.05:0.3
 for u = 1800:100:3500
 [k j u]
@@ -138,7 +138,7 @@ while mfuel(i) > 0;
     
     Fd = 1/2*rho(i)*v(i)^2*A;
     
-    v(i+1) = v(i) + Thrust/(m+mfuel(i))*dt - Fd/(m+mfuel(i))*dt - g*sin(Theta(i))/(m+mfuel(i))*dt; % assumes that gravity is offset by body lift when horizontal
+    v(i+1) = v(i) + Thrust/(m+mfuel(i))*dt - Fd/(m+mfuel(i))*dt - g*sin(Theta(i))/(m+mfuel(i))*dt;
     
     i = i+1;
     
@@ -188,7 +188,7 @@ while Theta(i) > 0;
     
     Fd = 1/2*rho(i)*v(i)^2*A;
     
-    v(i+1) = v(i) - Fd/(m)*dt - g*sin(Theta(i))/(m)*dt;
+    v(i+1) = v(i) - Fd/(m)*dt ;
     
     i = i+1;
     

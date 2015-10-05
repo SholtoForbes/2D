@@ -3,8 +3,10 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 clear all;		
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%velocity primal
-% global v
+
+%  or v end const = 1 or Q end const = 2
+global const
+const = 1
 
 % Inputs ============================================
 
@@ -45,7 +47,8 @@ Vf = 40000.; % Final values here are for guess and bounds, need to be fairly acc
 H0 = 0.;
 Hf = 700000.;
 
-v0 = 1864.13; % 50kpa q at 27000m
+% v0 = 1864.13; % 50kpa q at 27000m
+v0 = 2000;
 vf = 2979.83; % 50kpa q at 33000m
 
 %dawids results have around 1 degree or under flight path angle
@@ -67,7 +70,8 @@ VU = 1.0*Vf;
 HL = -1.;
 HU = 1.2*Hf;
 
-vL = 1500;
+% vL = 1500;
+vL = 2000;
 vU = 3100; % This limit must not cause the drag force to exceed the potential thrust of the vehicle, otherwise DIDO will not solve
 
 % thetaL = -.2; %  NEED TO WATCH THAT THIS IS NOT OVERCONSTRAINING
@@ -89,12 +93,15 @@ QL = 0;
 % QU = 30*10^6;
 QU = 10*10^6;
 
+if const == 1
+bounds.lower.states = [VL ; vL; thetaL; mfuelL];
+bounds.upper.states = [VU ; vU; thetaU; mfuelU];
+end
 
-% bounds.lower.states = [VL ; vL; thetaL; mfuelL];
-% bounds.upper.states = [VU ; vU; thetaU; mfuelU];
-
+if const == 2
 bounds.lower.states = [VL ; vL; thetaL; mfuelL; QL];
 bounds.upper.states = [VU ; vU; thetaU; mfuelU; QU*1.2];
+end
 
 % control bounds
 
@@ -128,16 +135,16 @@ bounds.upper.time	= [t0; tfMax];
 % Set up the bounds on the endpoint function
 %-------------------------------------------
 % See events file for definition of events function
+if const == 1
+bounds.lower.events = [v0; vf; mfuelU];
+end
 
-% bounds.lower.events = [v0; vf; mfuelU];
+if const == 2
 bounds.lower.events = [v0; mfuelU; QL; QU];
+end
+
 
 bounds.upper.events = bounds.lower.events;      % equality event function bounds
-
-
-
-% bounds.lower.path = [QL];
-% bounds.upper.path = [QU]; 
 
 
 % PATH BOUNDS IF NECESSARY
@@ -179,8 +186,9 @@ guess.states(3,:) = [atan((Vf-V0)/(Hf-H0)),atan((Vf-V0)/(Hf-H0))];
 
 guess.states(4,:) = [mfuelU, mfuelU/2];
 
+if const == 2
 guess.states(5,:) = [0, 50*10^6];
-
+end
 
 guess.controls(1,:)    = [0,0]; 
 

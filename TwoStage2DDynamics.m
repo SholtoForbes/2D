@@ -12,6 +12,7 @@ function XDOT = Brac1Dynamics(primal)
 global a
 global Fueldt
 global heating_rate
+global const
 
 %changed notation to horizontal and vertical, x and y in plane of vehicle
 V = primal.states(1,:) ; 
@@ -22,8 +23,9 @@ vdot = a;
 
 theta = primal.states(3,:) ; 
 
+if const == 2
 Qdot = heating_rate;
-
+end
 
 mfueldot = -Fueldt ; 
 
@@ -40,7 +42,11 @@ Vdot = v.*sin(theta);
 
 
 %======================================================
+if const == 1
+XDOT = [Vdot;vdot; thetadot; mfueldot];
+end
 
-% XDOT = [Vdot;vdot; thetadot; mfueldot];
+if const == 2
 XDOT = [Vdot;vdot; thetadot; mfueldot; Qdot];
+end
 %======================================================
