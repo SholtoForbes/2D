@@ -6,7 +6,7 @@ clear all;
 
 %  or v end const = 1 or Q end const = 2
 global const
-const = 1
+const = 2
 
 % Inputs ============================================
 
@@ -99,7 +99,7 @@ bounds.upper.states = [VU ; vU; thetaU; mfuelU];
 end
 
 if const == 2
-bounds.lower.states = [VL ; vL; thetaL; mfuelL; QL];
+bounds.lower.states = [VL ; vL; thetaL; mfuelL; -1];
 bounds.upper.states = [VU ; vU; thetaU; mfuelU; QU*1.2];
 end
 

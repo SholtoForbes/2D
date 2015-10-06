@@ -89,10 +89,10 @@ ThirdStagePayloadMass = ThirdStagePayloadSpline(V(end), theta(end), v(end));
 % Endcost = tf;
 
 % It is able to run with no cost at all:
-Endcost = 0;
+% Endcost = 0;
 
 % Endcost = 2000 - mfuel(end); % change 2000 to whatever mU is
-% Endcost =  - mfuel(end) - ThirdStagePayloadMass;
+Endcost =  - mfuel(end) - ThirdStagePayloadMass;
 
 % Endcost = -gaussmf(theta(end),[0.01 0.1]) * 7.7e6;
 
@@ -100,11 +100,11 @@ Endcost = 0;
 
 EndpointCost = Endcost;
 
-% RunningCost = 0;
+RunningCost = 0;
 
 % RunningCost =((q-80000).^2+2000000)/2000000;
 % RunningCost =((q-50000).^2+4000000)/4000000; % if a cost does not work, try loosening it 
-RunningCost =((q-50000).^2+2000000)/2000000; % if a cost does not work, try loosening it 
+% RunningCost =((q-50000).^2+2000000)/2000000; % if a cost does not work, try loosening it 
 % RunningCost =((q-50000).^2+1000000)/1000000; 
 % RunningCost =((q-50000).^2+500000)/500000;
 
