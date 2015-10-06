@@ -2,6 +2,7 @@ function [Drag, Alpha, flapdeflection] = OutForce(theta,M,q,m,AoA_spline,flapdef
 % function [Alpha, D ,pitchingmoment] = OutForce(theta,M,q,m,S, communicator, communicator_trim)
 % Out_force interpolator
 
+
 % find aerodynamics using only gravity of vehicle
 gravity = -m*9.81; 
 

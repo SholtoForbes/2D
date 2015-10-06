@@ -98,7 +98,7 @@ Efficiency = rho./(50000*2./v_array.^2); % linear rho efficiency, scaled to rho 
 Fueldt = FuelF_spline(M,Alpha).*Efficiency;
 % Fueldt = FuelF_spline(M,Alpha);
 
-Isp = ThrustF_spline(M,Alpha)./FuelF_spline(M,Alpha);
+Isp = ThrustF_spline(M,Alpha)./FuelF_spline(M,Alpha); % this isnt quite Isp (doesnt have g) but doesnt matter
 
 % Fueldt(1:nodes) = 4; % arbitrary
 

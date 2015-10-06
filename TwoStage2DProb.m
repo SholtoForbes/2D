@@ -42,7 +42,7 @@ ThirdStagePayloadSpline = scatteredInterpolant(ThirdStageData(:,1),ThirdStageDat
 %=============================================== 
 %Second Stage
 V0 = 20000.; % Keep initial values zero
-Vf = 40000.; % Final values here are for guess and bounds, need to be fairly accurate
+Vf = 60000.; % Final values here are for guess and bounds, need to be fairly accurate
 
 H0 = 0.;
 Hf = 700000.;
@@ -177,10 +177,12 @@ nodes = algorithm.nodes;
 tfGuess = tfMax; % this needs to be close to make sure solution stays withing Out_Force bounds
 
 
-guess.states(1,:) = [0 ,Vf]; %V
+% guess.states(1,:) = [0 ,Vf]; %V
+guess.states(1,:) = [26000 ,33000]; %V
 % guess.states(1,:) = [25000 ,25000]; %V
 
 guess.states(2,:) = [v0, vf]; %v
+
 guess.states(3,:) = [atan((Vf-V0)/(Hf-H0)),atan((Vf-V0)/(Hf-H0))]; 
 % guess.states(3,:) = [0,0]; 
 
@@ -410,7 +412,7 @@ line(t, q./(10^4),'Parent',ax1,'Color','k', 'LineStyle',':', 'lineWidth', 2.0)
 % 
 line(t, Q./(10^7),'Parent',ax1,'Color','k', 'LineStyle','-', 'lineWidth', 2.0)
 
-legend(ax1,  'Trajectory Angle (degrees)', 'Mach no', 'Velocity (m/s x 10^3)', 'Dynamic Pressure (Pa x 10^4)', 'heating rate (kw x 100)', 'Q (Mj x 10)')
+legend(ax1,  'Trajectory Angle (degrees)', 'Mach no', 'Velocity (m/s x 10^3)', 'Dynamic Pressure (Pa x 10^4)',  'Q (Mj x 10)')
 
 
 subplot(2,6,[10,12])
