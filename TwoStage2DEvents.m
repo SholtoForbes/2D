@@ -16,7 +16,8 @@ mfuel0 = primal.states(4,1);
 
 
 if const == 1
-endpointFunction = zeros(3,1);
+% endpointFunction = zeros(3,1);
+endpointFunction = zeros(2,1);
 end
 
 if const == 2
@@ -32,8 +33,10 @@ end
 endpointFunction(1) = v0;
 
 if const == 1
-endpointFunction(2) = vf;
-endpointFunction(3) = mfuel0;
+% endpointFunction(2) = vf;
+% endpointFunction(3) = mfuel0;
+
+endpointFunction(2) = mfuel0;
 end
 
 if const == 2

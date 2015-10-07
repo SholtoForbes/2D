@@ -12,9 +12,14 @@ Atmosphere = dlmread('atmosphere.txt');
 
 iteration = 1;
 
-for k = 20000:1000:60000
-for j = -.2:.05:0.3
-for u = 1800:100:3500
+% for k = 20000:1000:60000
+% for j = -.2:.05:0.3
+% for u = 1800:100:3500
+
+k = 30000;
+j = 0.05;
+u=2000;
+
 [k j u]
         
         Starting_Altitude = k;
@@ -93,7 +98,7 @@ CD(1) = CA*cos(Alpha) + CN*sin(Alpha);
 
 CL(1) = CN*cos(Alpha) - CA*sin(Alpha);
 
-
+Fd(i) = 1/2*rho(1)*v(1)^2*A*CD(1);
 
 while mfuel(i) > 0;
     t(i+1) = t(i) + dt;
@@ -136,9 +141,9 @@ while mfuel(i) > 0;
     
     CL(i+1) = CN(i)*cos(Alpha) - CA(i)*sin(Alpha);
     
-    Fd = 1/2*rho(i)*v(i)^2*A;
+    Fd(i+1) = 1/2*rho(i)*v(i)^2*A*CD(i);
     
-    v(i+1) = v(i) + Thrust/(m+mfuel(i))*dt - Fd/(m+mfuel(i))*dt - g*sin(Theta(i))/(m+mfuel(i))*dt; % assumes that gravity is offset by body lift when horizontal
+    v(i+1) = v(i) + Thrust/(m+mfuel(i))*dt - Fd(i)/(m+mfuel(i))*dt - g*sin(Theta(i))/(m+mfuel(i))*dt; % assumes that gravity is offset by body lift when horizontal
     
     i = i+1;
     
@@ -186,9 +191,9 @@ while Theta(i) > 0;
     
     CL(i+1) = CN(i)*cos(Alpha) - CA(i)*sin(Alpha);
     
-    Fd = 1/2*rho(i)*v(i)^2*A;
+    Fd(i+1) = 1/2*rho(i)*v(i)^2*A*CD(i);
     
-    v(i+1) = v(i) - Fd/(m)*dt - g*sin(Theta(i))/(m)*dt;
+    v(i+1) = v(i) - Fd(i)/(m)*dt - g*sin(Theta(i))/(m)*dt;
     
     i = i+1;
     
@@ -241,11 +246,11 @@ payload_matrix(iteration,4) = mpayload;
 
 
 iteration = iteration + 1;
- end
-end
-end
+%  end
+% end
+% end
         
-dlmwrite('thirdstage.dat', payload_matrix,'delimiter','\t')
+% dlmwrite('thirdstage.dat', payload_matrix,'delimiter','\t')
 
 
 % time = cputime - time1

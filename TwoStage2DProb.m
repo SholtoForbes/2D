@@ -6,7 +6,7 @@ clear all;
 
 %  or v end const = 1 or Q end const = 2
 global const
-const = 2
+const = 1
 
 % Inputs ============================================
 
@@ -85,7 +85,7 @@ thetaU = 0.26/2;
 
 
 mfuelL = -3000;
-mfuelU = 2000; % 
+mfuelU = 1000; % 
 
 QL = 0;
 % QU = 100*10^6; %joules, estimate
@@ -136,7 +136,8 @@ bounds.upper.time	= [t0; tfMax];
 %-------------------------------------------
 % See events file for definition of events function
 if const == 1
-bounds.lower.events = [v0; vf; mfuelU];
+% bounds.lower.events = [v0; vf; mfuelU];
+bounds.lower.events = [v0; mfuelU];
 end
 
 if const == 2
@@ -383,7 +384,7 @@ plot(H(end), V(end), 'o', 'MarkerSize', 10, 'MarkerEdgeColor','k')
 text(H(end),V(end),'Third Stage Transition Point','VerticalAlignment','top', 'FontSize', 10);
 
 dim = [.65 .45 .2 .2];
-annotation('textbox',dim,'string',{['Payload Mass: ', num2str(ThirdStagePayloadMass), ' kg'],['Second Stage Fuel Used: ' num2str(2000 - mfuel(end)) ' kg']},'FitBoxToText','on');  
+annotation('textbox',dim,'string',{['Payload Mass: ', num2str(ThirdStagePayloadMass), ' kg'],['Second Stage Fuel Used: ' num2str(1000 - mfuel(end)) ' kg']},'FitBoxToText','on');  
 
 thirdstageexample_H = [0+H(end) (H(end)-H(end - 1))+H(end) 20*(H(end)-H(end - 1))+H(end) 40*(H(end)-H(end - 1))+H(end) 60*(H(end)-H(end - 1))+H(end) 80*(H(end)-H(end - 1))+H(end)]; %makes a small sample portion of an arbitrary third stage trajectory for example
 thirdstageexample_V = [0+V(end) (V(end)-V(end - 1))+V(end) 20*((V(end)-V(end -1)))+V(end) 40*((V(end)-V(end -1)))+V(end) 60*((V(end)-V(end -1)))+V(end) 80*((V(end)-V(end -1)))+V(end)];
