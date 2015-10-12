@@ -19,8 +19,8 @@ dt_array = time(2:end)-time(1:end-1); % Time change between each node pt
 
 v_array = v;
 
-mstruct = 8755.1 - 994; % mass of everything but fuel from dawids work,added variable struct mass just under q calc
-
+% mstruct = 8755.1 - 994; % mass of everything but fuel from dawids work,added variable struct mass just under q calc
+mstruct = 8755.1 - 994-1000;
 
 m = mfuel + mstruct;
 
@@ -81,7 +81,7 @@ Efficiency = rho./(50000*2./v_array.^2); % linear rho efficiency, scaled to rho 
 % Efficiency = q./50000; % linear q efficiency, this isnt really efficiency in fuel, scales fuel use as well.... more like thrust scaling
 % Efficiency2 = q./50000.*(-(q-50000).^4.*6.25e-19 + 1);% test of quadratic dropoff (0.9 at 70kpa), used only for thrust (fuel will still use linear efficiency)
 % Efficiency = atan(q/5000)/pi*2;
-% Efficiency = -((q-50000)./50000).^2 + 1; % this is an assumption of how the engine behaves
+Efficiency4 = -((q-50000)./50000).^2 + 1; % this is an assumption of how the engine behaves
 
 % Thrust(1:nodes) =  200000;
 % Thrust = ThrustF_spline(M,Alpha).*Efficiency2;
@@ -95,7 +95,7 @@ Efficiency = rho./(50000*2./v_array.^2); % linear rho efficiency, scaled to rho 
 % Efficiency
 
 % Fueldt = FuelF(M,Alpha);
-Fueldt = FuelF_spline(M,Alpha).*Efficiency*3;
+Fueldt = FuelF_spline(M,Alpha).*Efficiency;
 % Fueldt = FuelF_spline(M,Alpha);
 
 Isp = ThrustF_spline(M,Alpha)./FuelF_spline(M,Alpha); % this isnt quite Isp (doesnt have g) but doesnt matter
@@ -103,7 +103,7 @@ Isp = ThrustF_spline(M,Alpha)./FuelF_spline(M,Alpha); % this isnt quite Isp (doe
 % Fueldt(1:nodes) = 4; % arbitrary
 
 Thrust = Isp.*Fueldt;
-
+% Thrust = Isp.*Fueldt.*Efficiency4;
 
 fuelchange_array = -Fueldt(1:end-1).*dt_array ;
 

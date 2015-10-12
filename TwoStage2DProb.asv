@@ -4,8 +4,9 @@
 clear all;		
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%
-
+%  no end const = 1 or Q end const = 2, v end const = 3
+global const
+const = 3
 
 % Inputs ============================================
 
@@ -41,15 +42,15 @@ ThirdStagePayloadSpline = scatteredInterpolant(ThirdStageData(:,1),ThirdStageDat
 %=============================================== 
 %Second Stage
 V0 = 20000.; % Keep initial values zero
-Vf = 40000.; % Final values here are for guess and bounds, need to be fairly accurate
+Vf = 45000.; % Final values here are for guess and bounds, need to be fairly accurate
 
 H0 = 0.;
 Hf = 700000.;
 
 % v0 = 1864.13; % 50kpa q at 27000m
 v0 = 2000;
-vf = 2979.83; % 50kpa q at 33000m
-
+% vf = 2979.83; % 50kpa q at 33000m
+vf = 2900;
 %dawids results have around 1 degree or under flight path angle
 %===================
 % Problem variables:
@@ -84,7 +85,7 @@ thetaU = 0.26/2;
 
 
 mfuelL = -3000;
-mfuelU = 2000; % 
+mfuelU = 1000; % 
 
 QL = 0;
 % QU = 100*10^6; %joules, estimate
@@ -92,12 +93,15 @@ QL = 0;
 % QU = 30*10^6;
 QU = 10*10^6;
 
+if const == 1 || const == 3
+bounds.lower.states = [VL ; vL; thetaL; mfuelL];
+bounds.upper.states = [VU ; vU; thetaU; mfuelU];
+end
 
-% bounds.lower.states = [VL ; vL; thetaL; mfuelL];
-% bounds.upper.states = [VU ; vU; thetaU; mfuelU];
-
-bounds.lower.states = [VL ; vL; thetaL; mfuelL; QL];
+if const == 2
+bounds.lower.states = [VL ; vL; thetaL; mfuelL; -1];
 bounds.upper.states = [VU ; vU; thetaU; mfuelU; QU*1.2];
+end
 
 % control bounds
 
@@ -131,16 +135,20 @@ bounds.upper.time	= [t0; tfMax];
 % Set up the bounds on the endpoint function
 %-------------------------------------------
 % See events file for definition of events function
+if const == 1
 
-% bounds.lower.events = [v0; vf; mfuelU];
+bounds.lower.events = [v0; mfuelU];
+end
+
+if const == 2
 bounds.lower.events = [v0; mfuelU; QL; QU];
+end
+
+if const == 3
+bounds.lower.events = [v0; vf; mfuelU]; 
+end
 
 bounds.upper.events = bounds.lower.events;      % equality event function bounds
-
-
-
-% bounds.lower.path = [QL];
-% bounds.upper.path = [QU]; 
 
 
 % PATH BOUNDS IF NECESSARY
@@ -174,16 +182,19 @@ tfGuess = tfMax; % this needs to be close to make sure solution stays withing Ou
 
 
 guess.states(1,:) = [0 ,Vf]; %V
+% guess.states(1,:) = [26000 ,33000]; %V
 % guess.states(1,:) = [25000 ,25000]; %V
 
 guess.states(2,:) = [v0, vf]; %v
+
 guess.states(3,:) = [atan((Vf-V0)/(Hf-H0)),atan((Vf-V0)/(Hf-H0))]; 
 % guess.states(3,:) = [0,0]; 
 
 guess.states(4,:) = [mfuelU, mfuelU/2];
 
+if const == 2
 guess.states(5,:) = [0, 50*10^6];
-
+end
 
 guess.controls(1,:)    = [0,0]; 
 
@@ -279,22 +290,22 @@ subplot(5,5,[1,5])
 hold on
 plot(H, V)
 plot(H(algorithm.nodes(1)), V(algorithm.nodes(1)), '+', 'MarkerSize', 10, 'MarkerEdgeColor','r')
-title('Trajectory')
+title('Trajectory (m)')
 
 subplot(5,5,6)
 hold on
 plot(t, v)
 plot(t(algorithm.nodes(1)), v(algorithm.nodes(1)), '+', 'MarkerSize', 10, 'MarkerEdgeColor','r')
-title('v')
+title('Velocity (m/s)')
 
 
 subplot(5,5,7)
 plot(t, M)
-title('M')
+title('Mach no')
 
 subplot(5,5,8)
 plot(t, q)
-title('q')
+title('Dynamic Pressure (pa)')
 
 subplot(5,5,9)
 hold on
@@ -317,7 +328,7 @@ title('Drag Force')
 
 subplot(5,5,14)
 hold on
-plot(t(1:end-1), FuelUsed)
+plot(t(1:end-1), mfu)
 bar(t(end), ThirdStagePayloadMass)
 title('Fuel and Payload Mass')
 
@@ -338,6 +349,7 @@ plot(t, Thrust)
 title('Thrust (N)')
 
 Isp = Thrust./Fueldt./9.81;
+IspNet = (Thrust-Fd)./Fueldt./9.81;
 
 subplot(5,5,16)
 plot(t, Isp)
@@ -376,7 +388,7 @@ plot(H(end), V(end), 'o', 'MarkerSize', 10, 'MarkerEdgeColor','k')
 text(H(end),V(end),'Third Stage Transition Point','VerticalAlignment','top', 'FontSize', 10);
 
 dim = [.65 .45 .2 .2];
-annotation('textbox',dim,'string',{['Payload Mass: ', num2str(ThirdStagePayloadMass), ' kg'],['Second Stage Fuel Used: ' num2str(2000 - mfuel(end)) ' kg']},'FitBoxToText','on');  
+annotation('textbox',dim,'string',{['Payload Mass: ', num2str(ThirdStagePayloadMass), ' kg'],['Second Stage Fuel Used: ' num2str(1000 - mfuel(end)) ' kg']},'FitBoxToText','on');  
 
 thirdstageexample_H = [0+H(end) (H(end)-H(end - 1))+H(end) 20*(H(end)-H(end - 1))+H(end) 40*(H(end)-H(end - 1))+H(end) 60*(H(end)-H(end - 1))+H(end) 80*(H(end)-H(end - 1))+H(end)]; %makes a small sample portion of an arbitrary third stage trajectory for example
 thirdstageexample_V = [0+V(end) (V(end)-V(end - 1))+V(end) 20*((V(end)-V(end -1)))+V(end) 40*((V(end)-V(end -1)))+V(end) 60*((V(end)-V(end -1)))+V(end) 80*((V(end)-V(end -1)))+V(end)];
@@ -405,7 +417,7 @@ line(t, q./(10^4),'Parent',ax1,'Color','k', 'LineStyle',':', 'lineWidth', 2.0)
 % 
 line(t, Q./(10^7),'Parent',ax1,'Color','k', 'LineStyle','-', 'lineWidth', 2.0)
 
-legend(ax1,  'Trajectory Angle (degrees)', 'Mach no', 'Velocity (m/s x 10^3)', 'Dynamic Pressure (Pa x 10^4)', 'heating rate (kw x 100)', 'Q (Mj x 10)')
+legend(ax1,  'Trajectory Angle (degrees)', 'Mach no', 'Velocity (m/s x 10^3)', 'Dynamic Pressure (Pa x 10^4)',  'Q (Mj x 10)')
 
 
 subplot(2,6,[10,12])
@@ -420,11 +432,11 @@ line(t, flapdeflection,'Parent',ax2,'Color','k', 'LineStyle','--')
 line(t, mfuel./(10^2),'Parent',ax2,'Color','k', 'LineStyle','-.')
 
 
-line(t, Isp./(10^2),'Parent',ax2,'Color','k', 'LineStyle',':', 'lineWidth', 2.0)
+line(t, IspNet./(10^2),'Parent',ax2,'Color','k', 'LineStyle',':', 'lineWidth', 2.0)
 
 
 
-legend(ax2, 'AoA (degrees)','Flap Deflection (degrees)', 'Fuel Mass (kg x 10^2)', 'Isp (s x 10^2)')
+legend(ax2, 'AoA (degrees)','Flap Deflection (degrees)', 'Fuel Mass (kg x 10^2)', 'Net Isp (s x 10^2)')
 
 
 

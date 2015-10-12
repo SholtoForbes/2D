@@ -47,7 +47,8 @@ c   - all input based on flight conditions has been removed (change to input fil
 c     now thrust5.in
 c   - forebody calcs removed.
 c***********************************************************************************
-c  
+c  Sholto Notes:
+c  This calls different sets of data dependant on the mach no. Bivar interpolations are between set Mach nos
 c
       real M1,M2,mc,isp,M1des,Mrati,Mache
 C Dawid Plotting 15/10/2011

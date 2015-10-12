@@ -4,9 +4,9 @@
 clear all;		
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%  or v end const = 1 or Q end const = 2
+%  no end const = 1 or Q end const = 2, v end const = 3
 global const
-const = 1
+const = 3
 
 % Inputs ============================================
 
@@ -42,15 +42,15 @@ ThirdStagePayloadSpline = scatteredInterpolant(ThirdStageData(:,1),ThirdStageDat
 %=============================================== 
 %Second Stage
 V0 = 20000.; % Keep initial values zero
-Vf = 60000.; % Final values here are for guess and bounds, need to be fairly accurate
+Vf = 45000.; % Final values here are for guess and bounds, need to be fairly accurate
 
 H0 = 0.;
 Hf = 700000.;
 
 % v0 = 1864.13; % 50kpa q at 27000m
 v0 = 2000;
-vf = 2979.83; % 50kpa q at 33000m
-
+% vf = 2979.83; % 50kpa q at 33000m
+vf = 2900;
 %dawids results have around 1 degree or under flight path angle
 %===================
 % Problem variables:
@@ -93,7 +93,7 @@ QL = 0;
 % QU = 30*10^6;
 QU = 10*10^6;
 
-if const == 1
+if const == 1 || const == 3
 bounds.lower.states = [VL ; vL; thetaL; mfuelL];
 bounds.upper.states = [VU ; vU; thetaU; mfuelU];
 end
@@ -136,7 +136,7 @@ bounds.upper.time	= [t0; tfMax];
 %-------------------------------------------
 % See events file for definition of events function
 if const == 1
-% bounds.lower.events = [v0; vf; mfuelU];
+
 bounds.lower.events = [v0; mfuelU];
 end
 
@@ -144,6 +144,9 @@ if const == 2
 bounds.lower.events = [v0; mfuelU; QL; QU];
 end
 
+if const == 3
+bounds.lower.events = [v0; vf; mfuelU]; 
+end
 
 bounds.upper.events = bounds.lower.events;      % equality event function bounds
 
@@ -178,8 +181,8 @@ nodes = algorithm.nodes;
 tfGuess = tfMax; % this needs to be close to make sure solution stays withing Out_Force bounds
 
 
-% guess.states(1,:) = [0 ,Vf]; %V
-guess.states(1,:) = [26000 ,33000]; %V
+guess.states(1,:) = [0 ,Vf]; %V
+% guess.states(1,:) = [26000 ,33000]; %V
 % guess.states(1,:) = [25000 ,25000]; %V
 
 guess.states(2,:) = [v0, vf]; %v
@@ -287,22 +290,22 @@ subplot(5,5,[1,5])
 hold on
 plot(H, V)
 plot(H(algorithm.nodes(1)), V(algorithm.nodes(1)), '+', 'MarkerSize', 10, 'MarkerEdgeColor','r')
-title('Trajectory')
+title('Trajectory (m)')
 
 subplot(5,5,6)
 hold on
 plot(t, v)
 plot(t(algorithm.nodes(1)), v(algorithm.nodes(1)), '+', 'MarkerSize', 10, 'MarkerEdgeColor','r')
-title('v')
+title('Velocity (m/s)')
 
 
 subplot(5,5,7)
 plot(t, M)
-title('M')
+title('Mach no')
 
 subplot(5,5,8)
 plot(t, q)
-title('q')
+title('Dynamic Pressure (pa)')
 
 subplot(5,5,9)
 hold on
@@ -315,19 +318,15 @@ hold on
 plot(t, rad2deg(thetadot))
 title('thetadot (Deg/s)')
 
-subplot(5,5,19)
-plot(t, mfuel)
-title('fuel mass')
-
 subplot(5,5,10)
 plot(t, Fd)
 title('Drag Force')
 
 subplot(5,5,14)
 hold on
-plot(t(1:end-1), FuelUsed)
+plot(t, mfuel)
 bar(t(end), ThirdStagePayloadMass)
-title('Fuel and Payload Mass')
+title('Fuel and Payload Mass (kg)')
 
 subplot(5,5,11);
 plot(t, dual.dynamics);
@@ -346,6 +345,7 @@ plot(t, Thrust)
 title('Thrust (N)')
 
 Isp = Thrust./Fueldt./9.81;
+IspNet = (Thrust-Fd)./Fueldt./9.81;
 
 subplot(5,5,16)
 plot(t, Isp)
@@ -353,11 +353,11 @@ title('Isp')
 
 subplot(5,5,17)
 plot(t, flapdeflection)
-title('flapdeflection')
+title('flapdeflection (deg)')
 
 subplot(5,5,18)
 plot(t, Alpha)
-title('Alpha')
+title('Alpha (deg)')
 
 
 
@@ -428,11 +428,11 @@ line(t, flapdeflection,'Parent',ax2,'Color','k', 'LineStyle','--')
 line(t, mfuel./(10^2),'Parent',ax2,'Color','k', 'LineStyle','-.')
 
 
-line(t, Isp./(10^2),'Parent',ax2,'Color','k', 'LineStyle',':', 'lineWidth', 2.0)
+line(t, IspNet./(10^2),'Parent',ax2,'Color','k', 'LineStyle',':', 'lineWidth', 2.0)
 
 
 
-legend(ax2, 'AoA (degrees)','Flap Deflection (degrees)', 'Fuel Mass (kg x 10^2)', 'Isp (s x 10^2)')
+legend(ax2, 'AoA (degrees)','Flap Deflection (degrees)', 'Fuel Mass (kg x 10^2)', 'Net Isp (s x 10^2)')
 
 
 

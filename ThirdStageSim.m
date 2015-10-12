@@ -12,15 +12,15 @@ Atmosphere = dlmread('atmosphere.txt');
 
 iteration = 1;
 
-% for k = 20000:1000:60000
-% for j = -.2:.05:0.3
-% for u = 1800:100:3500
+for k = 20000:1000:60000
+for j = -.2:.05:0.3
+for u = 1800:100:3500
 
-k = 30000;
-j = 0.05;
-u=2000;
+% k = 32000;
+% j = 0.005;
+% u=2950;
 
-[k j u]
+[k j u];
         
         Starting_Altitude = k;
         Starting_Theta = j;
@@ -49,8 +49,9 @@ HelioSync_Altitude = 566.89 + 6371; %Same as Dawids
 
 Orbital_Velocity_f = sqrt(398600/(566.89 + 6371))*10^3; %Calculating the necessary orbital velocity with altitude in km
 
-maxturnratepos = deg2rad(7)/80; %rad/s these are from dawids glasgow paper, need to figure out where these come from
-maxturnrateneg = -deg2rad(7)/110; %rad/s
+maxturnratepos = deg2rad(8)/80; %rad/s these are from dawids glasgow paper, need to figure out where these come from
+maxturnrateneg = -deg2rad(8)/110; %rad/s
+
 
 %Reference area using diameter from Dawid (3i)
 A = pi*(0.9/2)^2;
@@ -234,21 +235,21 @@ mpayload = m4 - 347.4; % subtract structural mass from Dawids glasgow paper
 payload_matrix(iteration,1) = k ;
 payload_matrix(iteration,2) = j ;
 payload_matrix(iteration,3) = u ;
-payload_matrix(iteration,4) = mpayload;
+payload_matrix(iteration,4) = mpayload
 
 
-% thirdstage = fopen('thirdstage.dat','a+');
-%         
-% thirdstage_results = [num2str(Starting_Altitude,'%10.4e') ' ' num2str(Starting_Theta,'%10.4e') ' ' num2str(mpayload,'%10.4e') '\r\n'] ;
-%         
-% fprintf(thirdstage,thirdstage_results);
+thirdstage = fopen('thirdstage.dat','a+');
+        
+thirdstage_results = [num2str(Starting_Altitude,'%10.4e') ' ' num2str(Starting_Theta,'%10.4e') ' ' num2str(mpayload,'%10.4e') '\r\n'] ;
+        
+fprintf(thirdstage,thirdstage_results);
 
 
 
 iteration = iteration + 1;
-%  end
-% end
-% end
+ end
+end
+end
         
 % dlmwrite('thirdstage.dat', payload_matrix,'delimiter','\t')
 

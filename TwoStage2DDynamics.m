@@ -42,7 +42,7 @@ Vdot = v.*sin(theta);
 
 
 %======================================================
-if const == 1
+if const == 1 || const == 3
 XDOT = [Vdot;vdot; thetadot; mfueldot];
 end
 
