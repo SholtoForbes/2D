@@ -4,9 +4,10 @@
 clear all;		
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%  no end const = 1 or Q end const = 2, v end const = 3
+%  no end const = 1 or Q end const = 2, v end const = 3, q state variable
+%  const == 4
 global const
-const = 3
+const = 1
 
 % Inputs ============================================
 
@@ -42,7 +43,7 @@ ThirdStagePayloadSpline = scatteredInterpolant(ThirdStageData(:,1),ThirdStageDat
 %=============================================== 
 %Second Stage
 V0 = 20000.; % Keep initial values zero
-Vf = 45000.; % Final values here are for guess and bounds, need to be fairly accurate
+Vf = 50000.; % Final values here are for guess and bounds, need to be fairly accurate
 
 H0 = 0.;
 Hf = 700000.;
@@ -103,6 +104,7 @@ bounds.lower.states = [VL ; vL; thetaL; mfuelL; -1];
 bounds.upper.states = [VU ; vU; thetaU; mfuelU; QU*1.2];
 end
 
+
 % control bounds
 
 % thetadotL = -0.05;
@@ -135,7 +137,7 @@ bounds.upper.time	= [t0; tfMax];
 % Set up the bounds on the endpoint function
 %-------------------------------------------
 % See events file for definition of events function
-if const == 1
+if const == 1 
 
 bounds.lower.events = [v0; mfuelU];
 end
@@ -148,9 +150,14 @@ if const == 3
 bounds.lower.events = [v0; vf; mfuelU]; 
 end
 
+
+
 bounds.upper.events = bounds.lower.events;      % equality event function bounds
 
 
+
+% bounds.lower.constraints = 30000;
+% bounds.upper.constraints = 70000;
 % PATH BOUNDS IF NECESSARY
 
 
@@ -160,7 +167,7 @@ bounds.upper.events = bounds.lower.events;      % equality event function bounds
 Brac_1.cost 		= 'TwoStage2DCost';
 Brac_1.dynamics	    = 'TwoStage2DDynamics';
 Brac_1.events		= 'TwoStage2DEvents';	
-% Brac_1.path         = 'TwoStage2DPath';
+% Brac_1.Path         = 'TwoStage2DPath';
 %Path file optional	
 
 Brac_1.bounds       = bounds;
@@ -195,6 +202,7 @@ guess.states(4,:) = [mfuelU, mfuelU/2];
 if const == 2
 guess.states(5,:) = [0, 50*10^6];
 end
+
 
 guess.controls(1,:)    = [0,0]; 
 

@@ -1,10 +1,10 @@
-function HeatIn = Brac1Path(primal)
+function DynamicPressure = Brac1Path(primal)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-global Q
+global q
 
-HeatIn = Q;
+DynamicPressure = q
 
 
 

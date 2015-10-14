@@ -125,7 +125,8 @@ while mfuel(i) > 0;
     else
     c(i+1) = spline( Atmosphere(:,1),  Atmosphere(:,5), 85000); % if altitude is over 85km, set values of atmospheric data not change. i will need to look at this
     
-    rho(i+1) = spline( Atmosphere(:,1),  Atmosphere(:,4), 85000);
+%     rho(i+1) = spline( Atmosphere(:,1),  Atmosphere(:,4), 85000);
+    rho(i+1) = 0;
     
     end
     
@@ -235,14 +236,16 @@ mpayload = m4 - 347.4; % subtract structural mass from Dawids glasgow paper
 payload_matrix(iteration,1) = k ;
 payload_matrix(iteration,2) = j ;
 payload_matrix(iteration,3) = u ;
-payload_matrix(iteration,4) = mpayload
+payload_matrix(iteration,4) = mpayload;
+
+[k j u mpayload]
 
 
-thirdstage = fopen('thirdstage.dat','a+');
-        
-thirdstage_results = [num2str(Starting_Altitude,'%10.4e') ' ' num2str(Starting_Theta,'%10.4e') ' ' num2str(mpayload,'%10.4e') '\r\n'] ;
-        
-fprintf(thirdstage,thirdstage_results);
+% thirdstage = fopen('thirdstage.dat','a+');
+%         
+% thirdstage_results = [num2str(Starting_Altitude,'%10.4e') ' ' num2str(Starting_Theta,'%10.4e') ' ' num2str(mpayload,'%10.4e') '\r\n'] ;
+%         
+% fprintf(thirdstage,thirdstage_results);
 
 
 
@@ -251,7 +254,7 @@ iteration = iteration + 1;
 end
 end
         
-% dlmwrite('thirdstage.dat', payload_matrix,'delimiter','\t')
+dlmwrite('thirdstage.dat', payload_matrix,'delimiter','\t')
 
 
 % time = cputime - time1
