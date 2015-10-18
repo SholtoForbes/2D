@@ -48,8 +48,8 @@ Vf = 50000.; % Final values here are for guess and bounds, need to be fairly acc
 H0 = 0.;
 Hf = 700000.;
 
-% v0 = 1864.13; % 50kpa q at 27000m
-v0 = 2000;
+v0 = 1864.13; % 50kpa q at 27000m
+% v0 = 2000;
 % vf = 2979.83; % 50kpa q at 33000m
 vf = 2900;
 %dawids results have around 1 degree or under flight path angle
@@ -68,11 +68,14 @@ vf = 2900;
 VL = -1.;
 VU = 1.0*Vf; 
 
+% VL = 27000;
+% VU = 40000; 
+
 HL = -1.;
 HU = 1.2*Hf;
 
-% vL = 1500;
-vL = 2000;
+vL = 1500;
+% vL = 2000;
 vU = 3100; % This limit must not cause the drag force to exceed the potential thrust of the vehicle, otherwise DIDO will not solve
 
 % thetaL = -.2; %  NEED TO WATCH THAT THIS IS NOT OVERCONSTRAINING
@@ -175,7 +178,7 @@ Brac_1.bounds       = bounds;
 
 % Node Definition ====================================================
 
-algorithm.nodes		= [90];	
+algorithm.nodes		= [100];	
 
 
 global nodes
@@ -190,7 +193,7 @@ tfGuess = tfMax; % this needs to be close to make sure solution stays withing Ou
 
 guess.states(1,:) = [0 ,Vf]; %V
 % guess.states(1,:) = [26000 ,33000]; %V
-% guess.states(1,:) = [25000 ,25000]; %V
+% guess.states(1,:) = [25000 ,35000]; %V
 
 guess.states(2,:) = [v0, vf]; %v
 

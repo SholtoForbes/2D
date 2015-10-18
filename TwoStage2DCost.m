@@ -123,11 +123,11 @@ for i = 1:length(q)
 if q(i) > 70000
     
 % RunningCost(i) = 1;   
-RunningCost =((q-70000).^2+2000000)/2000000-1;
+RunningCost(i) =1*((q(i)-70000).^2+2000000)/2000000-1;
 
 elseif q(i) < 30000
 % RunningCost(i) = 1;    
-RunningCost =((q-30000).^2+2000000)/2000000-1;
+RunningCost(i) =1*((q(i)-30000).^2+2000000)/2000000-1;
 else
     
 RunningCost(i) = 0;

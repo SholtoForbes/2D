@@ -19,8 +19,8 @@ dt_array = time(2:end)-time(1:end-1); % Time change between each node pt
 
 v_array = v;
 
-% mstruct = 8755.1 - 994; % mass of everything but fuel from dawids work,added variable struct mass just under q calc
-mstruct = 8755.1 - 994-1000;
+mstruct = 8755.1 - 994; % mass of everything but fuel from dawids work,added variable struct mass just under q calc
+% mstruct = 8755.1 - 994-3000;
 
 m = mfuel + mstruct;
 
@@ -73,6 +73,8 @@ end
 
 
 [Fd, Alpha, flapdeflection] = OutForce(theta,M,q,m,AoA_spline,flapdeflection_spline,Dragq_spline);
+Fd = Fd*8/10;
+
 % THRUST AND MOTION ==================================================================
 
 % Thrust(1:nodes) =  50000;
