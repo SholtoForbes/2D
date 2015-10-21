@@ -73,7 +73,7 @@ end
 
 
 [Fd, Alpha, flapdeflection] = OutForce(theta,M,q,m,AoA_spline,flapdeflection_spline,Dragq_spline);
-Fd = Fd*8/10;
+% Fd = Fd*8/10;
 
 % THRUST AND MOTION ==================================================================
 

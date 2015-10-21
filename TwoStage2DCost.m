@@ -91,9 +91,9 @@ ThirdStagePayloadMass = ThirdStagePayloadSpline(V(end), theta(end), v(end));
 % It is able to run with no cost at all:
 % Endcost = 0;
 
-Endcost =  - mfuel(end) - ThirdStagePayloadMass;
+% Endcost =  - mfuel(end) - ThirdStagePayloadMass;
 
-% Endcost =  - ThirdStagePayloadMass;
+Endcost =  - ThirdStagePayloadMass;
 
 
 % Endcost = -gaussmf(theta(end),[0.01 0.1]) * 7.7e6;
@@ -102,7 +102,7 @@ Endcost =  - mfuel(end) - ThirdStagePayloadMass;
 
 EndpointCost = Endcost;
 
-% RunningCost = 0;
+RunningCost = 0;
 
 % RunningCost =((q-80000).^2+2000000)/2000000;
 % RunningCost =((q-50000).^2+4000000)/4000000; % if a cost does not work, try loosening it 
@@ -118,20 +118,20 @@ EndpointCost = Endcost;
 % RunningCost = -mfuel;
 
 
-for i = 1:length(q)
-    
-if q(i) > 70000
-    
-% RunningCost(i) = 1;   
-RunningCost(i) =1*((q(i)-70000).^2+2000000)/2000000-1;
-
-elseif q(i) < 30000
-% RunningCost(i) = 1;    
-RunningCost(i) =1*((q(i)-30000).^2+2000000)/2000000-1;
-else
-    
-RunningCost(i) = 0;
-    
-end
-    
-end
+% for i = 1:length(q)
+%     
+% if q(i) > 70000
+%     
+% % RunningCost(i) = 1;   
+% RunningCost(i) =1*((q(i)-70000).^2+2000000)/2000000-1;
+% 
+% elseif q(i) < 30000
+% % RunningCost(i) = 1;    
+% RunningCost(i) =1*((q(i)-30000).^2+2000000)/2000000-1;
+% else
+%     
+% RunningCost(i) = 0;
+%     
+% end
+%     
+% end

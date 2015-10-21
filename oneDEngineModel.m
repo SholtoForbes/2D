@@ -29,6 +29,7 @@ end
 
 
 hf = 14.31*prop(1); % fuel specific enthalpy of H2
+% hf = 0;
 
 R = 8.3144598 ; % universal gas constant kJ/kg-mol-k
 
@@ -106,8 +107,11 @@ MW = MWN2*fracN2i + MWO2*fracO2 + MWH2O*fracH2O; % molecular weight
 
  % molecular weight gradient
 
+ 
 h = hN2*fracN2i + hO2*fracO2 + hH2O*fracH2O; % total enthalpy
 h0 = h + prop(2)^2/2; % stagnation enthalpy
+
+
 
 
 
@@ -192,6 +196,15 @@ dprop = zeros(4,1);
  dprop(4) = -gamma*prop(3)*M^2*(1/prop(2)*dprop(2) + 0.5*4*cf/Delta + 1/mdot*dmdotdx);
 
 % dTdx
- dprop(1) = dhdT^-1*((hf/mdot*dmdotdx - 2*cf*cp*(Taw - Tw)/(Pr^(2/3)*Delta*A) - h0/mdot*dmdotdx - prop(2)*dprop(2)) - dhdp*dprop(2) - dhdphi*dphidx);
+% hf - h0
+
+ dprop(1) = dhdT^-1*((hf/mdot*dmdotdx - 2*cf*cp*(Taw - Tw)/(Pr^(2/3)*Delta*A) - h0/mdot*dmdotdx - prop(2)*dprop(2)) - dhdp*dprop(2) - dhdphi*dphidx)
+%  dhdT
+%  hf/mdot*dmdotdx
+%  2*cf*cp*(Taw - Tw)/(Pr^(2/3)*Delta*A)
+%  h0/mdot*dmdotdx
+%  prop(2)*dprop(2)
+%  dhdp*dprop(2)
+%  dhdphi*dphidx
 end
 

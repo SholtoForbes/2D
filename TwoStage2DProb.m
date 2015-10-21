@@ -88,7 +88,8 @@ thetaU = 0.26/2;
 % thetaU = 0.4; 
 
 
-mfuelL = -3000;
+% mfuelL = -3000;
+mfuelL = 0;
 mfuelU = 1000; % 
 
 QL = 0;
@@ -98,8 +99,8 @@ QL = 0;
 QU = 10*10^6;
 
 if const == 1 || const == 3
-bounds.lower.states = [VL ; vL; thetaL; mfuelL];
-bounds.upper.states = [VU ; vU; thetaU; mfuelU];
+bounds.lower.states = [VL ; vL; thetaL; mfuelL-1];
+bounds.upper.states = [VU ; vU; thetaU; mfuelU+1];
 end
 
 if const == 2
@@ -142,7 +143,7 @@ bounds.upper.time	= [t0; tfMax];
 % See events file for definition of events function
 if const == 1 
 
-bounds.lower.events = [v0; mfuelU];
+bounds.lower.events = [v0; mfuelU; mfuelL];
 end
 
 if const == 2
@@ -192,7 +193,7 @@ tfGuess = tfMax; % this needs to be close to make sure solution stays withing Ou
 
 
 guess.states(1,:) = [0 ,Vf]; %V
-% guess.states(1,:) = [26000 ,33000]; %V
+% guess.states(1,:) = [27000 ,27000]; %V doesnt work
 % guess.states(1,:) = [25000 ,35000]; %V
 
 guess.states(2,:) = [v0, vf]; %v
@@ -297,79 +298,92 @@ end
 
 figure(1)
 
-subplot(5,5,[1,5])
+subplot(5,5,[1,10])
 hold on
 plot(H, V)
 plot(H(algorithm.nodes(1)), V(algorithm.nodes(1)), '+', 'MarkerSize', 10, 'MarkerEdgeColor','r')
 title('Trajectory (m)')
 
-subplot(5,5,6)
+dim = [.7 .52 .2 .2];
+annotation('textbox',dim,'string',{['Payload Mass: ', num2str(ThirdStagePayloadMass), ' kg'],['Second Stage Fuel Used: ' num2str(1000 - mfuel(end)) ' kg']},'FitBoxToText','on');  
+
+
+subplot(5,5,11)
 hold on
 plot(t, v)
 plot(t(algorithm.nodes(1)), v(algorithm.nodes(1)), '+', 'MarkerSize', 10, 'MarkerEdgeColor','r')
 title('Velocity (m/s)')
 
 
-subplot(5,5,7)
+subplot(5,5,12)
 plot(t, M)
 title('Mach no')
 
-subplot(5,5,8)
+subplot(5,5,13)
 plot(t, q)
 title('Dynamic Pressure (pa)')
 
-subplot(5,5,9)
+subplot(5,5,14)
 hold on
 plot(t, rad2deg(theta))
 plot(t(algorithm.nodes(1)), rad2deg(theta(algorithm.nodes(1))), '+', 'MarkerSize', 10, 'MarkerEdgeColor','r')
-title('theta (Deg)')
+title('Trajectory Angle (Deg)')
 
-subplot(5,5,13)
-hold on
-plot(t, rad2deg(thetadot))
-title('thetadot (Deg/s)')
 
-subplot(5,5,10)
+
+subplot(5,5,15)
 plot(t, Fd)
 title('Drag Force')
 
-subplot(5,5,14)
+subplot(5,5,16)
 hold on
-plot(t, mfuel)
-bar(t(end), ThirdStagePayloadMass)
-title('Fuel and Payload Mass (kg)')
+plot(t, mfuel + 8755.1 - 994)
+title('Vehicle Mass (kg)')
 
-subplot(5,5,11);
-plot(t, dual.dynamics);
-title('costates')
-xlabel('time');
-ylabel('costates');
-legend('\lambda_1', '\lambda_2', '\lambda_3');
 
-subplot(5,5,12)
-Hamiltonian = dual.Hamiltonian(1,:);
-plot(t,Hamiltonian);
-title('Hamiltonian')
 
-subplot(5,5,15)
+subplot(5,5,17)
 plot(t, Thrust)
 title('Thrust (N)')
 
 Isp = Thrust./Fueldt./9.81;
 IspNet = (Thrust-Fd)./Fueldt./9.81;
 
-subplot(5,5,16)
+subplot(5,5,18)
 plot(t, Isp)
 title('Isp')
 
-subplot(5,5,17)
+subplot(5,5,19)
+plot(t, IspNet)
+title('Net Isp')
+
+subplot(5,5,20)
 plot(t, flapdeflection)
-title('flapdeflection (deg)')
+title('Flap Deflection (deg)')
 
-subplot(5,5,18)
+subplot(5,5,21)
 plot(t, Alpha)
-title('Alpha (deg)')
+title('Angle of Attack (deg)')
 
+subplot(5,5,22);
+plot(t, dual.dynamics);
+title('costates')
+xlabel('time');
+ylabel('costates');
+legend('\lambda_1', '\lambda_2', '\lambda_3');
+
+subplot(5,5,23)
+Hamiltonian = dual.Hamiltonian(1,:);
+plot(t,Hamiltonian);
+title('Hamiltonian')
+
+subplot(5,5,24)
+hold on
+plot(t, rad2deg(thetadot))
+title('Trajectory Angle Change Rate (Deg/s)')
+
+dim = [.8 .0 .2 .2];
+annotation('textbox',dim,'string',{['Third Stage Thrust: ', num2str(50), ' kN'],['Third Stage Starting Mass: ' num2str(2850) ' kg'],['Third Stage Isp: ' num2str(350) ' s']},'FitBoxToText','on');  
 
 
 figure(2)
@@ -380,6 +394,8 @@ plot(H, V,'Color','k')
 title('Trajectory')
 xlabel('Horizontal Position (m)')
 ylabel('Vertical Position (m)')
+
+
 
 for i = 1:floor(t(end)/30)
     [j,k] = min(abs(t-30*i));

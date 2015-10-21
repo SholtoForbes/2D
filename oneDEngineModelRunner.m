@@ -1,6 +1,6 @@
 clear all
 options = odeset('MaxStep',0.0001);
-[x,prop] = ode45(@oneDEngineModel,[0 3],[300 2000 .01 1000], options);
+[x,prop] = ode45(@oneDEngineModel,[1 2],[300 2000 .01 1000], options);
 
 
 hold on
