@@ -142,8 +142,8 @@ bounds.upper.time	= [t0; tfMax];
 %-------------------------------------------
 % See events file for definition of events function
 if const == 1 
-
-bounds.lower.events = [v0; mfuelU; mfuelL];
+bounds.lower.events = [v0; mfuelU];
+% bounds.lower.events = [v0; mfuelU; mfuelL];
 end
 
 if const == 2

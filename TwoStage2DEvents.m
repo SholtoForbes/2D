@@ -14,9 +14,13 @@ v0 = primal.states(2,1);
 mfuel0 = primal.states(4,1);
 
 
+mfuelf = primal.states(4,end);
+
+
 
 if const == 1
 % 
+% endpointFunction = zeros(3,1);
 endpointFunction = zeros(2,1);
 end
 
@@ -41,6 +45,7 @@ if const == 1
 % 
 
 endpointFunction(2) = mfuel0;
+% endpointFunction(3) = mfuelf;
 end
 
 if const == 2
