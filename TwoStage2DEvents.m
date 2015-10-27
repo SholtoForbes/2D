@@ -7,6 +7,7 @@ global Stage
 global const
      
 
+
 v0 = primal.states(2,1);  
 
  
@@ -37,6 +38,13 @@ endpointFunction = zeros(3,1);
 vf = primal.states(2,end);
 end
 
+if const == 4
+endpointFunction = zeros(5,1);
+vf = primal.states(2,end);
+V0 = primal.states(1,1); 
+q0 = primal.states(5,1);
+end
+
 %===========================================================
 
 endpointFunction(1) = v0;
@@ -58,4 +66,14 @@ end
 if const == 3
 endpointFunction(2) = vf;
 endpointFunction(3) = mfuel0;
+end
+
+
+if const == 4
+
+    
+endpointFunction(2) = vf;
+endpointFunction(3) = mfuel0;
+endpointFunction(4) = V0;
+endpointFunction(5) = q0;
 end

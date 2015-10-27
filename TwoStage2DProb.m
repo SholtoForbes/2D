@@ -7,7 +7,7 @@ clear all;
 %  no end const = 1 or Q end const = 2, v end const = 3, q state variable
 %  const == 4
 global const
-const = 1
+const = 3
 
 % Inputs ============================================
 
@@ -39,6 +39,16 @@ global ThirdStagePayloadSpline
 % ThirdStagePayloadSpline = scatteredInterpolant(ThirdStageData(:,1),ThirdStageData(:,2),ThirdStageData(:,3));
 
 ThirdStagePayloadSpline = scatteredInterpolant(ThirdStageData(:,1),ThirdStageData(:,2),ThirdStageData(:,3),ThirdStageData(:,4));
+
+Atmosphere = dlmread('atmosphere.txt');
+% rho derivative
+global drho
+j=1;
+for i = 1:100:85000
+drho(j,1) = i;
+drho(j,2) = (spline(Atmosphere(:,1),  Atmosphere(:,4), i) - spline(Atmosphere(:,1),  Atmosphere(:,4), i-1))/1;
+j = j+1;
+end
 
 %=============================================== 
 %Second Stage
@@ -98,7 +108,10 @@ QL = 0;
 % QU = 30*10^6;
 QU = 10*10^6;
 
-if const == 1 || const == 3
+ql = 0;
+qu = 100000;
+
+if const == 1 
 bounds.lower.states = [VL ; vL; thetaL; mfuelL-1];
 bounds.upper.states = [VU ; vU; thetaU; mfuelU+1];
 end
@@ -108,6 +121,15 @@ bounds.lower.states = [VL ; vL; thetaL; mfuelL; -1];
 bounds.upper.states = [VU ; vU; thetaU; mfuelU; QU*1.2];
 end
 
+if const == 3
+bounds.lower.states = [VL ; vL; thetaL; mfuelL-1000];
+bounds.upper.states = [VU ; vU; thetaU; mfuelU+1];
+end
+
+if const == 4
+bounds.lower.states = [VL ; vL; thetaL; mfuelL-1000; ql];
+bounds.upper.states = [VU ; vU; thetaU; mfuelU+1; qu];
+end
 
 % control bounds
 
@@ -154,7 +176,9 @@ if const == 3
 bounds.lower.events = [v0; vf; mfuelU]; 
 end
 
-
+if const == 4
+bounds.lower.events = [v0; vf; mfuelU; 27000; 50000]; 
+end
 
 bounds.upper.events = bounds.lower.events;      % equality event function bounds
 
@@ -205,6 +229,10 @@ guess.states(4,:) = [mfuelU, mfuelU/2];
 
 if const == 2
 guess.states(5,:) = [0, 50*10^6];
+end
+
+if const == 4
+guess.states(5,:) = [50*10^3, 50*10^3];
 end
 
 

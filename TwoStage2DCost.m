@@ -49,6 +49,8 @@ global ThirdStagePayloadSpline
 global heating_rate
 global Q
 
+global rho
+global const
 
 V = primal.states(1, :) ; % Scaled vertical position
 
@@ -65,7 +67,7 @@ time = primal.nodes(1, :); % Time
 
 % theta  = primal.controls(1, :);
 
-[dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha, heating_rate, Q] = VehicleModel(time, theta, V, v, mfuel, nodes,AoA_spline,flapdeflection_spline,Dragq_spline,ThrustF_spline,FuelF_spline);
+[dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha, heating_rate, Q, rho] = VehicleModel(time, theta, V, v, mfuel, nodes,AoA_spline,flapdeflection_spline,Dragq_spline,ThrustF_spline,FuelF_spline);
 
 % THIRD STAGE ======================================================
 % NEED TO WATCH THIS, IT CAN EXTRAPOLATE BUT IT DOESNT DO IT WELL
@@ -89,12 +91,15 @@ ThirdStagePayloadMass = ThirdStagePayloadSpline(V(end), theta(end), v(end));
 % Endcost = tf;
 
 % It is able to run with no cost at all:
-% Endcost = 0;
+if const == 3 || const == 4
+Endcost = 0;
+end
 
+if const == 1
 % Endcost =  - mfuel(end) - ThirdStagePayloadMass;
-Endcost =  - 0.1*mfuel(end) - ThirdStagePayloadMass;
+% Endcost =  - 0.1*mfuel(end) - ThirdStagePayloadMass;
 % Endcost =  - ThirdStagePayloadMass;
-
+end
 
 % Endcost = -gaussmf(theta(end),[0.01 0.1]) * 7.7e6;
 
@@ -102,13 +107,18 @@ Endcost =  - 0.1*mfuel(end) - ThirdStagePayloadMass;
 
 EndpointCost = Endcost;
 
+if const == 1
 % RunningCost = 0;
+end
 
+if const == 3 || const == 4
 % RunningCost =((q-80000).^2+2000000)/2000000;
 % RunningCost =((q-50000).^2+4000000)/4000000; % if a cost does not work, try loosening it 
-% RunningCost =((q-50000).^2+2000000)/2000000; % if a cost does not work, try loosening it 
+RunningCost =((q-50000).^2+2000000)/2000000; % if a cost does not work, try loosening it 
 % RunningCost =((q-50000).^2+1000000)/1000000; 
 % RunningCost =((q-50000).^2+500000)/500000;
+
+end
 
 % RunningCost = -gaussmf(q,[1000 50000]); this doesnt work
 
@@ -118,20 +128,20 @@ EndpointCost = Endcost;
 % RunningCost = -mfuel;
 
 
-for i = 1:length(q)
-    
-if q(i) > 70000
-    
-% RunningCost(i) = 1;   
-RunningCost(i) =1*((q(i)-70000).^2+2000000)/2000000-1;
-
-elseif q(i) < 30000
-% RunningCost(i) = 1;    
-RunningCost(i) =1*((q(i)-30000).^2+2000000)/2000000-1;
-else
-    
-RunningCost(i) = 0;
-    
-end
-    
-end
+% for i = 1:length(q)
+%     
+% if q(i) > 70000
+%     
+% % RunningCost(i) = 1;   
+% RunningCost(i) =1*((q(i)-50000).^2+100000)/100000-1;
+% 
+% elseif q(i) < 30000
+% % RunningCost(i) = 1;    
+% RunningCost(i) =1*((q(i)-30000).^2+100000)/100000-1;
+% else
+%     
+% RunningCost(i) = 0;
+%     
+% end
+%     
+% end
