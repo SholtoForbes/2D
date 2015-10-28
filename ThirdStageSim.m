@@ -64,9 +64,12 @@ t(1) = 0.;
 
 dt = .5; %time step
 
-v(1) = u;
+
 
 Theta(1) = Starting_Theta;
+
+vx(1) = u*cos(Theta(1));
+vy(1) = u*sin(Theta(1));
 
 Alt(1) = Starting_Altitude;
 
@@ -87,7 +90,7 @@ c(1) = spline( Atmosphere(:,1),  Atmosphere(:,5), Alt(1)); % Calculate speed of 
 
 rho(1) = spline( Atmosphere(:,1),  Atmosphere(:,4), Alt(1)); % Calculate density using atmospheric data
 
-M(1) = v(1)/c(1);
+M(1) = sqrt(vx(1)^2+vy(1)^2)/c(1);
 
 
 Alpha = 0; %will need to change this to trim vehicle
@@ -100,7 +103,7 @@ CD(1) = CA*cos(Alpha) + CN*sin(Alpha);
 
 CL(1) = CN*cos(Alpha) - CA*sin(Alpha);
 
-Fd(i) = 1/2*rho(1)*v(1)^2*A*CD(1);
+Fd(i) = 1/2*rho(1)*sqrt(vx(1)^2+vy(1)^2)^2*A*CD(1);
 
 while mfuel(i) > 0;
     t(i+1) = t(i) + dt;
@@ -117,9 +120,9 @@ while mfuel(i) > 0;
 %     
 %     end
 %     
-    Alt(i+1) = Alt(i) + v(i)*sin(Theta(i))*dt;
+    Alt(i+1) = Alt(i) + vy(i)*sin(Theta(i))*dt;
     
-    Hor(i+1) = Hor(i) + v(i)*cos(Theta(i))*dt; 
+    Hor(i+1) = Hor(i) + vx(i)*cos(Theta(i))*dt; 
     
     Theta(i+1) = Theta(i) + maxturnratepos*dt;
 
@@ -139,7 +142,7 @@ while mfuel(i) > 0;
     
     end
     
-    M(i+1) = v(i)/c(i);
+    M(i+1) = sqrt(vx(i)^2+vy(i)^2)/c(i);
     
     %calculate axial and normal coefficient, and then lift and drag
     %coefficients. from Dawid (3i)
@@ -152,9 +155,12 @@ while mfuel(i) > 0;
     
     CL(i+1) = CN(i)*cos(Alpha) - CA(i)*sin(Alpha);
     
-    Fd(i+1) = 1/2*rho(i)*v(i)^2*A*CD(i);
+    Fd(i+1) = 1/2*rho(i)*sqrt(vx(i)^2+vy(i)^2)^2*A*CD(i);
     
-    v(i+1) = v(i) + Thrust/(m+mfuel(i))*dt - Fd(i)/(m+mfuel(i))*dt - g*sin(Theta(i))/(m+mfuel(i))*dt; % assumes that gravity is offset by body lift when horizontal
+%     v(i+1) = v(i) + Thrust/(m+mfuel(i))*dt - Fd(i)/(m+mfuel(i))*dt - g*sin(Theta(i))/(m+mfuel(i))*dt; % assumes that gravity is offset by body lift when horizontal
+%     
+    vx(i+1) = vx(i) - Fd(i)/(m+mfuel(i))*dt*cos(Theta(i)) + Thrust/(m+mfuel(i))*dt*cos(Theta(i));
+    vy(i+1) = vy(i) - Fd(i)/(m+mfuel(i))*dt*sin(Theta(i)) - g/(m+mfuel(i))*dt + Thrust/(m+mfuel(i))*dt*sin(Theta(i));
     
     i = i+1;
     
@@ -178,9 +184,9 @@ while Theta(i) > 0;
 %         m = minit;
 %     end
     
-    Alt(i+1) = Alt(i) + v(i)*sin(Theta(i))*dt;
+    Alt(i+1) = Alt(i) + vy(i)*sin(Theta(i))*dt;
     
-    Hor(i+1) = Hor(i) + v(i)*cos(Theta(i))*dt; 
+    Hor(i+1) = Hor(i) + vx(i)*cos(Theta(i))*dt; 
     
     Theta(i+1) = Theta(i) + maxturnrateneg*dt;
 
@@ -196,7 +202,7 @@ while Theta(i) > 0;
     
     end
     
-    M(i+1) = v(i)/c(i);
+    M(i+1) = sqrt(vx(i)^2+vy(i)^2)/c(i);
     
     %calculate axial and normal coefficient, and then lift and drag
     %coefficients. from Dawid (3i)
@@ -209,10 +215,10 @@ while Theta(i) > 0;
     
     CL(i+1) = CN(i)*cos(Alpha) - CA(i)*sin(Alpha);
     
-    Fd(i+1) = 1/2*rho(i)*v(i)^2*A*CD(i);
+    Fd(i+1) = 1/2*rho(i)*sqrt(vx(i)^2+vy(i)^2)^2*A*CD(i);
     
-    v(i+1) = v(i) - Fd(i)/(m)*dt - g*sin(Theta(i))/(m)*dt;
-    
+    vx(i+1) = vx(i) - Fd(i)/(m)*dt*cos(Theta(i)) ;
+    vy(i+1) = vy(i) - Fd(i)/(m)*dt*sin(Theta(i)) - g/(m)*dt;
     i = i+1;
     
 end
@@ -223,7 +229,9 @@ end
 mu = 398600;
 Rearth = 6371; %radius of earth
 
-v12 = sqrt(mu / (Alt(end)/10^3 + Rearth))*10^3 - v(end);
+vend = sqrt(vx(end)^2+vy(end)^2);
+
+v12 = sqrt(mu / (Alt(end)/10^3 + Rearth))*10^3 - vend;
 
 v23 = sqrt(mu / (Alt(end)/10^3+ Rearth))*(sqrt(2*HelioSync_Altitude/((Alt(end)/10^3 + Rearth)+HelioSync_Altitude))-1)*10^3;
 
