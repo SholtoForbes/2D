@@ -54,6 +54,7 @@ end
 %Second Stage
 V0 = 20000.; % Keep initial values zero
 Vf = 50000.; % Final values here are for guess and bounds, need to be fairly accurate
+% Vf = 40000.;
 
 H0 = 0.;
 Hf = 700000.;
@@ -68,7 +69,7 @@ vf = 2900;
 % control factor: omega
 % variable trajectory
 %===================
-
+ 
 %========================================================
 
 %---------------------------------------
@@ -86,7 +87,7 @@ HU = 1.2*Hf;
 
 vL = 1500;
 % vL = 2000;
-vU = 3100; % This limit must not cause the drag force to exceed the potential thrust of the vehicle, otherwise DIDO will not solve
+vU = 3100; % This limit must not cause the drag force to exceed the potential thrust of the vehicle by a large amount, otherwise DIDO will not solve
 
 % thetaL = -.2; %  NEED TO WATCH THAT THIS IS NOT OVERCONSTRAINING
 % thetaU = 1.6;
@@ -122,13 +123,13 @@ bounds.upper.states = [VU ; vU; thetaU; mfuelU; QU*1.2];
 end
 
 if const == 3
-bounds.lower.states = [VL ; vL; thetaL; mfuelL-1000];
-bounds.upper.states = [VU ; vU; thetaU; mfuelU+1];
+bounds.lower.states = [VL ; vL; thetaL; mfuelL-3000];
+bounds.upper.states = [VU ; vU; thetaU; mfuelU];
 end
 
 if const == 4
-bounds.lower.states = [VL ; vL; thetaL; mfuelL-1000; ql];
-bounds.upper.states = [VU ; vU; thetaU; mfuelU+1; qu];
+bounds.lower.states = [VL ; vL; thetaL; mfuelL-3000; ql];
+bounds.upper.states = [VU ; vU; thetaU; mfuelU; qu];
 end
 
 % control bounds
