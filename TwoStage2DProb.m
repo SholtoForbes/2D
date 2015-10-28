@@ -7,7 +7,7 @@ clear all;
 %  no end const = 1 or Q end const = 2, v end const = 3, q state variable
 %  const == 4
 global const
-const = 3
+const = 1
 
 % Inputs ============================================
 
@@ -95,7 +95,10 @@ vU = 3100; % This limit must not cause the drag force to exceed the potential th
 thetaL = -0.1; %  NEED TO WATCH THAT THIS IS NOT OVERCONSTRAINING
 % thetaL = 0.;
 % thetaU = 0.26; %15 degrees
-thetaU = 0.26/2;
+
+% thetaU = 0.26/2;
+thetaU = 0.05;
+
 % thetaU = 0.4; 
 
 
