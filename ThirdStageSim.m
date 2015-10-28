@@ -12,9 +12,10 @@ Atmosphere = dlmread('atmosphere.txt');
 
 iteration = 1;
 
-for k = 20000:1000:60000
-for j = -.2:.05:0.3
-for u = 1800:100:3500
+% for minit = 1500:100:3000
+for k = 20000:5000:60000
+for j = -.05:.01:0.1
+for u = 1800:200:3400
 
 % k = 32000;
 % j = 0.005;
@@ -104,10 +105,18 @@ Fd(i) = 1/2*rho(1)*v(1)^2*A*CD(1);
 while mfuel(i) > 0;
     t(i+1) = t(i) + dt;
     
-    if t > 160
+    if Alt(i) > 70000
         m = 1750 - 302.8; %release of heat shield, from dawids glasgow paper
     end
-    
+
+%     if Alt(i) > 70000
+% %         m = 1750 - 302.8; %release of heat shield, from dawids glasgow paper
+%     m = minit - 302.8;
+%     else
+%         m = minit;
+%     
+%     end
+%     
     Alt(i+1) = Alt(i) + v(i)*sin(Theta(i))*dt;
     
     Hor(i+1) = Hor(i) + v(i)*cos(Theta(i))*dt; 
@@ -158,9 +167,16 @@ while Theta(i) > 0;
 
     t(i+1) = t(i) + dt;
     
-    if t > 160
+    if Alt(i) > 70000
         m = 1750 - 302.8; %release of heat shield, from dawids glasgow paper
     end
+
+%     if Alt(i) > 70000
+% %         m = 1750 - 302.8; %release of heat shield, from dawids glasgow paper
+%     m = m - 302.8;
+%     else
+%         m = minit;
+%     end
     
     Alt(i+1) = Alt(i) + v(i)*sin(Theta(i))*dt;
     
@@ -238,6 +254,12 @@ payload_matrix(iteration,2) = j ;
 payload_matrix(iteration,3) = u ;
 payload_matrix(iteration,4) = mpayload;
 
+% payload_matrix(iteration,1) = minit ;
+% payload_matrix(iteration,2) = k ;
+% payload_matrix(iteration,3) = j ;
+% payload_matrix(iteration,4) = u ;
+% payload_matrix(iteration,5) = mpayload;
+
 [k j u mpayload]
 
 
@@ -253,8 +275,8 @@ iteration = iteration + 1;
  end
 end
 end
-        
+% end     
 dlmwrite('thirdstage.dat', payload_matrix,'delimiter','\t')
-
+% dlmwrite('thirdstagewithmass.dat', payload_matrix,'delimiter','\t')
 
 % time = cputime - time1
