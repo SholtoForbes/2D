@@ -13,13 +13,15 @@ Atmosphere = dlmread('atmosphere.txt');
 iteration = 1;
 
 % for minit = 1500:100:3000
-for k = 20000:5000:60000
-for j = -.05:.01:0.1
-for u = 1800:200:3400
 
-% k = 32000;
-% j = 0.005;
-% u=2950;
+
+% for k = 20000:5000:60000
+% for j = -.05:.01:0.1
+% for u = 1800:200:3400
+
+k = 32000;
+j = 0.17;
+u = 2800;
 
 [k j u];
         
@@ -35,13 +37,16 @@ for u = 1800:200:3400
         M = [];
         CN = [];
         CA = [];
-        v = [];
+        vx = [];
+        vy = [];
         rho = [];
         t= [];
-        theta = [];
+        Theta = [];
         Alt = [];
         mfuel = [];
         Hor = [];
+        Fd = [];
+        Fl = [];
 
 
         
@@ -55,7 +60,7 @@ maxturnrateneg = -deg2rad(8)/110; %rad/s
 
 
 %Reference area using diameter from Dawid (3i)
-A = pi*(0.9/2)^2;
+A = pi*(0.9/2)^2; % this is the same for lift and drag
 
 g = 9.81; %standard gravity
 
@@ -63,7 +68,6 @@ g = 9.81; %standard gravity
 t(1) = 0.;
 
 dt = .5; %time step
-
 
 
 Theta(1) = Starting_Theta;
@@ -78,7 +82,9 @@ Hor(1) = 0.;
 i=1;
 
 %
-Thrust = 50000;
+Thrust = 50510;
+
+
 m = 1750; %vehicle mass, less 1100kg fuel (to match Dawids glasgow paper)
 
 
@@ -93,7 +99,8 @@ rho(1) = spline( Atmosphere(:,1),  Atmosphere(:,4), Alt(1)); % Calculate density
 M(1) = sqrt(vx(1)^2+vy(1)^2)/c(1);
 
 
-Alpha = 0; %will need to change this to trim vehicle
+Alpha = deg2rad(10); % angle of attack, from dawids 6d
+
     
 CA(1) = 0.346 + 0.183*M(1) - 0.058*M(1)^2 + 0.00382*M(1)^3;
 
@@ -103,7 +110,9 @@ CD(1) = CA*cos(Alpha) + CN*sin(Alpha);
 
 CL(1) = CN*cos(Alpha) - CA*sin(Alpha);
 
-Fd(i) = 1/2*rho(1)*sqrt(vx(1)^2+vy(1)^2)^2*A*CD(1);
+Fd(1) = 1/2*rho(1)*(vx(1)^2+vy(1)^2)*A*CD(1);
+
+Fl(1) = 1/2*rho(1)*(vx(1)^2+vy(1)^2)*A*CL(1);
 
 while mfuel(i) > 0;
     t(i+1) = t(i) + dt;
@@ -120,9 +129,9 @@ while mfuel(i) > 0;
 %     
 %     end
 %     
-    Alt(i+1) = Alt(i) + vy(i)*sin(Theta(i))*dt;
+    Alt(i+1) = Alt(i) + vy(i)*dt;
     
-    Hor(i+1) = Hor(i) + vx(i)*cos(Theta(i))*dt; 
+    Hor(i+1) = Hor(i) + vx(i)*dt; 
     
     Theta(i+1) = Theta(i) + maxturnratepos*dt;
 
@@ -155,12 +164,13 @@ while mfuel(i) > 0;
     
     CL(i+1) = CN(i)*cos(Alpha) - CA(i)*sin(Alpha);
     
-    Fd(i+1) = 1/2*rho(i)*sqrt(vx(i)^2+vy(i)^2)^2*A*CD(i);
+    Fd(i+1) = 1/2*rho(i)*(vx(i)^2+vy(i)^2)*A*CD(i);
+    Fl(i+1) = 1/2*rho(i)*(vx(i)^2+vy(i)^2)*A*CL(i);
     
 %     v(i+1) = v(i) + Thrust/(m+mfuel(i))*dt - Fd(i)/(m+mfuel(i))*dt - g*sin(Theta(i))/(m+mfuel(i))*dt; % assumes that gravity is offset by body lift when horizontal
-%     
-    vx(i+1) = vx(i) - Fd(i)/(m+mfuel(i))*dt*cos(Theta(i)) + Thrust/(m+mfuel(i))*dt*cos(Theta(i));
-    vy(i+1) = vy(i) - Fd(i)/(m+mfuel(i))*dt*sin(Theta(i)) - g/(m+mfuel(i))*dt + Thrust/(m+mfuel(i))*dt*sin(Theta(i));
+
+    vx(i+1) = sqrt(vx(i)^2+vy(i)^2)*cos(Theta(i)) - Fd(i)/(m+mfuel(i))*dt*cos(Theta(i)) - Fl(i)/(m+mfuel(i))*dt*sin(Theta(i)) + Thrust/(m+mfuel(i))*dt*cos(Theta(i)+Alpha);
+    vy(i+1) = sqrt(vx(i)^2+vy(i)^2)*sin(Theta(i)) - Fd(i)/(m+mfuel(i))*dt*sin(Theta(i)) + Fl(i)/(m+mfuel(i))*dt*cos(Theta(i)) - g*dt + Thrust/(m+mfuel(i))*dt*sin(Theta(i)+Alpha);
     
     i = i+1;
     
@@ -169,7 +179,8 @@ end
 
 %after fuel burn out, turn to zero trajectory angle
 
-while Theta(i) > 0; 
+% while Theta(i) > 0; 
+while vy(i) > 0;
 
     t(i+1) = t(i) + dt;
     
@@ -184,9 +195,9 @@ while Theta(i) > 0;
 %         m = minit;
 %     end
     
-    Alt(i+1) = Alt(i) + vy(i)*sin(Theta(i))*dt;
+    Alt(i+1) = Alt(i) + vy(i)*dt;
     
-    Hor(i+1) = Hor(i) + vx(i)*cos(Theta(i))*dt; 
+    Hor(i+1) = Hor(i) + vx(i)*dt; 
     
     Theta(i+1) = Theta(i) + maxturnrateneg*dt;
 
@@ -198,7 +209,7 @@ while Theta(i) > 0;
     else
     c(i+1) = spline( Atmosphere(:,1),  Atmosphere(:,5), 85000); % if altitude is over 85km, set values of atmospheric data not change. i will need to look at this
     
-    rho(i+1) = spline( Atmosphere(:,1),  Atmosphere(:,4), 85000);
+    rho(i+1) = 0;
     
     end
     
@@ -215,10 +226,12 @@ while Theta(i) > 0;
     
     CL(i+1) = CN(i)*cos(Alpha) - CA(i)*sin(Alpha);
     
-    Fd(i+1) = 1/2*rho(i)*sqrt(vx(i)^2+vy(i)^2)^2*A*CD(i);
+    Fd(i+1) = 1/2*rho(i)*(vx(i)^2+vy(i)^2)*A*CD(i);
     
-    vx(i+1) = vx(i) - Fd(i)/(m)*dt*cos(Theta(i)) ;
-    vy(i+1) = vy(i) - Fd(i)/(m)*dt*sin(Theta(i)) - g/(m)*dt;
+    Fl(i+1) = 1/2*rho(i)*(vx(i)^2+vy(i)^2)*A*CL(i);
+    
+    vx(i+1) = vx(i) - Fd(i)/(m)*dt*cos(Theta(i)) - Fl(i)/(m)*dt*sin(Theta(i));
+    vy(i+1) = vy(i) - Fd(i)/(m)*dt*sin(Theta(i)) + Fl(i)/(m)*dt*cos(Theta(i)) - g*dt;
     i = i+1;
     
 end
@@ -229,7 +242,8 @@ end
 mu = 398600;
 Rearth = 6371; %radius of earth
 
-vend = sqrt(vx(end)^2+vy(end)^2);
+% vend = sqrt(vx(end)^2+vy(end)^2);
+vend = vx(end)
 
 v12 = sqrt(mu / (Alt(end)/10^3 + Rearth))*10^3 - vend;
 
@@ -276,15 +290,19 @@ payload_matrix(iteration,4) = mpayload;
 % thirdstage_results = [num2str(Starting_Altitude,'%10.4e') ' ' num2str(Starting_Theta,'%10.4e') ' ' num2str(mpayload,'%10.4e') '\r\n'] ;
 %         
 % fprintf(thirdstage,thirdstage_results);
+figure(1)
+plot(Hor, Alt)
+figure(2)
+plot(t,sqrt(vx.^2 + vy.^2))
+
+% iteration = iteration + 1;
+%  end
+% end
+% end
+% % end     
+% dlmwrite('thirdstage.dat', payload_matrix,'delimiter','\t')
 
 
-
-iteration = iteration + 1;
- end
-end
-end
-% end     
-dlmwrite('thirdstage.dat', payload_matrix,'delimiter','\t')
 % dlmwrite('thirdstagewithmass.dat', payload_matrix,'delimiter','\t')
 
 % time = cputime - time1
