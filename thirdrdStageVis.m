@@ -10,11 +10,10 @@ ThirdStageData = dlmread('thirdstage.dat');
 % colormap(map)
 
 colormap jet
-scatter3(ThirdStageData(:,2),ThirdStageData(:,3),ThirdStageData(:,1),30,ThirdStageData(:,4))
-
-
-
-
+scatter3(ThirdStageData(:,2),ThirdStageData(:,3),ThirdStageData(:,1),30,ThirdStageData(:,5), 'filled')
+xlabel('Trajectory Angle (deg)')
+ylabel('Velocity (m/s)')
+zlabel('Altitude (m)')
 
 % j=1;
 % k=0;

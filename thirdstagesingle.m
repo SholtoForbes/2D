@@ -1,9 +1,9 @@
 function payload = thirdstagesingle(AoA, Alt, theta, v)
 
-% AoA = 7;
-% Alt = 20000;
-% theta = -3; 
-% V = 2000;
+% AoA = 10;
+% Alt = 35000;
+% theta = 9; 
+% v = 3000;
 
 delete cond.dat
 delete TRAJ3.ASC

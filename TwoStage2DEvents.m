@@ -35,6 +35,7 @@ end
 
 if const == 3
 endpointFunction = zeros(3,1);
+% endpointFunction = zeros(4,1);
 vf = primal.states(2,end);
 end
 
@@ -64,8 +65,13 @@ end
 
 
 if const == 3
-endpointFunction(2) = vf;
-endpointFunction(3) = mfuel0;
+% endpointFunction(2) = vf;
+% endpointFunction(3) = mfuel0;
+% % endpointFunction(4) = mfuelf;
+
+
+endpointFunction(2) = mfuel0;
+endpointFunction(3) = mfuelf;
 end
 
 

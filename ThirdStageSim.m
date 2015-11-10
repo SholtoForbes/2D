@@ -1,5 +1,5 @@
 clear all
-
+% my attempt at third stage simulation... not very good
 time1 = cputime;
 
 Atmosphere = dlmread('atmosphere.txt');
