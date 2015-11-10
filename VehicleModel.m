@@ -82,8 +82,8 @@ end
 if const == 1
 Efficiency = zeros(1,length(q));
 for i = 1:length(q)
-    if q(i) < 55000
-    Efficiency(i) = rho(i)/(55000*2/v_array(i)^2);
+    if q(i) < 50000
+    Efficiency(i) = rho(i)/(50000*2/v_array(i)^2);
 
     else
     Efficiency(i) = 1;

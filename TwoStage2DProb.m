@@ -93,13 +93,18 @@ vU = 3100; % This limit must not cause the drag force to exceed the potential th
 % thetaL = -.2; %  NEED TO WATCH THAT THIS IS NOT OVERCONSTRAINING
 % thetaU = 1.6;
 
+if const == 1
+thetaL = 0.0;
+else
 thetaL = -0.1; %  NEED TO WATCH THAT THIS IS NOT OVERCONSTRAINING
+end
 % thetaL = 0.;
 % thetaU = 0.26; %15 degrees
 
 % thetaU = 0.26/2;
 if const == 1
-thetaU = 0.05;
+% thetaU = 0.17;
+thetaU = 0.1;
 else
 thetaU = 0.1;  
 end
@@ -120,8 +125,8 @@ ql = 0;
 qu = 100000;
 
 if const == 1 
-% bounds.lower.states = [VL ; vL; thetaL; mfuelL-1];
-bounds.lower.states = [VL ; vL; thetaL; mfuelL];
+bounds.lower.states = [VL ; vL; thetaL; mfuelL-1];
+% bounds.lower.states = [VL ; vL; thetaL; mfuelL];
 bounds.upper.states = [VU ; vU; thetaU; mfuelU+1];
 end
 
@@ -215,7 +220,7 @@ Brac_1.bounds       = bounds;
 
 % Node Definition ====================================================
 
-algorithm.nodes		= [100];	
+algorithm.nodes		= [150];	
 
 
 global nodes
@@ -237,7 +242,8 @@ guess.states(2,:) = [v0, vf]; %v
 guess.states(3,:) = [atan((Vf-V0)/(Hf-H0)),atan((Vf-V0)/(Hf-H0))]; 
 % guess.states(3,:) = [0,0]; 
 
-guess.states(4,:) = [mfuelU, mfuelU/2];
+% guess.states(4,:) = [mfuelU, mfuelU/2];
+guess.states(4,:) = [mfuelU, 0];
 
 if const == 2
 guess.states(5,:) = [0, 50*10^6];
@@ -528,7 +534,7 @@ title('Hamiltonian')
 ThirdStageAoASpline = scatteredInterpolant(ThirdStageData(:,1),ThirdStageData(:,2),ThirdStageData(:,3),ThirdStageData(:,4));
 AoA = ThirdStageAoASpline(V(end), rad2deg(theta(end)), v(end));
 figure(4)
-ThirdStageVisTrajectory(AoA, V(end), rad2deg(theta(end)), v(end));
+evalc('ThirdStageVisTrajectory(AoA, V(end), rad2deg(theta(end)), v(end));');
 
 
 % hold on

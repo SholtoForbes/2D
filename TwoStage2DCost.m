@@ -98,6 +98,7 @@ end
 if const == 1
 % Endcost =  - mfuel(end) - ThirdStagePayloadMass;
 Endcost =  - 0.01*mfuel(end) - ThirdStagePayloadMass;
+% Endcost =  - 0.05*mfuel(end) - ThirdStagePayloadMass;
 % Endcost =  - ThirdStagePayloadMass;
 end
 
