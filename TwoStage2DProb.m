@@ -4,7 +4,7 @@
 clear all;		
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%  no end const = 1 or Q end const = 2, v end const = 3, q state variable
+%  no end const = 1 or Q end const = 2, mass end const = 3, q state variable
 %  const == 4
 global const
 const = 1
@@ -526,9 +526,9 @@ title('Hamiltonian')
 %visualise third stage trajectory
 %calculate angle of attack by creating spline and interpolating
 ThirdStageAoASpline = scatteredInterpolant(ThirdStageData(:,1),ThirdStageData(:,2),ThirdStageData(:,3),ThirdStageData(:,4));
-AoA = ThirdStageAoASpline(V(end), theta(end), v(end));
-figure(3)
-ThirdStageVisTrajectory(AoA, V(end), theta(end), v(end));
+AoA = ThirdStageAoASpline(V(end), rad2deg(theta(end)), v(end));
+figure(4)
+ThirdStageVisTrajectory(AoA, V(end), rad2deg(theta(end)), v(end));
 
 
 % hold on

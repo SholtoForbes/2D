@@ -10,11 +10,15 @@ Traj = txt2mat('TRAJ3.ASC');
 hold on
 
 subplot(2,5,[1,5])
+
+
 plot(Traj(2:end-1,1),Traj(2:end-1,11), 'LineStyle', '-','Color','k', 'lineWidth', 2.0) % trajectory
+ylabel('Altitude (m)')
+xlabel('time (s)')
 
 subplot(2,5,[6,10])
-xlabel('time (s)')
 ax2 = gca;
+xlabel('time (s)')
 line(Traj(2:end-1,1),Traj(2:end-1,8), 'LineStyle', '-','Color','k', 'lineWidth', 2.0) % trajectory angle
 line(Traj(2:end-1,1),Traj(2:end-1,5)/100, 'LineStyle', ':','Color','k', 'lineWidth', 2.0) % mass
 
