@@ -2,7 +2,7 @@ clear all
 j = 1;
 payload_matrix = [];
 for Alt = 20000:2500:40000
-for theta = 0:1:10
+for theta = -6:1:-1
 for v = 2000:200:3200
 
 i=1;

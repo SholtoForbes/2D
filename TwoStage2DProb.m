@@ -94,7 +94,7 @@ vU = 3100; % This limit must not cause the drag force to exceed the potential th
 % thetaU = 1.6;
 
 if const == 1
-thetaL = 0.0;
+thetaL = -0.1;
 else
 thetaL = -0.1; %  NEED TO WATCH THAT THIS IS NOT OVERCONSTRAINING
 end
