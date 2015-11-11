@@ -77,7 +77,8 @@ vf = 2900;
 % bound and scale the state and control variables
 %---------------------------------------
 
-VL = -1.;
+% VL = -1.;
+VL = V0;
 VU = 1.0*Vf; 
 
 % VL = 27000;
@@ -94,7 +95,8 @@ vU = 3100; % This limit must not cause the drag force to exceed the potential th
 % thetaU = 1.6;
 
 if const == 1
-thetaL = -0.1;
+% thetaL = -0.1;
+thetaL = -0.05;
 else
 thetaL = -0.1; %  NEED TO WATCH THAT THIS IS NOT OVERCONSTRAINING
 end
@@ -105,6 +107,7 @@ end
 if const == 1
 % thetaU = 0.17;
 thetaU = 0.1;
+% thetaU = 0.05;
 else
 thetaU = 0.1;  
 end
@@ -220,7 +223,7 @@ Brac_1.bounds       = bounds;
 
 % Node Definition ====================================================
 
-algorithm.nodes		= [150];	
+algorithm.nodes		= [100];	
 
 
 global nodes
@@ -232,15 +235,21 @@ nodes = algorithm.nodes;
 
 tfGuess = tfMax; % this needs to be close to make sure solution stays withing Out_Force bounds
 
+if const == 1
+guess.states(1,:) = [25000 ,35000]; 
+else
+guess.states(1,:) = [0 ,Vf];
+end
 
-guess.states(1,:) = [0 ,Vf]; %V
+ %V
 % guess.states(1,:) = [27000 ,27000]; %V doesnt work
 % guess.states(1,:) = [25000 ,35000]; %V
 
 guess.states(2,:) = [v0, vf]; %v
 
 guess.states(3,:) = [atan((Vf-V0)/(Hf-H0)),atan((Vf-V0)/(Hf-H0))]; 
-% guess.states(3,:) = [0,0]; 
+
+% guess.states(3,:) = [0,thetaU]; 
 
 % guess.states(4,:) = [mfuelU, mfuelU/2];
 guess.states(4,:) = [mfuelU, 0];
