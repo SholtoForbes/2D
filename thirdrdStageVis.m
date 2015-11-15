@@ -1,6 +1,6 @@
 % visualising third stage cost results
 clear all
-ThirdStageData = dlmread('thirdstage.dat');
+ThirdStageData = sortrows(dlmread('thirdstage.dat'));
 % map = [0, 0, 0
 %     0, 0, 0
 %     .0, 0, 0
@@ -9,93 +9,83 @@ ThirdStageData = dlmread('thirdstage.dat');
 %     1.0, 0, 0];
 % colormap(map)
 
-colormap jet
+% colormap gray
 scatter3(ThirdStageData(:,2),ThirdStageData(:,3),ThirdStageData(:,1),30,ThirdStageData(:,5), 'filled')
+
 xlabel('Trajectory Angle (deg)')
 ylabel('Velocity (m/s)')
 zlabel('Altitude (m)')
 
-% j=1;
-% k=0;
+
+
+% for deleting large values
+
 % for i = 1:length(ThirdStageData)
-%     
-% if ThirdStageData(i,3) == 2000
-%     if ThirdStageData(i,2) == -0.2
-%             k=k+1;
-%             j = 1;
-%     end
-%     
-%     Alt1(j,k) = ThirdStageData(i,1);
-%     Theta1(j,k) = ThirdStageData(i,2);
-%     Payload1(j,k) = ThirdStageData(i,4);
-%     
-%     
-%     
-%     j=j+1;
-%     
-%    
 % 
-% end
+% if (ThirdStageData(i,5) > 350 ) & (ThirdStageData(i,2) < 0)
+%     
+% ThirdStageData(i,:) = [];
 %     
 % end
 % 
-% j=1;
-% k=0;
+% end
+% 
+% 
+% dlmwrite('thirdstage.dat', ThirdStageData,'delimiter','\t')
+% j = 2;
+% x = 1;
+% y = 1;
+% z = 1;
+% %for creating a 3D array
 % for i = 1:length(ThirdStageData)
+% if ThirdStageData(i,2) >= 0
 %     
-% if ThirdStageData(i,3) == 2500
-%     if ThirdStageData(i,2) == -0.2
-%             k=k+1;
-%             j = 1;
-%     end
+% if (ThirdStageData(j,1) == ThirdStageData(j-1,1)) && (ThirdStageData(j,2) == ThirdStageData(j-1,2)) ;
 %     
-%     Alt2(j,k) = ThirdStageData(i,1);
-%     Theta2(j,k) = ThirdStageData(i,2);
-%     Payload2(j,k) = ThirdStageData(i,4);
-%     
-%     
-%     
-%     j=j+1;
-%     
-%    
+% threeDMAT(x,y,z) = ThirdStageData(j-1,5);
+% threeDAlt(x,y,z) = ThirdStageData(j-1,1);
+% threeDAngle(x,y,z) = ThirdStageData(j-1,2);
+% threeDVel(x,y,z) = ThirdStageData(j-1,3);
 % 
-% end
-%     
-% end
+% x = x + 1;
 % 
-% j=1;
-% k=0;
-% for i = 1:length(ThirdStageData)
-%     
-% if ThirdStageData(i,3) == 3000
-%     if ThirdStageData(i,2) == -0.2
-%             k=k+1;
-%             j = 1;
-%     end
-%     
-%     Alt3(j,k) = ThirdStageData(i,1);
-%     Theta3(j,k) = ThirdStageData(i,2);
-%     Payload3(j,k) = ThirdStageData(i,4);
-%     
-%     
-%     
-%     j=j+1;
-%     
-%    
 % 
-% end
+% 
+% elseif (ThirdStageData(j,1) == ThirdStageData(j-1,1))
 %     
+% threeDMAT(x,y,z) = ThirdStageData(j-1,5);
+% threeDAlt(x,y,z) = ThirdStageData(j-1,1);
+% threeDAngle(x,y,z) = ThirdStageData(j-1,2);
+% threeDVel(x,y,z) = ThirdStageData(j-1,3);
+% 
+% x = 1;
+% y = y+1;
+% 
+% else
+%     
+% threeDMAT(x,y,z) = ThirdStageData(j-1,5);
+% threeDAlt(x,y,z) = ThirdStageData(j-1,1);
+% threeDAngle(x,y,z) = ThirdStageData(j-1,2);
+% threeDVel(x,y,z) = ThirdStageData(j-1,3);
+% 
+% x = 1;
+% y = 1;
+% z = z + 1;
+% end
+% j = j+1;
+% end
 % end
 % 
-% figure(1)
-% surf(Alt1,Theta1,Payload1)
 % 
-% figure(2)
-% surf(Alt2,Theta2,Payload2)
+% Alt = [20000:2500:40000];
+% Angle = [0:10];
+% Vel = [2000:200:3200];
 % 
-% figure(3)
-% surf(Alt3,Theta3,Payload3)
-
-
-
-
+% [meshAlt,meshAngle,meshVel] = meshgrid(Alt,Angle,Vel);
+% 
+% 
+% % slice(threeDMAT,[1,3,5],[],[])
+% % colormap hsv
+% 
+% 
+% contourslice(threeDMAT,[1,3,6],[],[],10)

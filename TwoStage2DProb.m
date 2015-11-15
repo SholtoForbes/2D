@@ -54,8 +54,9 @@ end
 %=============================================== 
 %Second Stage
 V0 = 20000.; % Keep initial values zero
-% Vf = 50000.; % Final values here are for guess and bounds, need to be fairly accurate
-Vf = 40000.;
+% V0 = 0.;
+Vf = 50000.; % Final values here are for guess and bounds, need to be fairly accurate
+% Vf = 40000.;
 
 H0 = 0.;
 Hf = 700000.;
@@ -96,7 +97,8 @@ vU = 3100; % This limit must not cause the drag force to exceed the potential th
 
 if const == 1
 % thetaL = -0.1;
-thetaL = -0.05;
+thetaL = -0.1;
+% thetaL = 0.;
 else
 thetaL = -0.1; %  NEED TO WATCH THAT THIS IS NOT OVERCONSTRAINING
 end
@@ -106,8 +108,8 @@ end
 % thetaU = 0.26/2;
 if const == 1
 % thetaU = 0.17;
-thetaU = 0.1;
-% thetaU = 0.05;
+% thetaU = 0.1;
+thetaU = 0.05;
 else
 thetaU = 0.1;  
 end
@@ -129,8 +131,10 @@ qu = 100000;
 
 if const == 1 
 bounds.lower.states = [VL ; vL; thetaL; mfuelL-1];
+% bounds.lower.states = [VL ; vL; thetaL; mfuelL-3000];
 % bounds.lower.states = [VL ; vL; thetaL; mfuelL];
 bounds.upper.states = [VU ; vU; thetaU; mfuelU+1];
+% bounds.upper.states = [VU ; vU; thetaU; mfuelU];
 end
 
 if const == 2

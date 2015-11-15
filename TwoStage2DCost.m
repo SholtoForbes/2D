@@ -99,7 +99,9 @@ if const == 1
 % Endcost =  - mfuel(end) - ThirdStagePayloadMass;
 Endcost =  - 0.01*mfuel(end) - ThirdStagePayloadMass;
 % Endcost =  - 0.05*mfuel(end) - ThirdStagePayloadMass;
+% Endcost =  - 0.1*mfuel(end) - ThirdStagePayloadMass;
 % Endcost =  - ThirdStagePayloadMass;
+% Endcost = 0 ;
 end
 
 % Endcost = -gaussmf(theta(end),[0.01 0.1]) * 7.7e6;
@@ -110,6 +112,17 @@ EndpointCost = Endcost;
 
 if const == 1
 RunningCost = 0;
+
+% RunningCost =((q-50000).^2+1000000)/1000000; 
+
+% for i = 1:length(q)   
+% if q(i) > 50000
+% RunningCost(i) =((q(i)-50000).^2+100000000)/100000000;
+% else
+% RunningCost(i) = 0;
+% end
+% end
+
 end
 
 if const == 3 || const == 4
