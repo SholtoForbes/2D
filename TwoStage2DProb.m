@@ -227,7 +227,7 @@ Brac_1.bounds       = bounds;
 
 % Node Definition ====================================================
 
-algorithm.nodes		= [100];	
+algorithm.nodes		= [90];	
 
 
 global nodes
