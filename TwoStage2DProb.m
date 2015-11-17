@@ -53,10 +53,11 @@ end
 
 %=============================================== 
 %Second Stage
-V0 = 20000.; % Keep initial values zero
+% V0 = 20000.; % 
+V0 = 20000.;
 % V0 = 0.;
 Vf = 50000.; % Final values here are for guess and bounds, need to be fairly accurate
-% Vf = 40000.;
+% Vf = 45000.;
 
 H0 = 0.;
 Hf = 700000.;
@@ -227,7 +228,7 @@ Brac_1.bounds       = bounds;
 
 % Node Definition ====================================================
 
-algorithm.nodes		= [90];	
+algorithm.nodes		= [89];	
 
 
 global nodes
@@ -253,7 +254,7 @@ guess.states(2,:) = [v0, vf]; %v
 
 guess.states(3,:) = [atan((Vf-V0)/(Hf-H0)),atan((Vf-V0)/(Hf-H0))]; 
 
-% guess.states(3,:) = [0,thetaU]; 
+% guess.states(3,:) = [0.9*atan((Vf-V0)/(Hf-H0)),atan((Vf-V0)/(Hf-H0))]; 
 
 % guess.states(4,:) = [mfuelU, mfuelU/2];
 guess.states(4,:) = [mfuelU, 0];
