@@ -241,10 +241,12 @@ nodes = algorithm.nodes;
 tfGuess = tfMax; % this needs to be close to make sure solution stays withing Out_Force bounds
 
 if const == 1
-guess.states(1,:) = [25000 ,35000]; 
+guess.states(1,:) = [25000 ,35000]; % for 50kPa
+% guess.states(1,:) = [26000 ,35000]; % for 55kPa
 else
-guess.states(1,:) = [0 ,Vf];
+guess.states(1,:) = [0 ,Vf]; % for constant 50kPa
 end
+
 
  %V
 % guess.states(1,:) = [27000 ,27000]; %V doesnt work
