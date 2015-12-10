@@ -230,9 +230,7 @@ Brac_1.bounds       = bounds;
 
 % Node Definition ====================================================
 
-% algorithm.nodes		= [89];	% use for 50, 55 kPa trajectories
-algorithm.nodes		= [88];	% 
-
+algorithm.nodes		= [89];	% use for 50, 55 kPa trajectories
 % algorithm.nodes		= [69];	
 
 
@@ -482,10 +480,10 @@ plot(H(end)/1000, V(end)/1000, 'o', 'MarkerSize', 10, 'MarkerEdgeColor','k')
 text(H(end)/1000,V(end)/1000,'Third Stage Transition Point','VerticalAlignment','top', 'FontSize', 10);
 
 dim = [.65 .45 .2 .2];
-annotation('textbox',dim,'string',{['Payload Mass: ', num2str(ThirdStagePayloadMass,4), ' kg'],['Second Stage Fuel Used: ' num2str(1000 - mfuel(end)) ' kg']},'FitBoxToText','on');  
+annotation('textbox',dim,'string',{['Payload Mass: ', num2str(ThirdStagePayloadMass), ' kg'],['Second Stage Fuel Used: ' num2str(1000 - mfuel(end)) ' kg']},'FitBoxToText','on');  
 
-thirdstageexample_H = [0+H(end) (H(end)-H(end - 1))+H(end) 20*(H(end)-H(end - 1))+H(end) 40*(H(end)-H(end - 1))+H(end) 60*(H(end)-H(end - 1))+H(end) 80*(H(end)-H(end - 1))+H(end)]/1000; %makes a small sample portion of an arbitrary third stage trajectory for example
-thirdstageexample_V = [0+V(end) (V(end)-V(end - 1))+V(end) 20*((V(end)-V(end -1)))+V(end) 40*((V(end)-V(end -1)))+V(end) 60*((V(end)-V(end -1)))+V(end) 80*((V(end)-V(end -1)))+V(end)]/1000;
+thirdstageexample_H = [0+H(end)/1000 (H(end)-H(end - 1))/1000+H(end)/1000 20*(H(end)-H(end - 1))/1000+H(end)/1000 40*(H(end)-H(end - 1))/1000+H(end)/1000 60*(H(end)-H(end - 1))+H(end) 80*(H(end)-H(end - 1))+H(end)]; %makes a small sample portion of an arbitrary third stage trajectory for example
+thirdstageexample_V = [0+V(end)/1000 (V(end)-V(end - 1))/1000+V(end)/1000 20*((V(end)-V(end -1)))/1000+V(end)/1000 40*((V(end)-V(end -1)))/1000+V(end) 60*((V(end)-V(end -1)))+V(end) 80*((V(end)-V(end -1)))+V(end)];
 plot(thirdstageexample_H, thirdstageexample_V, 'LineStyle', '--','Color','k');
 
 hold on

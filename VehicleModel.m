@@ -81,12 +81,14 @@ end
 if const == 1
 Efficiency = zeros(1,length(q));
 for i = 1:length(q)
-    if q(i) < 55000
+    if q(i) < 50000
     Efficiency(i) = rho(i)/(50000*2/v_array(i)^2); % dont change this
 
     else
-%     Efficiency(i) = 1;
-    Efficiency(i) = 1.1; 
+%         Efficiency(i) = .9;
+    Efficiency(i) = 1; % for 50kPa
+%     Efficiency(i) = 1.1; % for 55kPa
+%     Efficiency(i) = 1.2; 
     end
 end
 
@@ -99,7 +101,7 @@ end
 
 
 
-Efficiency4 = -((q-50000)./50000).^2 + 1; % this is an assumption of how the engine behaves
+% Efficiency4 = -((q-50000)./50000).^2 + 1; % this is an assumption of how the engine behaves
 
 % Thrust(1:nodes) =  200000;
 % Thrust = ThrustF_spline(M,Alpha).*Efficiency2;
