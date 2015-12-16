@@ -639,11 +639,11 @@ evalc('ThirdStageVisTrajectory(AoA, V(end), rad2deg(theta(end)), v(end));');
 
 
 % save results
-dlmwrite('primal', [primal.states;primal.controls;primal.nodes]);
-dlmwrite('dual', [dual.dynamics;dual.Hamiltonian]);
+dlmwrite('primal.txt', [primal.states;primal.controls;primal.nodes]);
+dlmwrite('dual.txt', [dual.dynamics;dual.Hamiltonian]);
 
-copyfile('primal',sprintf('../ArchivedResults/primal_%s',Timestamp))
-copyfile('dual',sprintf('../ArchivedResults/dual_%s',Timestamp))
+copyfile('primal.txt',sprintf('../ArchivedResults/primal_%s.txt',Timestamp))
+copyfile('dual.txt',sprintf('../ArchivedResults/dual_%s.txt',Timestamp))
 
 
 primal_old = primal;
