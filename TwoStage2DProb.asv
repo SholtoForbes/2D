@@ -230,7 +230,10 @@ Brac_1.bounds       = bounds;
 
 % Node Definition ====================================================
 
-algorithm.nodes		= [89];	% use for 50, 55 kPa trajectories
+% algorithm.nodes		= [89];	% use for 50, 55 kPa trajectories (doesnt
+% produce exact results for 1000kg fuel) seems to like odd numbers
+algorithm.nodes		= [87];	% Testing
+
 % algorithm.nodes		= [69];	
 
 
@@ -244,9 +247,10 @@ nodes = algorithm.nodes;
 tfGuess = tfMax; % this needs to be close to make sure solution stays withing Out_Force bounds
 
 if const == 1
-guess.states(1,:) = [25000 ,35000]; % for 50kPa end point of 35km is a
+% guess.states(1,:) = [25000 ,35000]; % for 50kPa end point of 35km is a
 % sweet spot which allows max payload, while net ISP does not go below zero
 % guess.states(1,:) = [26000 ,35000]; % for 55kPa
+guess.states(1,:) = [25500 ,35000]; % for 55kPa
 % guess.states(1,:) = [25000 ,34900];
 % guess.states(1,:) = [26000 ,35000]; % 
 
@@ -480,10 +484,10 @@ plot(H(end)/1000, V(end)/1000, 'o', 'MarkerSize', 10, 'MarkerEdgeColor','k')
 text(H(end)/1000,V(end)/1000,'Third Stage Transition Point','VerticalAlignment','top', 'FontSize', 10);
 
 dim = [.65 .45 .2 .2];
-annotation('textbox',dim,'string',{['Payload Mass: ', num2str(ThirdStagePayloadMass), ' kg'],['Second Stage Fuel Used: ' num2str(1000 - mfuel(end)) ' kg']},'FitBoxToText','on');  
+annotation('textbox',dim,'string',{['Payload Mass: ', num2str(ThirdStagePayloadMass,4), ' kg'],['Second Stage Fuel Used: ' num2str(1000 - mfuel(end)) ' kg']},'FitBoxToText','on');  
 
-thirdstageexample_H = [0+H(end)/1000 (H(end)-H(end - 1))/1000+H(end)/1000 20*(H(end)-H(end - 1))/1000+H(end)/1000 40*(H(end)-H(end - 1))/1000+H(end)/1000 60*(H(end)-H(end - 1))+H(end) 80*(H(end)-H(end - 1))+H(end)]; %makes a small sample portion of an arbitrary third stage trajectory for example
-thirdstageexample_V = [0+V(end)/1000 (V(end)-V(end - 1))/1000+V(end)/1000 20*((V(end)-V(end -1)))/1000+V(end)/1000 40*((V(end)-V(end -1)))/1000+V(end) 60*((V(end)-V(end -1)))+V(end) 80*((V(end)-V(end -1)))+V(end)];
+thirdstageexample_H = [0+H(end) (H(end)-H(end - 1))+H(end) 20*(H(end)-H(end - 1))+H(end) 40*(H(end)-H(end - 1))+H(end) 60*(H(end)-H(end - 1))+H(end) 80*(H(end)-H(end - 1))+H(end)]/1000; %makes a small sample portion of an arbitrary third stage trajectory for example
+thirdstageexample_V = [0+V(end) (V(end)-V(end - 1))+V(end) 20*((V(end)-V(end -1)))+V(end) 40*((V(end)-V(end -1)))+V(end) 60*((V(end)-V(end -1)))+V(end) 80*((V(end)-V(end -1)))+V(end)]/1000;
 plot(thirdstageexample_H, thirdstageexample_V, 'LineStyle', '--','Color','k');
 
 hold on
@@ -510,7 +514,7 @@ line(t, q./(10^4),'Parent',ax1,'Color','k', 'LineStyle',':', 'lineWidth', 2.0)
 % line(t, Q./(10^7),'Parent',ax1,'Color','k', 'LineStyle','-', 'lineWidth', 2.0)
 
 % legend(ax1,  'Trajectory Angle (degrees)', 'Mach no', 'Velocity (m/s x 10^3)', 'Dynamic Pressure (Pa x 10^4)',  'Q (Mj x 10)')
-h = legend(ax1,  'Trajectory Angle (degrees)', 'Mach no', 'Velocity (m/s x 10^3)', 'Dynamic Pressure (Pa x 10^4)')
+h = legend(ax1,  'Trajectory Angle (degrees)', 'Mach no', 'Velocity (m/s x 10^3)', 'Dynamic Pressure (Pa x 10^4)');
 rect1 = [0.12, 0.35, .25, .25];
 set(h, 'Position', rect1)
 
@@ -531,7 +535,7 @@ line(t, IspNet./(10^2),'Parent',ax2,'Color','k', 'LineStyle',':', 'lineWidth', 2
 
 
 
-g = legend(ax2, 'AoA (degrees)','Flap Deflection (degrees)', 'Fuel Mass (kg x 10^2)', 'Net Isp (s x 10^2)')
+g = legend(ax2, 'AoA (degrees)','Flap Deflection (degrees)', 'Fuel Mass (kg x 10^2)', 'Net Isp (s x 10^2)');
 
 rect2 = [0.52, 0.35, .25, .25];
 set(g, 'Position', rect2)
@@ -629,8 +633,12 @@ evalc('ThirdStageVisTrajectory(AoA, V(end), rad2deg(theta(end)), v(end));');
 % plot(h_Forward, v_Forward)
 
 
+% save results
+dlmwrite('primal', [primal.states;primal.controls;primal.nodes]);
+dlmwrite('dual', [dual.dynamics;dual.Hamiltonian]);
 
-
+copyfile('primal',sprintf('../ArchivedResults/primal_%s',datestr(now,30)))
+copyfile('dual',sprintf('../ArchivedResults/dual_%s',datestr(now,30)))
 
 
 primal_old = primal;

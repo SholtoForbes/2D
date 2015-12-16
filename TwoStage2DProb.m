@@ -4,6 +4,11 @@
 clear all;		
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%copy the current setting to archive
+Timestamp = datestr(now,30)
+copyfile('TwoStage2DProb.m',sprintf('../ArchivedResults/TwoStage2DProb_%s.m',Timestamp))
+copyfile('TwoStage2DCost.m',sprintf('../ArchivedResults/TwoStage2DCost_%s.m',Timestamp))
+
 %  no end const = 1 or Q end const = 2, mass end const = 3, q state variable
 %  const == 4
 global const
@@ -230,8 +235,9 @@ Brac_1.bounds       = bounds;
 
 % Node Definition ====================================================
 
-% algorithm.nodes		= [89];	% use for 50, 55 kPa trajectories
-algorithm.nodes		= [88];	% 
+% algorithm.nodes		= [89];	% use for 50, 55 kPa trajectories (doesnt
+% produce exact results for 1000kg fuel) seems to like odd numbers
+algorithm.nodes		= [87];	% Testing
 
 % algorithm.nodes		= [69];	
 
@@ -246,9 +252,10 @@ nodes = algorithm.nodes;
 tfGuess = tfMax; % this needs to be close to make sure solution stays withing Out_Force bounds
 
 if const == 1
-guess.states(1,:) = [25000 ,35000]; % for 50kPa end point of 35km is a
+% guess.states(1,:) = [25000 ,35000]; % for 50kPa end point of 35km is a
 % sweet spot which allows max payload, while net ISP does not go below zero
 % guess.states(1,:) = [26000 ,35000]; % for 55kPa
+guess.states(1,:) = [25500 ,35000]; % for 55kPa
 % guess.states(1,:) = [25000 ,34900];
 % guess.states(1,:) = [26000 ,35000]; % 
 
@@ -512,7 +519,7 @@ line(t, q./(10^4),'Parent',ax1,'Color','k', 'LineStyle',':', 'lineWidth', 2.0)
 % line(t, Q./(10^7),'Parent',ax1,'Color','k', 'LineStyle','-', 'lineWidth', 2.0)
 
 % legend(ax1,  'Trajectory Angle (degrees)', 'Mach no', 'Velocity (m/s x 10^3)', 'Dynamic Pressure (Pa x 10^4)',  'Q (Mj x 10)')
-h = legend(ax1,  'Trajectory Angle (degrees)', 'Mach no', 'Velocity (m/s x 10^3)', 'Dynamic Pressure (Pa x 10^4)')
+h = legend(ax1,  'Trajectory Angle (degrees)', 'Mach no', 'Velocity (m/s x 10^3)', 'Dynamic Pressure (Pa x 10^4)');
 rect1 = [0.12, 0.35, .25, .25];
 set(h, 'Position', rect1)
 
@@ -533,7 +540,7 @@ line(t, IspNet./(10^2),'Parent',ax2,'Color','k', 'LineStyle',':', 'lineWidth', 2
 
 
 
-g = legend(ax2, 'AoA (degrees)','Flap Deflection (degrees)', 'Fuel Mass (kg x 10^2)', 'Net Isp (s x 10^2)')
+g = legend(ax2, 'AoA (degrees)','Flap Deflection (degrees)', 'Fuel Mass (kg x 10^2)', 'Net Isp (s x 10^2)');
 
 rect2 = [0.52, 0.35, .25, .25];
 set(g, 'Position', rect2)
@@ -631,8 +638,12 @@ evalc('ThirdStageVisTrajectory(AoA, V(end), rad2deg(theta(end)), v(end));');
 % plot(h_Forward, v_Forward)
 
 
+% save results
+dlmwrite('primal', [primal.states;primal.controls;primal.nodes]);
+dlmwrite('dual', [dual.dynamics;dual.Hamiltonian]);
 
-
+copyfile('primal',sprintf('../ArchivedResults/primal_%s',Timestamp))
+copyfile('dual',sprintf('../ArchivedResults/dual_%s',Timestamp))
 
 
 primal_old = primal;
