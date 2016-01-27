@@ -1,4 +1,4 @@
-function [dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha, heating_rate, Q, rho] = VehicleModel(time, theta, V, v, mfuel, nodes,AoA_spline,flapdeflection_spline,Dragq_spline,ThrustF_spline,FuelF_spline, const)
+function [dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha, heating_rate, Q, rho] = VehicleModel(time, theta, V, v, mfuel, nodes,AoA_spline,flapdeflection_spline,Dragq_spline,ThrustF_spline,FuelF_spline, const,thetadot)
 % function [dfuel, v, m, q, M, v_array] = VehicleModel(time, theta, V, H, nodes)
 
 
@@ -71,9 +71,19 @@ end
 % mstruct = 8755.1 - 994 + max(Q)/(10^5); %variable structural mass
 % m = mfuel + mstruct;
 
+% Control
 
+% determine aerodynamics necessary for trim
 [Fd, Alpha, flapdeflection] = OutForce(theta,M,q,m,AoA_spline,flapdeflection_spline,Dragq_spline);
-% Fd = Fd*8/10;
+
+% determine additional control necessary for rotation
+
+%thetadot
+
+
+
+
+
 
 % THRUST AND MOTION ==================================================================
 

@@ -302,7 +302,7 @@ set(hx, 'EdgeColor', 'none');
 % set(hx, 'FaceColor', 'interp'); % use this to smooth
 set(hx, 'FaceColor', 'flat');
 
-xlabel('Trajectory Angle (deg)')
-ylabel('Velocity (m/s)')
-zlabel('Altitude (km)')
-ylabel(c,'Payload Mass, kg')
+xlabel('Trajectory Angle (deg)','FontSize',17)
+ylabel('Velocity (m/s)','FontSize',17)
+zlabel('Altitude (km)','FontSize',17)
+ylabel(c,'Payload Mass, kg','FontSize',17)

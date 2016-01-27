@@ -63,11 +63,12 @@ mfuel = primal.states(4,:) ;
 % mfuel = primal.states(3,:) ;
 
 
+
 time = primal.nodes(1, :); % Time
 
-% theta  = primal.controls(1, :);
+thetadot  = primal.controls(1, :);
 
-[dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha, heating_rate, Q, rho] = VehicleModel(time, theta, V, v, mfuel, nodes,AoA_spline,flapdeflection_spline,Dragq_spline,ThrustF_spline,FuelF_spline, const);
+[dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha, heating_rate, Q, rho] = VehicleModel(time, theta, V, v, mfuel, nodes,AoA_spline,flapdeflection_spline,Dragq_spline,ThrustF_spline,FuelF_spline, const,thetadot);
 
 % THIRD STAGE ======================================================
 % NEED TO WATCH THIS, IT CAN EXTRAPOLATE BUT IT DOESNT DO IT WELL

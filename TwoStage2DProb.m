@@ -9,27 +9,38 @@ Timestamp = datestr(now,30)
 copyfile('TwoStage2DProb.m',sprintf('../ArchivedResults/TwoStage2DProb_%s.m',Timestamp))
 copyfile('TwoStage2DCost.m',sprintf('../ArchivedResults/TwoStage2DCost_%s.m',Timestamp))
 
-%  no end const = 1 or Q end const = 2, mass end const = 3, q state variable
-%  const == 4
+
+% SET RUN MODE
+
+% const = 1: No end constraint, used for optimal trajectory calculation
+
+% const = 2: testing, Q end 
+
+% const = 3: Fuel mass is constrained at end point, used for constant dynamic pressure calculation
+
+% const == 4: testing, q state variable 
+
 global const
-const = 1
+const = 3
+
+
 
 % Inputs ============================================
-
+%Take inputs of communicator matrices
 communicator = importdata('communicatornew.txt');
-% communicator = importdata('communicator.txt');
 
 communicator_trim = importdata('communicator_trim.txt');
-% communicator_trim = importdata('communicator_trim_extrapolate.txt');
 
-%this produces simple splines for vehicle data
+
+%Produce splines for vehicle data
 global AoA_spline
 global flapdeflection_spline
 global Dragq_spline
+
 [AoA_spline, flapdeflection_spline, Dragq_spline] = LiftForceInterp(communicator,communicator_trim);
 
 
-%engine splines for thrust and fuel usage
+%produce engine splines for thrust and fuel usage
 enginedata = dlmread('engineoutput_matrix');
 
 global ThrustF_spline
@@ -137,11 +148,20 @@ QU = 10*10^6;
 ql = 0;
 qu = 100000;
 
+
+% Define bounds of primals and controls ---------------------------------
+
+%these must include every logical solution. For fuel mass I have found that
+%bounds of exactly upper and lower fuel values over-constrain. I have
+%modified the bounds accordingly
+
 if const == 1 
 % bounds.lower.states = [VL ; vL; thetaL; mfuelL-1];
 % bounds.lower.states = [VL ; vL; thetaL; mfuelL-3000];
+
 bounds.lower.states = [VL ; vL; thetaL; mfuelL];
 bounds.upper.states = [VU ; vU; thetaU; mfuelU+1];
+
 % bounds.upper.states = [VU ; vU; thetaU; mfuelU];
 end
 
@@ -227,19 +247,19 @@ bounds.upper.events = bounds.lower.events;      % equality event function bounds
 Brac_1.cost 		= 'TwoStage2DCost';
 Brac_1.dynamics	    = 'TwoStage2DDynamics';
 Brac_1.events		= 'TwoStage2DEvents';	
-% Brac_1.Path         = 'TwoStage2DPath';
-%Path file optional	
 
 Brac_1.bounds       = bounds;
 
 
 % Node Definition ====================================================
+% the number of nodes is extremely important to the problem solution.
+% usually between 50-150 works, with an odd number being best in most
+% cases (anecdotal experience). The node no must be found using trial and error approach, but usually
+% working down from 100 works well. 
 
-% algorithm.nodes		= [89];	% use for 50, 55 kPa trajectories (doesnt
+% algorithm.nodes		= [89];	% use for 50kPa trajectory (doesnt
 % produce exact results for 1000kg fuel) seems to like odd numbers
-algorithm.nodes		= [87];	% Testing
-
-% algorithm.nodes		= [69];	
+algorithm.nodes		= [87];	% works a little better for 45,55kpa
 
 
 global nodes
@@ -255,7 +275,7 @@ if const == 1
 % guess.states(1,:) = [25000 ,35000]; % for 50kPa end point of 35km is a
 % sweet spot which allows max payload, while net ISP does not go below zero
 % guess.states(1,:) = [26000 ,35000]; % for 55kPa
-guess.states(1,:) = [25500 ,35000]; % for 55kPa
+guess.states(1,:) = [25500 ,35000]; % for 55kPa 1000kg fuel
 % guess.states(1,:) = [25000 ,34900];
 % guess.states(1,:) = [26000 ,35000]; % 
 
@@ -639,12 +659,13 @@ evalc('ThirdStageVisTrajectory(AoA, V(end), rad2deg(theta(end)), v(end));');
 
 
 % save results
-dlmwrite('primal.txt', [primal.states;primal.controls;primal.nodes]);
+dlmwrite('primal.txt', [primal.states;primal.controls;primal.nodes;q;IspNet;Alpha]);
+dlmwrite('payload.txt', ThirdStagePayloadMass);
 dlmwrite('dual.txt', [dual.dynamics;dual.Hamiltonian]);
 
 copyfile('primal.txt',sprintf('../ArchivedResults/primal_%s.txt',Timestamp))
 copyfile('dual.txt',sprintf('../ArchivedResults/dual_%s.txt',Timestamp))
-
+copyfile('payload.txt',sprintf('../ArchivedResults/payload_%s.txt',Timestamp))
 
 primal_old = primal;
 
