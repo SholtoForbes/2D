@@ -24,14 +24,14 @@ flapdrag_spline = scatteredInterpolant(communicator_trim(:,1),communicator_trim(
 flaplift_spline = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,6));
 
 
-A = 60; % reference area
+A = 62.77; % reference area (m^2)
 
 % golden sections method, to search for a variety of M and lift forces / q
 %equalises the pitching moment of flap and body to calculate lift. works
 %towards the correct AoA (and corresponding flap pitching moment)
 liftarray = [];
 for M = 6:1:12 % M
-    for Liftq = 0:0.2:10 %Lift force / q
+    for Liftq = 0:0.1:10 %Lift force / q
 
         liftarray(end+1,1) = M;
         liftarray(end,2) = Liftq;

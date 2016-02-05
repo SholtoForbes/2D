@@ -17,8 +17,6 @@ dt_array = time(2:end)-time(1:end-1); % Time change between each node pt
 % 
 % dH_array = H(2:end)-H(1:end-1); % horizontal position change between each node pt
 
-v_array = v;
-
 mstruct = 8755.1 - 994; % mass of everything but fuel from dawids work,added variable struct mass just under q calc
 % mstruct = 8755.1 - 994-3000;
 
@@ -37,19 +35,15 @@ m = mfuel + mstruct;
 
 Atmosphere = dlmread('atmosphere.txt'); % import data from atmosphere matrix
 
-StartingV = 0; % Calculate ablsolute height % THIS NEEDS TO BE CHANGED FOR VARIABLE HEIGHT
+c = spline( Atmosphere(:,1),  Atmosphere(:,5), V); % Calculate speed of sound using atmospheric data
 
-Vabs = V + StartingV; % Absolute vertical position
+rho = spline( Atmosphere(:,1),  Atmosphere(:,4), V); % Calculate density using atmospheric data
 
-c = spline( Atmosphere(:,1),  Atmosphere(:,5), Vabs); % Calculate speed of sound using atmospheric data
-
-rho = spline( Atmosphere(:,1),  Atmosphere(:,4), Vabs); % Calculate density using atmospheric data
-
-q = 0.5 * rho .* (v_array .^2); % Calculating Dynamic Pressure
+q = 0.5 * rho .* (v .^2); % Calculating Dynamic Pressure
 
 
 
-M = v_array./c; % Calculating Mach No (Descaled)
+M = v./c; % Calculating Mach No (Descaled)
 
 
 
@@ -57,7 +51,7 @@ M = v_array./c; % Calculating Mach No (Descaled)
 kappa = 1.7415e-4;
 Rn = 1; %effective nose radius (m) (need to change this, find actual value)
 
-heating_rate = kappa*sqrt(rho./Rn).*v_array.^3; %watts
+heating_rate = kappa*sqrt(rho./Rn).*v.^3; %watts
 
 Q = zeros(1,length(time));
 Q(1) = 0;
@@ -74,7 +68,7 @@ end
 % Control
 
 % determine aerodynamics necessary for trim
-[Fd, Alpha, flapdeflection] = OutForce(theta,M,q,m,AoA_spline,flapdeflection_spline,Dragq_spline);
+[Fd, Alpha, flapdeflection] = OutForce(theta,M,q,m,AoA_spline,flapdeflection_spline,Dragq_spline,v,V);
 
 % determine additional control necessary for rotation
 
@@ -94,7 +88,7 @@ for i = 1:length(q)
 %     if q(i) < 50000
     if q(i) < 55000
 %     if q(i) < 45000
-    Efficiency(i) = rho(i)/(50000*2/v_array(i)^2); % dont change this
+    Efficiency(i) = rho(i)/(50000*2/v(i)^2); % dont change this
     
 
     else
@@ -107,7 +101,7 @@ end
 
 else
         
-Efficiency = rho./(50000*2./v_array.^2); % linear rho efficiency, scaled to rho at 50000kpa
+Efficiency = rho./(50000*2./v.^2); % linear rho efficiency, scaled to rho at 50000kpa
 end
 
 % Efficiency = rho./(50000*2./v_array.^2);
@@ -144,7 +138,9 @@ fuelchange_array = -Fueldt(1:end-1).*dt_array ;
 
 dfuel = sum(fuelchange_array); %total change in 'fuel' this is negative
 
-a = ((Thrust - (Fd + g*sin(theta))) ./ m );
+v_H = v.*cos(theta);
+
+a = ((Thrust - (Fd + (6.674e-11.*5.97e24./(V + 6371e3).^2 - v_H.^2./(V + 6371e3)).*sin(theta))) ./ m );
 
 
 end

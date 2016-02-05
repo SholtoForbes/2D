@@ -79,10 +79,10 @@ Vf = 50000.; % Final values here are for guess and bounds, need to be fairly acc
 H0 = 0.;
 Hf = 700000.;
 
-v0 = 1864.13; % 50kpa q at 27000m
+v0 = 1797.9; % 
 % v0 = 2000;
 % vf = 2979.83; % 50kpa q at 33000m
-vf = 2900;
+vf = 2839.51;
 %dawids results have around 1 degree or under flight path angle
 %===================
 % Problem variables:
@@ -137,7 +137,8 @@ end
 
 % mfuelL = -3000;
 mfuelL = 0;
-mfuelU = 1000; % 
+% mfuelU = 1000; % 
+mfuelU = 994; % 
 
 QL = 0;
 % QU = 100*10^6; %joules, estimate
@@ -257,9 +258,9 @@ Brac_1.bounds       = bounds;
 % cases (anecdotal experience). The node no must be found using trial and error approach, but usually
 % working down from 100 works well. 
 
-% algorithm.nodes		= [89];	% use for 50kPa trajectory (doesnt
+algorithm.nodes		= [89];	% use for 50kPa trajectory (doesnt
 % produce exact results for 1000kg fuel) seems to like odd numbers
-algorithm.nodes		= [87];	% works a little better for 45,55kpa
+% algorithm.nodes		= [87];	% works a little better for 45,55kpa
 
 
 global nodes
@@ -509,7 +510,7 @@ plot(H(end)/1000, V(end)/1000, 'o', 'MarkerSize', 10, 'MarkerEdgeColor','k')
 text(H(end)/1000,V(end)/1000,'Third Stage Transition Point','VerticalAlignment','top', 'FontSize', 10);
 
 dim = [.65 .45 .2 .2];
-annotation('textbox',dim,'string',{['Payload Mass: ', num2str(ThirdStagePayloadMass,4), ' kg'],['Second Stage Fuel Used: ' num2str(1000 - mfuel(end)) ' kg']},'FitBoxToText','on');  
+annotation('textbox',dim,'string',{['Payload Mass: ', num2str(ThirdStagePayloadMass,4), ' kg'],['Second Stage Fuel Used: ' num2str(994 - mfuel(end)) ' kg']},'FitBoxToText','on');  
 
 thirdstageexample_H = [0+H(end) (H(end)-H(end - 1))+H(end) 20*(H(end)-H(end - 1))+H(end) 40*(H(end)-H(end - 1))+H(end) 60*(H(end)-H(end - 1))+H(end) 80*(H(end)-H(end - 1))+H(end)]/1000; %makes a small sample portion of an arbitrary third stage trajectory for example
 thirdstageexample_V = [0+V(end) (V(end)-V(end - 1))+V(end) 20*((V(end)-V(end -1)))+V(end) 40*((V(end)-V(end -1)))+V(end) 60*((V(end)-V(end -1)))+V(end) 80*((V(end)-V(end -1)))+V(end)]/1000;
