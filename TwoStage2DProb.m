@@ -21,7 +21,7 @@ copyfile('TwoStage2DCost.m',sprintf('../ArchivedResults/TwoStage2DCost_%s.m',Tim
 % const == 4: testing, q state variable 
 
 global const
-const = 3
+const = 1
 
 
 
@@ -31,13 +31,16 @@ communicator = importdata('communicatornew.txt');
 
 communicator_trim = importdata('communicator_trim.txt');
 
-
-%Produce splines for vehicle data
-global AoA_spline
-global flapdeflection_spline
-global Dragq_spline
-
-[AoA_spline, flapdeflection_spline, Dragq_spline] = LiftForceInterp(communicator,communicator_trim);
+% Produce Atmosphere Data
+Atmosphere = dlmread('atmosphere.txt');
+% rho derivative
+global drho
+j=1;
+for i = 1:100:85000
+drho(j,1) = i;
+drho(j,2) = (spline(Atmosphere(:,1),  Atmosphere(:,4), i) - spline(Atmosphere(:,1),  Atmosphere(:,4), i-1))/1;
+j = j+1;
+end
 
 
 %produce engine splines for thrust and fuel usage
@@ -50,6 +53,14 @@ FuelF_spline= scatteredInterpolant(enginedata(:,1),enginedata(:,2),enginedata(:,
 
 
 
+%Produce splines for vehicle data
+global AoA_spline
+global flapdeflection_spline
+global Drag_spline
+[AoA_spline, flapdeflection_spline, Drag_spline] = LiftForceInterp(communicator,communicator_trim,const,Atmosphere,ThrustF_spline,FuelF_spline);
+
+
+
 ThirdStageData = dlmread('thirdstage.dat');
 global ThirdStagePayloadSpline
 % ThirdStagePayloadSpline = scatteredInterpolant(ThirdStageData(:,1),ThirdStageData(:,2),ThirdStageData(:,3));
@@ -57,15 +68,7 @@ global ThirdStagePayloadSpline
 % ThirdStagePayloadSpline = scatteredInterpolant(ThirdStageData(:,1),ThirdStageData(:,2),ThirdStageData(:,3),ThirdStageData(:,4));
 ThirdStagePayloadSpline = scatteredInterpolant(ThirdStageData(:,1),ThirdStageData(:,2),ThirdStageData(:,3),ThirdStageData(:,5));
 
-Atmosphere = dlmread('atmosphere.txt');
-% rho derivative
-global drho
-j=1;
-for i = 1:100:85000
-drho(j,1) = i;
-drho(j,2) = (spline(Atmosphere(:,1),  Atmosphere(:,4), i) - spline(Atmosphere(:,1),  Atmosphere(:,4), i-1))/1;
-j = j+1;
-end
+
 
 %=============================================== 
 %Second Stage

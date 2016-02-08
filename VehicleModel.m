@@ -1,4 +1,4 @@
-function [dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha, heating_rate, Q, rho] = VehicleModel(time, theta, V, v, mfuel, nodes,AoA_spline,flapdeflection_spline,Dragq_spline,ThrustF_spline,FuelF_spline, const,thetadot)
+function [dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha, heating_rate, Q, rho] = VehicleModel(time, theta, V, v, mfuel, nodes,AoA_spline,flapdeflection_spline,Drag_spline,ThrustF_spline,FuelF_spline, const,thetadot)
 % function [dfuel, v, m, q, M, v_array] = VehicleModel(time, theta, V, H, nodes)
 
 
@@ -68,7 +68,7 @@ end
 % Control
 
 % determine aerodynamics necessary for trim
-[Fd, Alpha, flapdeflection] = OutForce(theta,M,q,m,AoA_spline,flapdeflection_spline,Dragq_spline,v,V);
+[Fd, Alpha, flapdeflection] = OutForce(theta,M,q,m,AoA_spline,flapdeflection_spline,Drag_spline,v,V);
 
 % determine additional control necessary for rotation
 
@@ -85,16 +85,16 @@ end
 if const == 1
 Efficiency = zeros(1,length(q));
 for i = 1:length(q)
-%     if q(i) < 50000
-    if q(i) < 55000
+    if q(i) < 50000
+%     if q(i) < 55000
 %     if q(i) < 45000
     Efficiency(i) = rho(i)/(50000*2/v(i)^2); % dont change this
     
 
     else
 %         Efficiency(i) = .9; % for 45kPa
-%     Efficiency(i) = 1; % for 50kPa
-    Efficiency(i) = 1.1; % for 55kPa
+    Efficiency(i) = 1; % for 50kPa
+%     Efficiency(i) = 1.1; % for 55kPa
 %     Efficiency(i) = 1.2; 
     end
 end
@@ -104,19 +104,6 @@ else
 Efficiency = rho./(50000*2./v.^2); % linear rho efficiency, scaled to rho at 50000kpa
 end
 
-% Efficiency = rho./(50000*2./v_array.^2);
-
-
-
-% Efficiency4 = -((q-50000)./50000).^2 + 1; % this is an assumption of how the engine behaves
-
-% Thrust(1:nodes) =  200000;
-% Thrust = ThrustF_spline(M,Alpha).*Efficiency2;
-% Thrust = ThrustF_spline(M,Alpha).*Efficiency;
-
-% Acceleration ------------------------------------------------------------
-
-% a = ((Thrust - (Fd + g*sin(theta))) ./ m ); % acceleration
 
 %Fuel Cost ===========================================================================
 % Efficiency
@@ -129,7 +116,7 @@ Isp = ThrustF_spline(M,Alpha)./FuelF_spline(M,Alpha); % this isnt quite Isp (doe
 
 % Fueldt(1:nodes) = 4; % arbitrary
 
-Thrust = Isp.*Fueldt;
+Thrust = Isp.*Fueldt.*cos(theta); % Thrust in Direction of Motion (N)
 
 % Thrust = Isp.*Fueldt.*Efficiency4;
 
@@ -138,7 +125,7 @@ fuelchange_array = -Fueldt(1:end-1).*dt_array ;
 
 dfuel = sum(fuelchange_array); %total change in 'fuel' this is negative
 
-v_H = v.*cos(theta);
+v_H = v.*cos(Alpha);
 
 a = ((Thrust - (Fd + (6.674e-11.*5.97e24./(V + 6371e3).^2 - v_H.^2./(V + 6371e3)).*sin(theta))) ./ m );
 

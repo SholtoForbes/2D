@@ -1,4 +1,4 @@
-function [AoA_spline, flapdeflection_spline, Dragq_spline] = LiftForceInterp(communicator,communicator_trim)
+function [AoA_spline, flapdeflection_spline, Drag_spline] = LiftForceInterp(communicator,communicator_trim,const, Atmosphere,ThrustF_spline,FuelF_spline)
 %Lift Force interpolator
 
 %this module takes values from communicator and communicator-trim and finds
@@ -30,102 +30,175 @@ A = 62.77; % reference area (m^2)
 %equalises the pitching moment of flap and body to calculate lift. works
 %towards the correct AoA (and corresponding flap pitching moment)
 liftarray = [];
-for M = 6:1:12 % M
-    for Liftq = 0:0.1:10 %Lift force / q
+for v = 1500:100:3000 % Velocity (m/s)
+    for alt = 20000:1000:50000 % Altitude (m)
+        for Lift = 0:5000:90000 % Lift force (N)   max mass of vehicle is 8755.1
+        
+            liftarray(end+1,1) = v;
+            liftarray(end,2) = alt;
+            liftarray(end,3) = Lift;
+            
+            
+            c = spline( Atmosphere(:,1),  Atmosphere(:,5), alt); % Calculate speed of sound using atmospheric data
 
-        liftarray(end+1,1) = M;
-        liftarray(end,2) = Liftq;
+            rho = spline( Atmosphere(:,1),  Atmosphere(:,4), alt); % Calculate density using atmospheric data
 
-        
-%         Alpha = Alpha_spline(M, Liftq/A); % first approximation of alpha using only body lift
+            q = 0.5 * rho .* (v .^2); % Calculating Dynamic Pressure
 
-        Alpha1 = 0;
-        
-        Cl1 = Cl_spline(M,Alpha1);
-        
-        body_pitchingmoment1 = pitchingmoment_spline(M, Alpha1);% first approximation of pitchingmoment using only body lift
-        
-        Flap_lift1 = flaplift_spline(M,Alpha1,-body_pitchingmoment1);% first approximation of flap lift
-        
-        total_liftq1 = Cl1*A + Flap_lift1/50000; %first total lift force, with normalised dynamic pressure, this needs to iterate to equal the original liftq
-        
+            M = v./c; % Calculating Mach No (Descaled)
+            
+            %% Calculate Thrust Component ==================================
 
-        
-        
-        Alpha2 = 30; %first guesses of AoA
-        
-        Cl2 = Cl_spline(M,Alpha2);
-        
-        body_pitchingmoment2 = pitchingmoment_spline(M, Alpha2);% first approximation of pitchingmoment using only body lift
-        
-        Flap_lift2 = flaplift_spline(M,Alpha2,-body_pitchingmoment2);% first approximation of flap lift
-        
-        total_liftq2 = Cl2*A + Flap_lift2/50000;
-        
-        
-        
-        Alpha3 = Alpha2 - (-1+sqrt(5))/2*(Alpha2-Alpha1); %first golden section point
-        
-        Alpha4 = Alpha1 + (-1+sqrt(5))/2*(Alpha2-Alpha1); %first guesses of AoA
-
-        
-        while abs(Alpha4 - Alpha3) > 0.00005
+            if const == 1
+            Efficiency = zeros(1,length(q));
+            
+            for i = 1:length(q)
+                if q(i) < 50000
+%                 if q(i) < 55000
+            %     if q(i) < 45000
+                Efficiency(i) = rho/(50000*2/v^2); % dont change this
 
 
-        Cl3 = Cl_spline(M,Alpha3);
-        
-        body_pitchingmoment3 = pitchingmoment_spline(M, Alpha3);% first approximation of pitchingmoment using only body lift
-        
-        Flap_lift3 = flaplift_spline(M,Alpha3,-body_pitchingmoment3);% first approximation of flap lift
-        
-        total_liftq3 = Cl3*A + Flap_lift3/50000;
-
-        
-                
-        Cl4 = Cl_spline(M,Alpha4);
-        
-        body_pitchingmoment4 = pitchingmoment_spline(M, Alpha4);% first approximation of pitchingmoment using only body lift
-        
-        Flap_lift4 = flaplift_spline(M,Alpha4,-body_pitchingmoment4);% first approximation of flap lift
-        
-        total_liftq4 = Cl4*A + Flap_lift4/50000;
-        
-        
-
-            if abs(Liftq - total_liftq4) > abs(Liftq - total_liftq3)
-                Alpha2 = Alpha4;
-                Alpha4 = Alpha3;
-                Alpha3 = Alpha2 - (-1+sqrt(5))/2*(Alpha2-Alpha1);
-            else
-                Alpha1 = Alpha3;
-                Alpha3 = Alpha4;
-                Alpha4 = Alpha1 + (-1+sqrt(5))/2*(Alpha2-Alpha1);
+                else
+            %         Efficiency(i) = .9; % for 45kPa
+                Efficiency(i) = 1; % for 50kPa
+%                 Efficiency(i) = 1.1; % for 55kPa
+            %     Efficiency(i) = 1.2; 
+                end
             end
-            
-        
-            
-        end
-        
-        flapdeflection = flapdeflection_spline(M,Alpha4,-body_pitchingmoment4);
-        
-        Dragq = Cd_spline(M,Alpha4)*A +  flapdrag_spline(M,Alpha4,-body_pitchingmoment4)/50000;
-        
-        
-        liftarray(end,3) = Alpha4;
-        
-        liftarray(end,4) = flapdeflection;
-        
-        liftarray(end,5) = Dragq;
-        
 
+            else
+
+            Efficiency = rho./(50000*2./v.^2); % linear rho efficiency, scaled to rho at 50000kpa
+            end
+
+
+
+            %% Determine AoA ==============================================================
+            
+            
+            
+
+    %         Alpha = Alpha_spline(M, Liftq/A); % first approximation of alpha using only body lift
+
+            Alpha1 = 0;
+            
+            %Fuel Cost ===========================================================================
+
+            Fueldt = FuelF_spline(M,Alpha1).*Efficiency;
+
+            Isp = ThrustF_spline(M,Alpha1)./FuelF_spline(M,Alpha1); % this isnt quite Isp (doesnt have g) but doesnt matter
+
+            Thrust = Isp.*Fueldt; % Thrust (N)
+            %======================================================================
+
+            Cl1 = Cl_spline(M,Alpha1);
+
+            body_pitchingmoment1 = pitchingmoment_spline(M, Alpha1);% first approximation of pitchingmoment using only body lift
+
+            Flap_lift1 = flaplift_spline(M,Alpha1,-body_pitchingmoment1);% first approximation of flap lift
+
+            total_lift1 = Cl1*A*q + Flap_lift1 + Thrust*sin(deg2rad(Alpha1)); %first total lift force, with normalised dynamic pressure, this needs to iterate to equal the original liftq
+
+
+
+
+            Alpha2 = 10; %first guesses of AoA
+            %Fuel Cost ===========================================================================
+
+            Fueldt = FuelF_spline(M,Alpha2).*Efficiency;
+
+            Isp = ThrustF_spline(M,Alpha2)./FuelF_spline(M,Alpha2); % this isnt quite Isp (doesnt have g) but doesnt matter
+
+            Thrust = Isp.*Fueldt; % Thrust (N)
+            %======================================================================
+
+            Cl2 = Cl_spline(M,Alpha2);
+
+            body_pitchingmoment2 = pitchingmoment_spline(M, Alpha2);% first approximation of pitchingmoment using only body lift
+
+            Flap_lift2 = flaplift_spline(M,Alpha2,-body_pitchingmoment2);% first approximation of flap lift
+
+            total_lift2 = Cl2*A*q + Flap_lift2 + Thrust*sin(deg2rad(Alpha2));
+
+
+
+            Alpha3 = Alpha2 - (-1+sqrt(5))/2*(Alpha2-Alpha1); %first golden section point
+
+            Alpha4 = Alpha1 + (-1+sqrt(5))/2*(Alpha2-Alpha1); %first guesses of AoA
+
+
+            while abs(Alpha4 - Alpha3) > 0.00005
+
+            %Fuel Cost ===========================================================================
+
+            Fueldt = FuelF_spline(M,Alpha3).*Efficiency;
+
+            Isp = ThrustF_spline(M,Alpha3)./FuelF_spline(M,Alpha3); % this isnt quite Isp (doesnt have g) but doesnt matter
+
+            Thrust = Isp.*Fueldt; % Thrust (N)
+            %======================================================================
+            Cl3 = Cl_spline(M,Alpha3);
+
+            body_pitchingmoment3 = pitchingmoment_spline(M, Alpha3);% first approximation of pitchingmoment using only body lift
+
+            Flap_lift3 = flaplift_spline(M,Alpha3,-body_pitchingmoment3);% first approximation of flap lift
+
+            total_lift3 = Cl3*A*q + Flap_lift3 + Thrust*sin(deg2rad(Alpha3));
+
+
+            %Fuel Cost ===========================================================================
+
+            Fueldt = FuelF_spline(M,Alpha4).*Efficiency;
+
+            Isp = ThrustF_spline(M,Alpha4)./FuelF_spline(M,Alpha4); % this isnt quite Isp (doesnt have g) but doesnt matter
+
+            Thrust = Isp.*Fueldt; % Thrust (N)
+            %======================================================================
+            Cl4 = Cl_spline(M,Alpha4);
+
+            body_pitchingmoment4 = pitchingmoment_spline(M, Alpha4);% first approximation of pitchingmoment using only body lift
+
+            Flap_lift4 = flaplift_spline(M,Alpha4,-body_pitchingmoment4);% first approximation of flap lift
+
+            total_lift4 = Cl4*A*q + Flap_lift4 + Thrust*sin(deg2rad(Alpha4));
+
+
+
+                if abs(Lift - total_lift4) > abs(Lift - total_lift3)
+                    Alpha2 = Alpha4;
+                    Alpha4 = Alpha3;
+                    Alpha3 = Alpha2 - (-1+sqrt(5))/2*(Alpha2-Alpha1);
+                else
+                    Alpha1 = Alpha3;
+                    Alpha3 = Alpha4;
+                    Alpha4 = Alpha1 + (-1+sqrt(5))/2*(Alpha2-Alpha1);
+                end
+
+
+
+            end
+
+            flapdeflection = flapdeflection_spline(M,Alpha4,-body_pitchingmoment4);
+
+            Drag = Cd_spline(M,Alpha4)*A*q +  flapdrag_spline(M,Alpha4,-body_pitchingmoment4);
+
+
+            liftarray(end,4) = Alpha4;
+
+            liftarray(end,5) = flapdeflection;
+
+            liftarray(end,6) = Drag;
+
+        end
     end
 end
 
 % create splines
 % given M and lift force / q , find AoA, flap deflection and total drag
 % force / q
-AoA_spline = scatteredInterpolant(liftarray(:,1),liftarray(:,2),liftarray(:,3)); 
-flapdeflection_spline = scatteredInterpolant(liftarray(:,1),liftarray(:,2),liftarray(:,4));
-Dragq_spline = scatteredInterpolant(liftarray(:,1),liftarray(:,2),liftarray(:,5));
+AoA_spline = scatteredInterpolant(liftarray(:,1),liftarray(:,2),liftarray(:,3),liftarray(:,4)); 
+flapdeflection_spline = scatteredInterpolant(liftarray(:,1),liftarray(:,2),liftarray(:,3),liftarray(:,5));
+Drag_spline = scatteredInterpolant(liftarray(:,1),liftarray(:,2),liftarray(:,3),liftarray(:,6));
 
 end
