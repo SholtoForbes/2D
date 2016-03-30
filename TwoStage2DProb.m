@@ -21,7 +21,7 @@ copyfile('TwoStage2DCost.m',sprintf('../ArchivedResults/TwoStage2DCost_%s.m',Tim
 % const == 4: testing, q state variable 
 
 global const
-const = 1
+const = 3
 
 
 
@@ -176,9 +176,16 @@ end
 
 if const == 3
 bounds.lower.states = [VL ; vL; thetaL; mfuelL-3000];
+bounds.upper.states = [VU ; vU; thetaU; mfuelU];
+
+
 % bounds.lower.states = [VL ; vL; thetaL; mfuelL-1];
 % bounds.upper.states = [VU ; vU; thetaU; mfuelU+1];
-bounds.upper.states = [VU ; vU; thetaU; mfuelU];
+
+
+% bounds.lower.states = [VL ; vL*sin(deg2rad(5)); mfuelL-3000]; % FOR v_V TESTING
+% bounds.upper.states = [VU ; vU*sin(deg2rad(5));  mfuelU];
+
 end
 
 if const == 4
@@ -198,6 +205,9 @@ bounds.lower.controls = [thetadotL];
 bounds.upper.controls = [thetadotU]; 
 
 
+
+% bounds.lower.controls = [thetaL]; % FOR v_V TESTING
+% bounds.upper.controls = [thetaU]; 
 
 
 %------------------
@@ -261,10 +271,10 @@ Brac_1.bounds       = bounds;
 % cases (anecdotal experience). The node no must be found using trial and error approach, but usually
 % working down from 100 works well. 
 
-algorithm.nodes		= [89];	% use for 50kPa trajectory (doesnt
+% algorithm.nodes		= [89];	% use for 50kPa trajectory (doesnt
 % produce exact results for 1000kg fuel) seems to like odd numbers
-% algorithm.nodes		= [87];	% works a little better for 45,55kpa
-
+algorithm.nodes		= [87];	% works for 45kpa
+% algorithm.nodes		= [88]; % works for 55kPa
 
 global nodes
 
@@ -276,12 +286,11 @@ nodes = algorithm.nodes;
 tfGuess = tfMax; % this needs to be close to make sure solution stays withing Out_Force bounds
 
 if const == 1
-% guess.states(1,:) = [25000 ,35000]; % for 50kPa end point of 35km is a
-% sweet spot which allows max payload, while net ISP does not go below zero
+% guess.states(1,:) = [25000 ,35000]; % for 50kPa const q
 % guess.states(1,:) = [26000 ,35000]; % for 55kPa
-guess.states(1,:) = [25500 ,35000]; % for 55kPa 1000kg fuel
 % guess.states(1,:) = [25000 ,34900];
-% guess.states(1,:) = [26000 ,35000]; % 
+guess.states(1,:) = [25200 ,35000]; % Works fairly well for 50kPa limited, and 55kPa/45kPa, end point of 35km is a
+% sweet spot which allows max payload, while net ISP does not go below zero
 
 else
 guess.states(1,:) = [0 ,Vf]; % for constant 50kPa
@@ -293,6 +302,9 @@ end
 % guess.states(1,:) = [25000 ,35000]; %V
 
 guess.states(2,:) = [v0, vf]; %v
+
+% guess.states(2,:) = [v0, vf].*sin(deg2rad(5)); %v FOR v_V TESTING
+
 
 guess.states(3,:) = [atan((Vf-V0)/(Hf-H0)),atan((Vf-V0)/(Hf-H0))]; 
 
@@ -525,7 +537,7 @@ xlabel('time (s)')
 
 hold on
 ax1 = gca; % current axes
-
+xlim([min(t) max(t)]);
 
 line(t, rad2deg(theta),'Parent',ax1,'Color','k', 'LineStyle','-')
 
@@ -551,7 +563,7 @@ set(h, 'Position', rect1)
 subplot(2,6,[10,12])
 xlabel('time (s)')
 ax2 = gca;
-
+xlim([min(t) max(t)]);
 line(t, Alpha,'Parent',ax2,'Color','k', 'LineStyle','-')
 
 line(t, flapdeflection,'Parent',ax2,'Color','k', 'LineStyle','--')

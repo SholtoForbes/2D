@@ -53,15 +53,15 @@ for v = 1500:100:3000 % Velocity (m/s)
             Efficiency = zeros(1,length(q));
             
             for i = 1:length(q)
-                if q(i) < 50000
+%                 if q(i) < 50000
 %                 if q(i) < 55000
-            %     if q(i) < 45000
+                if q(i) < 45000
                 Efficiency(i) = rho/(50000*2/v^2); % dont change this
 
 
                 else
-            %         Efficiency(i) = .9; % for 45kPa
-                Efficiency(i) = 1; % for 50kPa
+                    Efficiency(i) = .9; % for 45kPa
+%                 Efficiency(i) = 1; % for 50kPa
 %                 Efficiency(i) = 1.1; % for 55kPa
             %     Efficiency(i) = 1.2; 
                 end

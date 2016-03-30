@@ -7,25 +7,23 @@ ThirdStageData = dlmread('thirdstage.dat');
 
 Traj = txt2mat('TRAJ3.ASC');
 
+set(gcf,'position',[300 300 800 600])
 hold on
 
-subplot(2,5,[1,5])
+
+plot(Traj(2:end-1,1),Traj(2:end-1,11)/1000, 'LineStyle', '-','Color','k', 'lineWidth', 2.0) % trajectory
 
 
-plot(Traj(2:end-1,1),Traj(2:end-1,11), 'LineStyle', '-','Color','k', 'lineWidth', 2.0) % trajectory
-ylabel('Altitude (m)')
+
+
 xlabel('time (s)')
+plot(Traj(2:end-1,1),Traj(2:end-1,8), 'LineStyle', '-','Color',[.5,.5,.5], 'lineWidth', 2.0) % trajectory angle
+plot(Traj(2:end-1,1),Traj(2:end-1,5)/100, 'LineStyle', ':','Color','k', 'lineWidth', 2.0) % mass
 
-subplot(2,5,[6,10])
-ax2 = gca;
-xlabel('time (s)')
-line(Traj(2:end-1,1),Traj(2:end-1,8), 'LineStyle', '-','Color','k', 'lineWidth', 2.0) % trajectory angle
-line(Traj(2:end-1,1),Traj(2:end-1,5)/100, 'LineStyle', ':','Color','k', 'lineWidth', 2.0) % mass
+plot(Traj(2:end-1,1),Traj(2:end-1,12)/100, 'LineStyle', '--','Color','k', 'lineWidth', 2.0) % velocity
 
-line(Traj(2:end-1,1),Traj(2:end-1,12)/100, 'LineStyle', '--','Color','k', 'lineWidth', 2.0) % velocity
+plot(Traj(2:end-1,1),Traj(2:end-1,3)/1000, 'LineStyle', '-.','Color','k', 'lineWidth', 2.0) %dynamic pressure
 
-line(Traj(2:end-1,1),Traj(2:end-1,3)/1000, 'LineStyle', '-.','Color','k', 'lineWidth', 2.0) %dynamic pressure
+legend(  'Altitude (km)', 'Trajectory Angle (degrees)', 'Mass (kg x 10^2)', 'Velocity (m/s x 10^2)', 'Dynamic Pressure (kPa)')
 
-legend(ax2,  'Trajectory Angle (degrees)', 'Mass (kg x 10^2)', 'Velocity (m/s x 10^2)', 'Dynamic Pressure (kPa)')
-
-
+axis([0,Traj(end-1,1),0,Traj(end-1,11)/1000])

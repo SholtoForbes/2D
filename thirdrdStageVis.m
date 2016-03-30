@@ -93,7 +93,7 @@ end
 
 
 Alt = [20000:2500:40000];
-Angle = [0:10];
+Angle = [0:1:10];
 Vel = [2000:200:3200];
 
 [meshAlt,meshAngle,meshVel] = meshgrid(Alt,Angle,Vel);
