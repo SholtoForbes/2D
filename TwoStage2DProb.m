@@ -21,7 +21,7 @@ copyfile('TwoStage2DCost.m',sprintf('../ArchivedResults/TwoStage2DCost_%s.m',Tim
 % const == 4: testing, q state variable 
 
 global const
-const = 3
+const = 1
 
 
 
@@ -63,9 +63,6 @@ global Drag_spline
 
 ThirdStageData = dlmread('thirdstage.dat');
 global ThirdStagePayloadSpline
-% ThirdStagePayloadSpline = scatteredInterpolant(ThirdStageData(:,1),ThirdStageData(:,2),ThirdStageData(:,3));
-
-% ThirdStagePayloadSpline = scatteredInterpolant(ThirdStageData(:,1),ThirdStageData(:,2),ThirdStageData(:,3),ThirdStageData(:,4));
 ThirdStagePayloadSpline = scatteredInterpolant(ThirdStageData(:,1),ThirdStageData(:,2),ThirdStageData(:,3),ThirdStageData(:,5));
 
 
@@ -248,13 +245,6 @@ end
 
 bounds.upper.events = bounds.lower.events;      % equality event function bounds
 
-
-
-% bounds.lower.constraints = 30000;
-% bounds.upper.constraints = 70000;
-% PATH BOUNDS IF NECESSARY
-
-
 %============================================
 % Define the problem using DIDO expresssions:
 %============================================
@@ -289,9 +279,9 @@ if const == 1
 % guess.states(1,:) = [25000 ,35000]; % for 50kPa const q
 % guess.states(1,:) = [26000 ,35000]; % for 55kPa
 % guess.states(1,:) = [25000 ,34900];
-guess.states(1,:) = [25200 ,35000]; % Works fairly well for 50kPa limited, and 55kPa/45kPa, end point of 35km is a
+% guess.states(1,:) = [25200 ,35000]; % Works fairly well for 50kPa limited, and 55kPa/45kPa, end point of 35km is a
 % sweet spot which allows max payload, while net ISP does not go below zero
-
+guess.states(1,:) = [25300 ,35300];
 else
 guess.states(1,:) = [0 ,Vf]; % for constant 50kPa
 end

@@ -826,9 +826,9 @@ end
 %% Detect line termination character
 
 if arg.val.InfoLevel >= 1
-    hw = waitbar(0,'detect line termination character ...');
-    set(hw,'Name',[mfilename ' - ' fnShort]);
-    hasWaitbar = true;
+%     hw = waitbar(0,'detect line termination character ...');
+%     set(hw,'Name',[mfilename ' - ' fnShort]);
+    hasWaitbar = false;
 else
     hasWaitbar = false;
 end
@@ -1626,7 +1626,7 @@ if strcmpi(readMode,'line') || ~isempty(errmsg)
 end % if
 
 if arg.val.InfoLevel >= 1
-    close(hw)
+%     close(hw)
 end
 
 

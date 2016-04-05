@@ -292,6 +292,10 @@ colormap(gray)
 colormap(flipud(colormap))
 hx = slice(meshAngle2,meshVel2,meshAlt2./1000,threeDMAT,[],[2600:100:3000],[])
 
+% [Xq,Yq,Zq] = meshgrid([0:.5:5],[2600:100:3000],[20000:500:40000]);
+% threeDMATint = interp3(meshAngle2,meshVel2,meshAlt2,threeDMAT,Xq,Yq,Zq);
+% hx = slice(Xq,Yq,Zq/1000,threeDMATint,[],[2600:100:3000],[]);
+
 caxis([220 340]) 
 c=colorbar('northoutside')
 c.LimitsMode = 'manual'
