@@ -61,10 +61,17 @@ global Drag_spline
 
 
 
-ThirdStageData = dlmread('thirdstage.dat');
-global ThirdStagePayloadSpline
-ThirdStagePayloadSpline = scatteredInterpolant(ThirdStageData(:,1),ThirdStageData(:,2),ThirdStageData(:,3),ThirdStageData(:,5));
 
+ThirdStageData = dlmread('thirdstage.dat');
+% global ThirdStagePayloadSpline
+ThirdStagePayloadSpline = scatteredInterpolant(ThirdStageData(:,1),ThirdStageData(:,2),ThirdStageData(:,3),ThirdStageData(:,5)); % not actually a spline...
+
+%TEST
+global alt_list
+global gamma_list
+global v_list
+global payload_array
+[alt_list,gamma_list,v_list,payload_array] = thirdstagemanipulation();
 
 
 %=============================================== 
@@ -281,7 +288,7 @@ if const == 1
 % guess.states(1,:) = [25000 ,34900];
 % guess.states(1,:) = [25200 ,35000]; % Works fairly well for 50kPa limited, and 55kPa/45kPa, end point of 35km is a
 % sweet spot which allows max payload, while net ISP does not go below zero
-guess.states(1,:) = [25300 ,35300];
+guess.states(1,:) = [26500 ,34900];
 else
 guess.states(1,:) = [0 ,Vf]; % for constant 50kPa
 end

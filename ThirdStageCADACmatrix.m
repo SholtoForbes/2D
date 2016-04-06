@@ -1,14 +1,14 @@
 clear all
 j = 1;
 payload_matrix = [];
-for Alt = 34500:100:35500
-for theta = 2.5:.1:3
-for v = 2700:50:2900
+for Alt = 35100:50:35500
+for theta = 2.5:.05:3
+for v = 2700:25:2900
 
 i=1;
 AoA_temp = [];
 ThirdStage_temp = [];
-for AoA = 0:1:20
+for AoA = 10:1:15
 AoA_temp(i) = AoA;
 ThirdStage_temp(i) = thirdstagesingle(AoA, Alt, theta, v);
 i=i+1;
@@ -25,4 +25,4 @@ end
 end
 
 
-dlmwrite('thirdstagearound35km.dat', payload_matrix,'delimiter','\t')
+dlmwrite('thirdstagearound35kmextrafine.dat', payload_matrix,'delimiter','\t')
