@@ -75,7 +75,7 @@ thetadot  = primal.controls(1, :);
 
 
 
-% global ThirdStagePayloadMass
+global ThirdStagePayloadMass
 % 
 % 
 % if V(end) > 40000;

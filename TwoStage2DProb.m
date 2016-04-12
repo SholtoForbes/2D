@@ -268,10 +268,12 @@ Brac_1.bounds       = bounds;
 % cases (anecdotal experience). The node no must be found using trial and error approach, but usually
 % working down from 100 works well. 
 
-% algorithm.nodes		= [89];	% use for 50kPa trajectory (doesnt
-% produce exact results for 1000kg fuel) seems to like odd numbers
-algorithm.nodes		= [87];	% works for 45kpa
-% algorithm.nodes		= [88]; % works for 55kPa
+
+% use 
+% 87 for const 50kPa
+%86 -88 for 50kPa limited
+algorithm.nodes		= [88];%for 55kPa and 45kPa limited
+
 
 global nodes
 
@@ -284,11 +286,14 @@ tfGuess = tfMax; % this needs to be close to make sure solution stays withing Ou
 
 if const == 1
 % guess.states(1,:) = [25000 ,35000]; % for 50kPa const q
-% guess.states(1,:) = [26000 ,35000]; % for 55kPa
-% guess.states(1,:) = [25000 ,34900];
-% guess.states(1,:) = [25200 ,35000]; % Works fairly well for 50kPa limited, and 55kPa/45kPa, end point of 35km is a
-% sweet spot which allows max payload, while net ISP does not go below zero
-guess.states(1,:) = [26500 ,34900];
+
+
+% guess.states(1,:) =
+% [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2) ,34900]; 50kpa limited
+guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000/v0^2)+10 ,34900]; %55kPa limited
+
+% guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*45000/v0^2) ,34900];%45kPa limited
+
 else
 guess.states(1,:) = [0 ,Vf]; % for constant 50kPa
 end

@@ -1,6 +1,6 @@
 function [x,y,z,V] = thirdstagemanipulation()
 
-ThirdStageData = dlmread('thirdstage -old.dat');
+ThirdStageData = dlmread('thirdstage.dat');
 ThirdStageData = sortrows(ThirdStageData);
 x = [20000:2500:40000];
 y = [-6:10];
