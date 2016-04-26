@@ -654,8 +654,8 @@ mu_u = dual.controls;
 
 figure(5)
 
-plot(t,mu_1,t,mu_2,t,mu_3,t,mu_4,t,mu_u);
-legend('mu_1','mu_2','mu_3','mu_4','mu_u');
+plot(t,dLHdu,t,mu_1,t,mu_2,t,mu_3,t,mu_4,t,mu_u);
+legend('dLHdu','mu_1','mu_2','mu_3','mu_4','mu_u');
 title('Validation')
 % ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 % FORWARD SIMULATION
