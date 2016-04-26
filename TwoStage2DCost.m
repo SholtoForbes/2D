@@ -1,4 +1,4 @@
-function [EndpointCost, RunningCost] = Brac1Cost(primal, algorithm)
+function [EndpointCost, RunningCost] = TwoStage2d(primal, algorithm)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Cost function for Rocket-Scramjet-Rocket System
 
@@ -72,8 +72,6 @@ thetadot  = primal.controls(1, :);
 
 % THIRD STAGE ======================================================
 % NEED TO WATCH THIS, IT CAN EXTRAPOLATE BUT IT DOESNT DO IT WELL
-
-
 
 global ThirdStagePayloadMass
 % 

@@ -1,7 +1,7 @@
 % ALV2 Velocity Calculator
 clear all
 
-rTarget = 29000;
+rTarget = 27000;
 gammaTarget = 0;
 
 

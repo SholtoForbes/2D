@@ -1,4 +1,4 @@
-function endpointFunction = Brac1Events(primal)
+function endpointFunction = TwoStage2d(primal)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Event Function for 2D Problem
 % Written by Sholto Forbes

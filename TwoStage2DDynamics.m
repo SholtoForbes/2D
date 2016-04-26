@@ -1,4 +1,4 @@
-function XDOT = Brac1Dynamics(primal)
+function XDOT = TwoStage2d(primal)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 2D Dynamics
 
@@ -23,18 +23,13 @@ v = primal.states(2,:) ;
 
 vdot = a;
 
-
 theta = primal.states(3,:) ; 
 
-
 % vdot = a.*sin(theta); % FOR v_V TESTING
-
 
 if const == 2
 Qdot = heating_rate;
 end
-
-
 
 mfueldot = -Fueldt ; 
 

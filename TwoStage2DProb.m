@@ -255,11 +255,11 @@ bounds.upper.events = bounds.lower.events;      % equality event function bounds
 %============================================
 % Define the problem using DIDO expresssions:
 %============================================
-Brac_1.cost 		= 'TwoStage2DCost';
-Brac_1.dynamics	    = 'TwoStage2DDynamics';
-Brac_1.events		= 'TwoStage2DEvents';	
+TwoStage2d.cost 		= 'TwoStage2DCost';
+TwoStage2d.dynamics	    = 'TwoStage2DDynamics';
+TwoStage2d.events		= 'TwoStage2DEvents';	
 
-Brac_1.bounds       = bounds;
+TwoStage2d.bounds       = bounds;
 
 
 % Node Definition ====================================================
@@ -346,7 +346,7 @@ algorithm.guess = guess;
 % Call dido
 % =====================================================================
 tStart= cputime;    % start CPU clock 
-[cost, primal, dual] = dido(Brac_1, algorithm);
+[cost, primal, dual] = dido(TwoStage2d, algorithm);
 runTime = cputime-tStart
 % ===================================================================
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -394,6 +394,7 @@ global Thrust
 global flapdeflection
 global Alpha
 global ThirdStagePayloadMass
+global a
 
 global heating_rate
 global Q
@@ -612,69 +613,6 @@ figure(4)
 evalc('ThirdStageVisTrajectory(AoA, V(end), rad2deg(theta(end)), v(end));');
 
 
-% hold on
-% subplot(2,5,[6,10])
-% plot(t, Alpha)
-
-
-
-% 
-% %------ Forward Simulation -----------
-% 
-% % potentially need to replace this with CADAC
-% 
-% % Import Controls, Time and Initial States
-% % these are the only things carried over from the PS method
-% tau_Forward = tau;
-% Mc_Forward = Mc;
-% t_Forward = t;
-% h_Forward(1) = h(1);
-% v_Forward(1) = v(1);
-% vh_Forward(1) = vh(1);
-% vv_Forward(1) = vv(1);
-% omega_Forward(1) = omega(1);
-% theta_Forward(1) = theta(1);
-% %--------------
-
-
-% Iy_Forward = 1.;
-% m_Forward = 1000.;
-% 
-% Fx_Forward = 0.; %Taking these out for testing
-% Fz_Forward = 0.;
-% My_Forward = 0.;
-
-
-
-
-% simple forward method
-% for i=2:length(Mc_Forward)
-% omegadot_Forward(i-1) = (My_Forward  + Mc_Forward(i-1))/Iy_Forward;
-% omega_Forward(i) = omegadot_Forward(i-1)*(t_Forward(i) - t_Forward(i-1)) + omega_Forward(i-1);
-% 
-% thetadot_Forward(i-1) = omega_Forward(i-1);
-% theta_Forward(i) = thetadot_Forward(i-1)*(t_Forward(i) - t_Forward(i-1)) + theta_Forward(i-1);
-% 
-%     
-% vhdot_Forward(i-1) = (Fx_Forward.*cos(theta_Forward(i-1)) + Fz_Forward.*sin(theta_Forward(i-1))  + tau_Forward(i-1).*cos(theta_Forward(i-1)))/m_Forward;
-% vh_Forward(i) = vhdot_Forward(i-1)*(t_Forward(i) - t_Forward(i-1)) + vh_Forward(i-1);
-% 
-% vvdot_Forward(i-1) = (-Fx_Forward.*sin(theta_Forward(i-1)) + Fz_Forward.*cos(theta_Forward(i-1))  + tau_Forward(i-1).*sin(theta_Forward(i-1)))/m_Forward;
-% vv_Forward(i) = vvdot_Forward(i-1)*(t_Forward(i) - t_Forward(i-1)) + vv_Forward(i-1);
-% 
-% 
-% hdot_Forward(i-1) = vh_Forward(i-1);
-% h_Forward(i) = hdot_Forward(i-1)*(t_Forward(i) - t_Forward(i-1)) + h_Forward(i-1);
-% 
-% vdot_Forward(i-1) = vv_Forward(i-1);
-% v_Forward(i) = vdot_Forward(i-1)*(t_Forward(i) - t_Forward(i-1)) + v_Forward(i-1);
-% 
-% end
-% 
-% 
-% figure(2)
-% plot(h_Forward, v_Forward)
-
 
 % save results
 dlmwrite('primal.txt', [primal.states;primal.controls;primal.nodes;q;IspNet;Alpha]);
@@ -688,5 +626,67 @@ copyfile('payload.txt',sprintf('../ArchivedResults/payload_%s.txt',Timestamp))
 primal_old = primal;
 
 
+
+
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+% TESTING AND VALIDATION
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+% If these are valid then solution is a KKT point
+
+%GRADIENT NORMALITY CONDITION
+
+% Lagrangian of the Hamiltonian 
+LH = dual.Hamiltonian + dot(dual.states,primal.states) + dual.controls.*primal.controls;
+
+dLHdu = diff(LH)./diff(primal.controls); % Should be close to zero, this is a KKT
+
+%COMPLEMENTARY CONDITIONS
+% These should be zero if the state or control is within set bounds
+% <=0 if at min bound, >=0 if at max bound
+
+mu_1 = dual.states(1,:);
+mu_2 = dual.states(2,:);
+mu_3 = dual.states(3,:);
+mu_4 = dual.states(4,:);
+
+mu_u = dual.controls;
+
+
+figure(5)
+
+plot(t,mu_1,t,mu_2,t,mu_3,t,mu_4,t,mu_u);
+legend('mu_1','mu_2','mu_3','mu_4','mu_u');
+title('Validation')
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+% FORWARD SIMULATION
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+% This simply tests that the system dynamics hold, as the
+% Pseudospectral method may not converge to a realistic
+% solution
+
+theta_F = cumtrapz(t,thetadot);
+theta_F = theta_F + theta(1);
+
+v_F = cumtrapz(t,a);
+v_F = v_F + v(1);
+
+V_F = cumtrapz(t,v_F.*sin(theta_F));
+V_F = V_F + V(1);
+
+mfuel_F = cumtrapz(t,-Fueldt);
+mfuel_F = mfuel_F + mfuel(1);
+
+figure(6)
+
+subplot(4,1,1)
+plot(t,theta_F,t,theta);
+title('Forward Simulation Comparison');
+
+subplot(4,1,2)
+plot(t,v_F,t,v);
+subplot(4,1,3)
+plot(t,V_F,t,V);
+subplot(4,1,4)
+plot(t,mfuel_F,t,mfuel);
 
 
