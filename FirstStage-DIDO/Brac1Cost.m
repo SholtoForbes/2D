@@ -5,9 +5,9 @@ function [EndpointCost, RunningCost] = Brac1Cost(primal)
 % I. Michael Ross
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-tf = primal.nodes(end);     
+vf = primal.states(2,end);   
 
-EndpointCost = tf;
+EndpointCost = -vf;
 RunningCost = 0;
 
 % That's it!

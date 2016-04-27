@@ -19,14 +19,16 @@ clear all;				% always a good idea to begin with this!
 % bounds the state and control variables
 %---------------------------------------
 
-xL = 0; xU = 20;
-yL = 0; yU = 20;
-vL = 0; vU = 20;
 
-bounds.lower.states = [xL; yL; vL];
-bounds.upper.states = [xU; yU; vU];
+VL = 0; VU = 100;
+vL = 0; vU = 30;
+thetaL = 0; thetaU = deg2rad(90);
+mfuelL = 0; mfuelU = 10;
 
-bounds.lower.controls = [0];
+bounds.lower.states = [VL; vL; thetaL; mfuelL];
+bounds.upper.states = [VU; vU; thetaU; mfuelU];
+
+bounds.lower.controls = [-pi];
 bounds.upper.controls = [pi];
 
 
@@ -45,7 +47,7 @@ bounds.upper.time	= [t0; tfMax];			    % Fixed time at t0 and a possibly free ti
 %-------------------------------------------
 % See events file for definition of events function
 
-bounds.lower.events = [0; 0; 0; 10; 10];
+bounds.lower.events = [0; 0; 5; 10; 0; 0];
 bounds.upper.events = bounds.lower.events;      % equality event function bounds
 
 
@@ -60,7 +62,7 @@ Brac_1.events		= 'Brac1Events';
 Brac_1.bounds       = bounds;
 %====================================================
 
-algorithm.nodes		= [16];					    % represents some measure of desired solution accuracy
+algorithm.nodes		= [90];					    % represents some measure of desired solution accuracy
 
 % Call dido
 tStart= cputime;    % start CPU clock 
@@ -73,18 +75,19 @@ runTime = cputime-tStart
 %          OUTPUT             %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-x = primal.states(1,:);
-y = primal.states(2,:);
-v = primal.states(3,:);
+V = primal.states(1,:);
+v = primal.states(2,:);
+theta = primal.states(3,:);
+mfuel = primal.states(4,:);
 t = primal.nodes;
 
 %=============================================
 figure;
-plot(t, x, '-o', t, y, '-x', t, v, '-.');
+plot(t, V, '-o', t, v, '-x', t, theta, '-.' ,t ,mfuel, '--');
 title('Brachistochrone States: Brac 1')
 xlabel('time');
 ylabel('states');
-legend('x', 'y', 'v');
+legend('V', 'v', 'theta', 'mfuel');
 
 %----------------------------------------------
 figure;

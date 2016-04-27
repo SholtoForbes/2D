@@ -18,11 +18,11 @@ thetadot  = primal.controls;
 Vdot = v.*sin(theta);
 						
 
-T = 10; %Thrust
+T = 1; %Thrust
 m = 1 + mfuel;
-vdot = T./m - 1*sin(theta)./m;   % 'faux gravity' 
+vdot = T./m;  
 
-mfueldot = -1*ones(1,length(primal.nodes));% mass flow rate
+mfueldot = -1;% mass flow rate
 %======================================================
 XDOT = [Vdot; vdot; thetadot; mfueldot];
 %======================================================

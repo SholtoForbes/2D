@@ -633,12 +633,8 @@ primal_old = primal;
 % ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 % If these are valid then solution is a KKT point
 
-%GRADIENT NORMALITY CONDITION
 
-% Lagrangian of the Hamiltonian 
-LH = dual.Hamiltonian + dot(dual.states,primal.states) + dual.controls.*primal.controls;
 
-dLHdu = diff(LH)./diff(primal.controls); % Should be close to zero, this is a KKT
 
 %COMPLEMENTARY CONDITIONS
 % These should be zero if the state or control is within set bounds
@@ -650,6 +646,12 @@ mu_3 = dual.states(3,:);
 mu_4 = dual.states(4,:);
 
 mu_u = dual.controls;
+
+
+%GRADIENT NORMALITY CONDITION
+
+% Lagrangian of the Hamiltonian 
+dLHdu = dual.dynamics(3,:) + mu_u; % NEED TO CHECK THAT THIS IS THE CORRECT ANALYTICAL SOLUTION
 
 
 figure(5)
