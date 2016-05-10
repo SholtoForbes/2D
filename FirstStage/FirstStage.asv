@@ -1,18 +1,16 @@
 
 
 clc; clear;
-clear all;
 addpath ../TrajOpt-master
 
-% mTotal = 15000;   %(kg)  %Total lift-off mass
-mRocket = 23000;
-mFuel = 0.8*mRocket;  %(kg)  %mass of the fuel
-mSpartan = 8755.1;
-mTotal = mSpartan + mRocket;
-mEmpty = mRocket-mFuel;  %(kg)  %mass of the rocket (without fuel)
-global Tmax
-% Tmax = 200000;    %(N)   %Maximum thrust
-Tmax = 400000;
+%%%% Assumptions:
+% SpaceX Falcon 9 rocket:
+% http://www.spacex.com/falcon9
+%
+mTotal = 15000;   %(kg)  %Total lift-off mass
+mFuel = 0.8*mTotal;  %(kg)  %mass of the fuel
+mEmpty = mTotal-mFuel;  %(kg)  %mass of the rocket (without fuel)
+Tmax = 200000;    %(N)   %Maximum thrust
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 %                        Pre-Pitchover Simulation                         %
@@ -29,15 +27,13 @@ y0 = [h0_prepitch, v0_prepitch, m0_prepitch, gamma0_prepitch];
 
 % % FOR TESTING
 phase = 'postpitch';
-Tratio = 1.;
-tspan = [0 (y(end,3)-(mEmpty+mSpartan))/(Tratio*60*Tmax/200000)];
+tspan = [0 180];
 postpitch0 = [y(end,1), y(end,2), y(end,3), deg2rad(89)];
-[t_postpitch, postpitch] = ode45(@(t,postpitch) rocketDynamics(postpitch,Tratio*Tmax,phase), tspan, postpitch0);
+[t_postpitch, postpitch] = ode45(@(t,postpitch) rocketDynamics(postpitch,.88*Tmax,phase), tspan, postpitch0);
 
 y
 postpitch
-postpitch(end,4)
-% 
+
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 %                        Problem Bounds                                   %
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
@@ -47,13 +43,13 @@ v0 = y(end,2);  %Rocket starts stationary
 m0 = y(end,3);  %Rocket starts full of fuel
 gamma0 = deg2rad(89);    % pitchover 
 
-vF = 2000;  
+vF = 2000;  %Trying to reach maximum height
 mF = mEmpty;  %Assume that we use all of the fuel
 gammaF = 0;
-hF = 28000;
+hF = 62000;
 
 hLow = 0;   %Cannot go through the earth
-hUpp = 80000;  
+hUpp = 80000;  %To the moon!
 
 vLow = 0; %Just look at the trajectory as it goes up
 vUpp = inf;  % Go as fast as you can
@@ -92,9 +88,9 @@ P.bounds.control.upp = uUpp;
 %                           Initial Guess                                 %
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 hGuess = 2e4;   %(m) guess at the maximum height reached
-P.guess.time = [0, 140];  %(s)
+P.guess.time = [0, 210];  %(s)
 P.guess.state = [ [h0;v0;m0;gamma0],  [hGuess;vF;mF;gammaF] ];
-P.guess.control = [ 1.0*uUpp, 1.0*uUpp ];
+P.guess.control = [ 0.88*uUpp, 0.88*uUpp ];
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 %                 Objective and Dynamic functions                         %
@@ -135,14 +131,14 @@ switch method
         P.options(1).defaultAccuracy = 'high';
         P.options(1).nlpOpt.MaxFunEvals = 2e5;
         P.options(1).nlpOpt.MaxIter = 1e5;
-
+%         P.options(1).rungeKutta.nColPts = 70;
 
         
         P.options(2).method = 'rungeKutta';
-        P.options(2).defaultAccuracy = 'high';
+        P.options(2).defaultAccuracy = 'h';
         P.options(2).nlpOpt.MaxFunEvals = 2e5;
         P.options(2).nlpOpt.MaxIter = 1e5;
-
+%         P.options(2).rungeKutta.nColPts = 70;
         
     case 'chebyshev'
         

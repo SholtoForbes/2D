@@ -61,21 +61,12 @@ for i = 1:length(dt_array)
 end
 
 
-
-% mstruct = 8755.1 - 994 + max(Q)/(10^5); %variable structural mass
-% m = mfuel + mstruct;
-
 % Control
 
 % determine aerodynamics necessary for trim
 [Fd, Alpha, flapdeflection] = OutForce(theta,M,q,m,AoA_spline,flapdeflection_spline,Drag_spline,v,V);
 
-% determine additional control necessary for rotation
-
-%thetadot
-
-
-
+% Fd = 1.1*Fd; % for L/D testing
 
 
 
@@ -85,16 +76,16 @@ end
 if const == 1
 Efficiency = zeros(1,length(q));
 for i = 1:length(q)
-%     if q(i) < 50000
-    if q(i) < 55000
+    if q(i) < 50000
+%     if q(i) < 55000
 %     if q(i) < 45000
     Efficiency(i) = rho(i)/(50000*2/v(i)^2); % dont change this
     
 
     else
 %         Efficiency(i) = .9; % for 45kPa
-%     Efficiency(i) = 1; % for 50kPa
-    Efficiency(i) = 1.1; % for 55kPa
+    Efficiency(i) = 1; % for 50kPa
+%     Efficiency(i) = 1.1; % for 55kPa
 %     Efficiency(i) = 1.2; 
     end
 end

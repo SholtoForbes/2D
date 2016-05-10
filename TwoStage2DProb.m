@@ -20,6 +20,10 @@ copyfile('TwoStage2DCost.m',sprintf('../ArchivedResults/TwoStage2DCost_%s.m',Tim
 
 % const == 4: testing, q state variable 
 
+% const == 5: fixed start position, not implemented properly yet, all but
+% events
+% should be the same as const==1
+
 global const
 const = 1
 
@@ -233,8 +237,10 @@ bounds.upper.time	= [t0; tfMax];
 %-------------------------------------------
 % See events file for definition of events function
 if const == 1 
-bounds.lower.events = [v0; mfuelU];
-% bounds.lower.events = [v0; mfuelU; mfuelL];
+bounds.lower.events = [v0; mfuelU]; % previous, working
+
+
+
 end
 
 if const == 2
@@ -248,6 +254,12 @@ end
 
 if const == 4
 bounds.lower.events = [v0; vf; mfuelU; 27000; 50000]; 
+end
+
+if const == 5
+Vinit = 27000;
+gammainit = 0;
+bounds.lower.events = [v0; mfuelU; Vinit; gammainit];
 end
 
 bounds.upper.events = bounds.lower.events;      % equality event function bounds
@@ -272,7 +284,9 @@ TwoStage2d.bounds       = bounds;
 % use 
 % 87 for const 50kPa
 %86 -88 for 50kPa limited
-algorithm.nodes		= [88];%for 55kPa and 45kPa limited
+algorithm.nodes		= [86];
+% algorithm.nodes		= [88];%for 55kPa and 45kPa limited
+
 
 
 global nodes

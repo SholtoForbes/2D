@@ -1,31 +1,18 @@
-function dz = rocketDynamics(z,u)
-% dz = rocketDynamics(z,u)
-%
-% The basic dynamics and drag coefficient data are from the paper:
-%
-%   "Drag-law Effects in the Goddard Problem"
-%   P. Tsiotras, H. Kelley, H.Kelley    1991
-%
-% INPUTS:
-%   z = [3,n] = [h; v; m] = state vector
-%   u = [1,n] = [T] = control = thrust
-%
+function dz = rocketDynamics(z,u,phase)
+
 
 h = z(1,:);   %Height
 v = z(2,:);   %Velocity
 m = z(3,:);   %Mass
 gamma = z(4,:);
 
+
 if isnan(gamma)
-    gamma = 90;
+    gamma = deg2rad(90)
 end
 
 T = u(1,:);        %Thrust
-% alpha = u(2,:);
 
-%%%% Density of air:
-% altitude = [0, 1e4, 2e4, 3e4, 4e4];  %(m)  %height above the ground
-% density = [1.23, 0.41, 0.089, 0.018, 0.004];   %(kg/m^3)  density of air
 density = 1.474085291*(0.9998541833.^h);  %Data fit off of wolfram alpha
 
 %%%% Drag coefficient, calculated from paper:
@@ -48,8 +35,8 @@ G = 6.67e-11; %(Nm^2/kg^2) gravitational constant
 g = G*mEarth./((h+rEarth).^2);
 
 %%%% Complete the calculation:
-
-dm = -60*ones(1,length(h));   %mass rate
+global Tmax
+dm = -60*ones(1,length(h)).*T/Tmax.*Tmax/200000;   %mass rate
 
 
 alpha = 0*ones(1,length(h));
@@ -57,18 +44,22 @@ alpha = 0*ones(1,length(h));
 xi = 0*ones(1,length(h));
 phi = 0*ones(1,length(h));
 zeta = 0*ones(1,length(h));
-% gamma = 90*ones(1,length(h));
 L = 0*ones(1,length(h));
 
-% h,xi,phi,gamma,v,zeta,L,D,T,m,alpha
-% h
-% gamma
-% v
+
+switch phase
+    case 'prepitch'
+    gamma = deg2rad(90)*ones(1,length(h)); % Control Trajectory Angle 
+    case 'postpitch'
+    %Do nothing
+end
 
 
 [dr,dxi,dphi,dgamma,dv,dzeta] = RotCoords(h+rEarth,xi,phi,gamma,v,zeta,L,D,T,m,alpha);
 
-
+if isnan(dgamma)
+dgamma = 0;
+end
 
 dz = [dr;dv;dm;dgamma];
 

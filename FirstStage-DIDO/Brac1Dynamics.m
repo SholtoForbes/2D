@@ -1,22 +1,31 @@
 function XDOT = Brac1Dynamics(primal)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Dynamics for the Brac:1 Formulation of the Brachistochrone Prob
-% Template for A Beginner's Guide to DIDO 
-% I. Michael Ross
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+global hscale
+global mscale
+global vscale
+global Tscale
 
-h = primal.states(1,:);	    
-v = primal.states(2,:);		
+h = primal.states(1,:)*hscale;	    
+v = primal.states(2,:)*vscale;		
 gamma = primal.states(3,:);		
-mfuel = primal.states(4,:);	
+m = primal.states(4,:)*mscale;	
 
-z = [h; v; gamma; mfuel];
-
-T  = primal.controls;
+z = [h; v; gamma; m];
 
 
-[rdot,vdot,gammadot,mfueldot] = rocketDynamics(z,T);
+T  = primal.controls*Tscale;
+
+phase = 'postpitch';
+dz = rocketDynamics(z,T,phase);
+rdot = dz(1,:);
+vdot = dz(2,:);
+gammadot = dz(3,:);
+
+
+
+mdot = dz(4,:);
 
 %======================================================
-XDOT = [rdot; vdot; gammadot; mfueldot];
+XDOT = [rdot/hscale; vdot/vscale; gammadot; mdot/mscale];
 %======================================================
