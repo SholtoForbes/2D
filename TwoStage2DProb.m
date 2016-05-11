@@ -284,7 +284,7 @@ TwoStage2d.bounds       = bounds;
 % use 
 % 87 for const 50kPa
 %86 -88 for 50kPa limited
-algorithm.nodes		= [86];
+algorithm.nodes		= [88];
 % algorithm.nodes		= [88];%for 55kPa and 45kPa limited
 
 
@@ -301,10 +301,10 @@ tfGuess = tfMax; % this needs to be close to make sure solution stays withing Ou
 if const == 1
 % guess.states(1,:) = [25000 ,35000]; % for 50kPa const q
 
+guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2) ,34300]; % high drag test
 
-% guess.states(1,:) =
-% [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2) ,34900]; 50kpa limited
-guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000/v0^2)+10 ,34900]; %55kPa limited
+% guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2) ,34900]; %50kpa limited
+% guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000/v0^2)+10 ,34900]; %55kPa limited
 
 % guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*45000/v0^2) ,34900];%45kPa limited
 
@@ -313,14 +313,8 @@ guess.states(1,:) = [0 ,Vf]; % for constant 50kPa
 end
 
 
- %V
-% guess.states(1,:) = [27000 ,27000]; %V doesnt work
-% guess.states(1,:) = [25000 ,35000]; %V
-
-guess.states(2,:) = [v0, vf]; %v
-
-% guess.states(2,:) = [v0, vf].*sin(deg2rad(5)); %v FOR v_V TESTING
-
+% guess.states(2,:) = [v0, vf]; %v for normal use
+guess.states(2,:) = [v0, 2800]; %v for increased drag testing
 
 guess.states(3,:) = [atan((Vf-V0)/(Hf-H0)),atan((Vf-V0)/(Hf-H0))]; 
 

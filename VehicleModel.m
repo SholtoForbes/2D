@@ -66,7 +66,7 @@ end
 % determine aerodynamics necessary for trim
 [Fd, Alpha, flapdeflection] = OutForce(theta,M,q,m,AoA_spline,flapdeflection_spline,Drag_spline,v,V);
 
-% Fd = 1.1*Fd; % for L/D testing
+Fd = 1.1*Fd; % for L/D testing
 
 
 
