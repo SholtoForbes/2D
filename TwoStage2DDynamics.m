@@ -53,7 +53,7 @@ qdot = spline(drho(:,1), drho(:,2), V).* Vdot .* v.^2 + 2*rho.*v.*vdot;
 end
 
 %======================================================
-if const == 1 || const == 3
+if const == 1 || const == 3 || const == 5
 XDOT = [Vdot;vdot; thetadot; mfueldot];
 end
 

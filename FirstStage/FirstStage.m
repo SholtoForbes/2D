@@ -4,15 +4,14 @@ clc; clear;
 clear all;
 addpath ../TrajOpt-master
 
-% mTotal = 15000;   %(kg)  %Total lift-off mass
-mRocket = 20000;
+   
+mRocket = 27000; %(kg)  %Total lift-off mass
 mFuel = 0.8*mRocket;  %(kg)  %mass of the fuel
 mSpartan = 8755.1;
 mTotal = mSpartan + mRocket;
 mEmpty = mRocket-mFuel;  %(kg)  %mass of the rocket (without fuel)
 global Tmax
-% Tmax = 200000;    %(N)   %Maximum thrust
-Tmax = 380000;
+Tmax = 460000;
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 %                        Pre-Pitchover Simulation                         %
@@ -49,7 +48,7 @@ gamma0 = deg2rad(89);    % pitchover
 
 vF = 1850;  
 mF = mEmpty+mSpartan;  %Assume that we use all of the fuel
-gammaF = 0;
+gammaF = deg2rad(1);
 hF = 26550;
 
 hLow = 0;   %Cannot go through the earth
@@ -213,7 +212,7 @@ ylabel('velocity (m/s)')
 subplot(2,3,4);
 plot(t,x(4,:))
 xlabel('time (s)')
-ylabel('trajectory angle (deg)')
+ylabel('trajectory angle (rad)')
 subplot(2,3,5);
 plot(t,u/1000)
 xlabel('time (s)')

@@ -15,7 +15,7 @@ T = u(1,:);        %Thrust
 
 density = 1.474085291*(0.9998541833.^h);  %Data fit off of wolfram alpha
 
-%%%% Drag coefficient, calculated from paper:
+
 A1 = 0.0095;
 A2 = 25;
 A3 = 0.953;
@@ -36,8 +36,8 @@ g = G*mEarth./((h+rEarth).^2);
 
 %%%% Complete the calculation:
 global Tmax
-dm = -60*ones(1,length(h)).*T/Tmax.*Tmax/200000;   %mass rate
-
+% dm = -60*ones(1,length(h)).*T/Tmax.*Tmax/200000;   %mass rate
+dm = -160*ones(1,length(h)).*T/Tmax;
 
 alpha = 0*ones(1,length(h));
 

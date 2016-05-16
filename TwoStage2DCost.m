@@ -112,7 +112,7 @@ if const == 3 || const == 4
 Endcost = 0;
 end
 
-if const == 1
+if const == 1 || const == 5
 % Endcost =  - mfuel(end) - ThirdStagePayloadMass;
 Endcost =  - 0.01*mfuel(end) - ThirdStagePayloadMass;
 % Endcost =  - 0.05*mfuel(end) - ThirdStagePayloadMass;
@@ -128,7 +128,7 @@ end
 
 EndpointCost = Endcost;
 
-if const == 1
+if const == 1 || const == 5
 RunningCost = 0;
 
 % RunningCost =((q-50000).^2+1000000)/1000000; 

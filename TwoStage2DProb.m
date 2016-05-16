@@ -25,7 +25,7 @@ copyfile('TwoStage2DCost.m',sprintf('../ArchivedResults/TwoStage2DCost_%s.m',Tim
 % should be the same as const==1
 
 global const
-const = 1
+const = 5
 
 
 
@@ -167,7 +167,7 @@ qu = 100000;
 %bounds of exactly upper and lower fuel values over-constrain. I have
 %modified the bounds accordingly
 
-if const == 1 
+if const == 1 || const == 5
 % bounds.lower.states = [VL ; vL; thetaL; mfuelL-1];
 % bounds.lower.states = [VL ; vL; thetaL; mfuelL-3000];
 
@@ -257,7 +257,7 @@ bounds.lower.events = [v0; vf; mfuelU; 27000; 50000];
 end
 
 if const == 5
-Vinit = 27000;
+Vinit = 28000;
 gammainit = 0;
 bounds.lower.events = [v0; mfuelU; Vinit; gammainit];
 end
@@ -298,10 +298,12 @@ nodes = algorithm.nodes;
 
 tfGuess = tfMax; % this needs to be close to make sure solution stays withing Out_Force bounds
 
-if const == 1
-% guess.states(1,:) = [25000 ,35000]; % for 50kPa const q
+if const == 1 || const == 5
+% guess.states(1,:) = [27900 ,34900]; % for testing
 
-guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2) ,34300]; % high drag test
+guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-50 ,34000]; % high drag test
+
+
 
 % guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2) ,34900]; %50kpa limited
 % guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000/v0^2)+10 ,34900]; %55kPa limited
@@ -313,8 +315,8 @@ guess.states(1,:) = [0 ,Vf]; % for constant 50kPa
 end
 
 
-% guess.states(2,:) = [v0, vf]; %v for normal use
-guess.states(2,:) = [v0, 2800]; %v for increased drag testing
+guess.states(2,:) = [v0, vf]; %v for normal use
+% guess.states(2,:) = [v0, vf]; %v
 
 guess.states(3,:) = [atan((Vf-V0)/(Hf-H0)),atan((Vf-V0)/(Hf-H0))]; 
 

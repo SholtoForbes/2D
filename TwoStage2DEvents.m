@@ -19,7 +19,7 @@ mfuelf = primal.states(4,end);
 
 
 
-if const == 1
+if const == 1 
 
 endpointFunction = zeros(2,1); % previous, working
 
