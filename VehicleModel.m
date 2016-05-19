@@ -66,6 +66,29 @@ end
 % determine aerodynamics necessary for trim
 [Fd, Alpha, flapdeflection] = OutForce(theta,M,q,m,AoA_spline,flapdeflection_spline,Drag_spline,v,V);
 
+
+% % Modify Flap Deflection for Manoeuvre 
+% global flapmoment_interp
+% global flap_interp
+% global flapdrag_interp
+% 
+% I = 150000; 
+% extramoment = zeros(1,nodes);
+% omegadot = (diff(thetadot)./diff(time));
+% for i = 60:80
+% extramoment(i) = omegadot(i)*I;
+% end
+% flapmoment = flapmoment_interp(M,Alpha,flapdeflection); 
+% 
+% flapdrag1 = flapdrag_interp(M,Alpha,flapdeflection);
+% 
+% flapdeflection = flap_interp(M,Alpha,flapmoment + extramoment);
+% 
+% flapdrag2 = flapdrag_interp(M,Alpha,flapdeflection);
+% 
+% Fd = Fd + flapdrag2 - flapdrag1;
+
+
 % Fd = 1.13*Fd; % for L/D testing
 
 

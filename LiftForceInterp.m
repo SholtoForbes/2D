@@ -33,7 +33,7 @@ liftarray = [];
 for v = 1500:100:3000 % Velocity (m/s)
     for alt = 20000:1000:50000 % Altitude (m)
         for Lift = 0:5000:90000 % Lift force (N)   max mass of vehicle is 8755.1
-        
+
             liftarray(end+1,1) = v;
             liftarray(end,2) = alt;
             liftarray(end,3) = Lift;

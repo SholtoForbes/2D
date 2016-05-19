@@ -25,7 +25,7 @@ copyfile('TwoStage2DCost.m',sprintf('../ArchivedResults/TwoStage2DCost_%s.m',Tim
 % should be the same as const==1
 
 global const
-const = 5
+const = 1
 
 
 
@@ -48,6 +48,7 @@ end
 
 
 %produce engine splines for thrust and fuel usage
+% THESE ARENT SPLINES ANYMORE, JUST NAMED BADLY
 enginedata = dlmread('engineoutput_matrix');
 
 global ThrustF_spline
@@ -63,7 +64,13 @@ global flapdeflection_spline
 global Drag_spline
 [AoA_spline, flapdeflection_spline, Drag_spline] = LiftForceInterp(communicator,communicator_trim,const,Atmosphere,ThrustF_spline,FuelF_spline);
 
-
+%TESTING 
+global flapmoment_interp
+flapmoment_interp = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,3),communicator_trim(:,4));
+global flap_interp
+flap_interp = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,3));
+global flapdrag_interp
+flapdrag_interp = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,3),communicator_trim(:,5));
 
 
 ThirdStageData = dlmread('thirdstage.dat');
@@ -276,8 +283,7 @@ TwoStage2d.bounds       = bounds;
 
 % Node Definition ====================================================
 % the number of nodes is extremely important to the problem solution.
-% usually between 50-150 works, with an odd number being best in most
-% cases (anecdotal experience). The node no must be found using trial and error approach, but usually
+% usually between 50-150 works. The node no. must be found using trial and error approach, but usually
 % working down from 100 works well. 
 
 
@@ -301,11 +307,11 @@ tfGuess = tfMax; % this needs to be close to make sure solution stays withing Ou
 if const == 1 || const == 5
 % guess.states(1,:) = [27900 ,34900]; % for testing
 
-guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-50 ,34000]; % high drag test
+% guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-50 ,34000]; % high drag test
 
 
 
-% guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2) ,34900]; %50kpa limited
+guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2) ,34900]; %50kpa limited
 % guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000/v0^2)+10 ,34900]; %55kPa limited
 
 % guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*45000/v0^2) ,34900];%45kPa limited
@@ -422,6 +428,11 @@ H(1) = 0;
 for i = 1:nodes-1
 H(i+1) = v(i)*(t(i+1) - t(i))*cos(theta(i)) + H(i);
 end
+
+
+
+
+
 
 figure(1)
 
@@ -677,6 +688,7 @@ title('Validation')
 % solution
 
 theta_F = cumtrapz(t,thetadot);
+
 theta_F = theta_F + theta(1);
 
 v_F = cumtrapz(t,a);
