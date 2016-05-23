@@ -71,6 +71,8 @@ global flap_interp
 flap_interp = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,3));
 global flapdrag_interp
 flapdrag_interp = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,3),communicator_trim(:,5));
+AoA_momentinterp = scatteredInterpolant(communicator(:,1),communicator(:,2),communicator(:,11));
+
 
 
 ThirdStageData = dlmread('thirdstage.dat');
@@ -90,7 +92,7 @@ global payload_array
 % V0 = 20000.; % 
 V0 = 20000.;
 % V0 = 0.;
-Vf = 50000.; % Final values here are for guess and bounds, need to be fairly accurate
+Vf = 50000.; %
 % Vf = 60000.;
 % Vf = 45000.;
 
@@ -125,11 +127,9 @@ HL = -1.;
 HU = 1.2*Hf;
 
 vL = 1500;
-% vL = 2000;
 vU = 3100; % This limit must not cause the drag force to exceed the potential thrust of the vehicle by a large amount, otherwise DIDO will not solve
 
-% thetaL = -.2; %  NEED TO WATCH THAT THIS IS NOT OVERCONSTRAINING
-% thetaU = 1.6;
+
 
 if const == 1
 % thetaL = -0.1;
@@ -155,7 +155,6 @@ end
 
 % mfuelL = -3000;
 mfuelL = 0;
-% mfuelU = 1000; % 
 mfuelU = 994; % 
 
 QL = 0;
@@ -233,7 +232,7 @@ bounds.upper.controls = [thetadotU];
 t0	    = 0;
 tfMax 	= Hf/1500;   %  max tf; DO NOT set to Inf even for time-free problems % remember to set higher than Vmax bounds min time
 
-bounds.lower.time 	= [t0; t0];				
+bounds.lower.time 	= [t0; 100];				
 bounds.upper.time	= [t0; tfMax];
 
 
@@ -309,9 +308,8 @@ if const == 1 || const == 5
 
 % guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-50 ,34000]; % high drag test
 
-
-
 guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2) ,34900]; %50kpa limited
+
 % guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000/v0^2)+10 ,34900]; %55kPa limited
 
 % guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*45000/v0^2) ,34900];%45kPa limited
@@ -320,15 +318,10 @@ else
 guess.states(1,:) = [0 ,Vf]; % for constant 50kPa
 end
 
-
 guess.states(2,:) = [v0, vf]; %v for normal use
-% guess.states(2,:) = [v0, vf]; %v
 
 guess.states(3,:) = [atan((Vf-V0)/(Hf-H0)),atan((Vf-V0)/(Hf-H0))]; 
 
-% guess.states(3,:) = [0.9*atan((Vf-V0)/(Hf-H0)),atan((Vf-V0)/(Hf-H0))]; 
-
-% guess.states(4,:) = [mfuelU, mfuelU/2];
 guess.states(4,:) = [mfuelU, 0];
 
 if const == 2
@@ -339,9 +332,7 @@ if const == 4
 guess.states(5,:) = [50*10^3, 50*10^3];
 end
 
-
 guess.controls(1,:)    = [0,0]; 
-
 
 guess.time        = [t0 ,tfGuess];
 
@@ -430,8 +421,21 @@ H(i+1) = v(i)*(t(i+1) - t(i))*cos(theta(i)) + H(i);
 end
 
 
-
-
+% 
+% I = 150000; 
+% extramoment = zeros(1,nodes);
+% % omegadot = diff(transpose([0,diff(transpose(theta))./(diff(t))]))./diff(t);
+% omegadot = transpose(diff(transpose(thetadot)./(diff(t))));
+% 
+% extramoment = omegadot*I;
+% 
+% flapmoment = flapmoment_interp(M,Alpha,flapdeflection); 
+% 
+% flapdeflection = flap_interp(M,Alpha,flapmoment + [0,extramoment]);
+% 
+% flapmoment = flapmoment_interp(M,Alpha,flapdeflection); 
+% 
+% moment = AoA_momentinterp(M,Alpha) + flapmoment;
 
 
 figure(1)
@@ -687,6 +691,8 @@ title('Validation')
 % Pseudospectral method may not converge to a realistic
 % solution
 
+
+
 theta_F = cumtrapz(t,thetadot);
 
 theta_F = theta_F + theta(1);
@@ -712,5 +718,10 @@ subplot(4,1,3)
 plot(t,V_F,t,V);
 subplot(4,1,4)
 plot(t,mfuel_F,t,mfuel);
+
+
+
+
+
 
 

@@ -113,6 +113,11 @@ Endcost = 0;
 end
 
 if const == 1 || const == 5
+    
+   
+    
+    
+    
 % Endcost =  - mfuel(end) - ThirdStagePayloadMass;
 Endcost =  - 0.01*mfuel(end) - ThirdStagePayloadMass;
 % Endcost =  - 0.05*mfuel(end) - ThirdStagePayloadMass;
@@ -129,17 +134,15 @@ end
 EndpointCost = Endcost;
 
 if const == 1 || const == 5
-RunningCost = 0;
+    
+     %TEST
+    omegadot = diff(thetadot)./diff(time);
+    RunningCost = [0 0.01*abs(omegadot)];
+    
+    
+    
+% RunningCost = 0;
 
-% RunningCost =((q-50000).^2+1000000)/1000000; 
-
-% for i = 1:length(q)   
-% if q(i) > 50000
-% RunningCost(i) =((q(i)-50000).^2+100000000)/100000000;
-% else
-% RunningCost(i) = 0;
-% end
-% end
 
 end
 

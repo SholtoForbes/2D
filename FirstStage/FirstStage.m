@@ -123,7 +123,7 @@ P.func.bndObj = @(t0,x0,tF,xF)( -xF(2)/100 );
         P.options(2).defaultAccuracy = 'high';
         P.options(2).nlpOpt.MaxFunEvals = 2e5;
         P.options(2).nlpOpt.MaxIter = 1e5;
-        P.options(2).rungeKutta.nSegment = 30;
+        P.options(2).rungeKutta.nSegment = 40;
 
 
 % %%%% NOTES:
