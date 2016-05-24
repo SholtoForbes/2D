@@ -62,7 +62,8 @@ FuelF_spline= scatteredInterpolant(enginedata(:,1),enginedata(:,2),enginedata(:,
 global AoA_spline
 global flapdeflection_spline
 global Drag_spline
-[AoA_spline, flapdeflection_spline, Drag_spline] = LiftForceInterp(communicator,communicator_trim,const,Atmosphere,ThrustF_spline,FuelF_spline);
+global Flap_pitchingmoment_spline
+[AoA_spline, flapdeflection_spline, Drag_spline,Flap_pitchingmoment_spline] = LiftForceInterp(communicator,communicator_trim,const,Atmosphere,ThrustF_spline,FuelF_spline);
 
 %TESTING 
 global flapmoment_interp
@@ -288,6 +289,7 @@ TwoStage2d.bounds       = bounds;
 
 % use 
 % 87 for const 50kPa
+% algorithm.nodes		= [87];
 %86 -88 for 50kPa limited
 algorithm.nodes		= [88];
 % algorithm.nodes		= [88];%for 55kPa and 45kPa limited

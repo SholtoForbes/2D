@@ -1,4 +1,4 @@
-function [Drag, Alpha, flapdeflection] = OutForce(theta,M,q,m,AoA_spline,flapdeflection_spline,Drag_spline,v,V)
+function [Drag, Alpha, flapdeflection] = OutForce(theta,M,q,m,AoA_spline,flapdeflection_spline,Drag_spline,Flap_pitchingmoment_spline,flap_interp,v,V,thetadot,time)
 % function [Alpha, D ,pitchingmoment] = OutForce(theta,M,q,m,S, communicator, communicator_trim)
 % Out_force interpolator
 
@@ -11,8 +11,18 @@ lift_search = -gravity.*cos(theta);
 
 %use LiftForceInterp splines
 Alpha = AoA_spline(v,V,lift_search);
-flapdeflection = flapdeflection_spline(v,V,lift_search);
+% flapdeflection = flapdeflection_spline(v,V,lift_search);
 Drag = Drag_spline(v,V,lift_search); 
+Flap_pitchingmoment = Flap_pitchingmoment_spline(v,V,lift_search);
+
+omegadot = diff(thetadot)./diff(time);
+I = 150000; 
+extramoment = [0 -omegadot*I];
+
+flapdeflection = flap_interp(M,Alpha,Flap_pitchingmoment + extramoment);
+
+
+
 
 
 

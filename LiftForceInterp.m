@@ -1,4 +1,4 @@
-function [AoA_spline, flapdeflection_spline, Drag_spline] = LiftForceInterp(communicator,communicator_trim,const, Atmosphere,ThrustF_spline,FuelF_spline)
+function [AoA_spline, flapdeflection_spline, Drag_spline,Flap_pitchingmoment_spline] = LiftForceInterp(communicator,communicator_trim,const, Atmosphere,ThrustF_spline,FuelF_spline)
 %Lift Force interpolator
 
 %this module takes values from communicator and communicator-trim and finds
@@ -182,13 +182,15 @@ for v = 1500:100:3000 % Velocity (m/s)
             flapdeflection = flapdeflection_spline(M,Alpha4,-body_pitchingmoment4);
 
             Drag = Cd_spline(M,Alpha4)*A*q +  flapdrag_spline(M,Alpha4,-body_pitchingmoment4);
-
+%               Drag = Cd_spline(M,Alpha4)*A*q ; % changed to just body drag
 
             liftarray(end,4) = Alpha4;
 
             liftarray(end,5) = flapdeflection;
 
             liftarray(end,6) = Drag;
+            
+            liftarray(end,7) = -body_pitchingmoment4;
 
         end
     end
@@ -200,5 +202,6 @@ end
 AoA_spline = scatteredInterpolant(liftarray(:,1),liftarray(:,2),liftarray(:,3),liftarray(:,4)); 
 flapdeflection_spline = scatteredInterpolant(liftarray(:,1),liftarray(:,2),liftarray(:,3),liftarray(:,5));
 Drag_spline = scatteredInterpolant(liftarray(:,1),liftarray(:,2),liftarray(:,3),liftarray(:,6));
+Flap_pitchingmoment_spline = scatteredInterpolant(liftarray(:,1),liftarray(:,2),liftarray(:,3),liftarray(:,7));
 
 end

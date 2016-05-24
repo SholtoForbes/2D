@@ -39,6 +39,8 @@ global Alpha
 global AoA_spline
 global flapdeflection_spline
 global Drag_spline
+global Flap_pitchingmoment_spline
+global flap_interp
 
 
 global ThrustF_spline
@@ -68,7 +70,7 @@ time = primal.nodes(1, :); % Time
 
 thetadot  = primal.controls(1, :);
 
-[dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha, heating_rate, Q, rho] = VehicleModel(time, theta, V, v, mfuel, nodes,AoA_spline,flapdeflection_spline,Drag_spline,ThrustF_spline,FuelF_spline, const,thetadot);
+[dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha, heating_rate, Q, rho] = VehicleModel(time, theta, V, v, mfuel, nodes,AoA_spline,flapdeflection_spline,Drag_spline,Flap_pitchingmoment_spline,ThrustF_spline,FuelF_spline,flap_interp, const,thetadot);
 
 % THIRD STAGE ======================================================
 % NEED TO WATCH THIS, IT CAN EXTRAPOLATE BUT IT DOESNT DO IT WELL
