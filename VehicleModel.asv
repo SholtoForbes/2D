@@ -1,4 +1,4 @@
-function [dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha, heating_rate, Q, rho,lift] = VehicleModel(time, theta, V, v, mfuel, nodes,AoA_spline,flapdeflection_spline,Drag_spline,Flap_pitchingmoment_spline,ThrustF_spline,FuelF_spline,flap_interp,flapdrag_interp, const,thetadot)
+function [dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha, heating_rate, Q, rho] = VehicleModel(time, theta, V, v, mfuel, nodes,AoA_spline,flapdeflection_spline,Drag_spline,Flap_pitchingmoment_spline,ThrustF_spline,FuelF_spline,flap_interp,flapdrag_interp, const,thetadot)
 % function [dfuel, v, m, q, M, v_array] = VehicleModel(time, theta, V, H, nodes)
 
 

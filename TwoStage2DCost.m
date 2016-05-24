@@ -31,6 +31,7 @@ global a
 global Fd
 global Fueldt
 global Thrust
+global lift
 
 global flapdeflection
 global Alpha
@@ -41,6 +42,7 @@ global flapdeflection_spline
 global Drag_spline
 global Flap_pitchingmoment_spline
 global flap_interp
+global flapdrag_interp
 
 
 global ThrustF_spline
@@ -70,7 +72,7 @@ time = primal.nodes(1, :); % Time
 
 thetadot  = primal.controls(1, :);
 
-[dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha, heating_rate, Q, rho] = VehicleModel(time, theta, V, v, mfuel, nodes,AoA_spline,flapdeflection_spline,Drag_spline,Flap_pitchingmoment_spline,ThrustF_spline,FuelF_spline,flap_interp, const,thetadot);
+[dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha, heating_rate, Q, rho,lift] = VehicleModel(time, theta, V, v, mfuel, nodes,AoA_spline,flapdeflection_spline,Drag_spline,Flap_pitchingmoment_spline,ThrustF_spline,FuelF_spline,flap_interp,flapdrag_interp, const,thetadot);
 
 % THIRD STAGE ======================================================
 % NEED TO WATCH THIS, IT CAN EXTRAPOLATE BUT IT DOESNT DO IT WELL
@@ -153,7 +155,11 @@ if const == 3 || const == 4
 % RunningCost =((q-50000).^2+4000000)/4000000; % if a cost does not work, try loosening it 
 % RunningCost =((q-50000).^2+2000000)/2000000; % if a cost does not work, try loosening it 
 % RunningCost =((q-50000).^2+1500000)/1500000; 
-RunningCost =((q-50000).^2+1000000)/1000000; 
+
+omegadot = diff(thetadot)./diff(time);
+     
+
+RunningCost =((q-50000).^2+1000000)/1000000 + [0 0.01*abs(omegadot)]; 
 % RunningCost =((q-50000).^2+500000)/500000;
 
 end

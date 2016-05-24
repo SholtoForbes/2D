@@ -71,8 +71,9 @@ flapmoment_interp = scatteredInterpolant(communicator_trim(:,1),communicator_tri
 global flap_interp
 flap_interp = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,3));
 global flapdrag_interp
-flapdrag_interp = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,3),communicator_trim(:,5));
+flapdrag_interp = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,5));
 AoA_momentinterp = scatteredInterpolant(communicator(:,1),communicator(:,2),communicator(:,11));
+
 
 
 
@@ -310,7 +311,9 @@ if const == 1 || const == 5
 
 % guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-50 ,34000]; % high drag test
 
-guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2) ,34900]; %50kpa limited
+% guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2) ,34900]; %50kpa limited
+
+guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2) ,34800]; %50kpa limited with bdrag
 
 % guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000/v0^2)+10 ,34900]; %55kPa limited
 
@@ -398,6 +401,7 @@ global M
 global q
 global Fd
 global Fueldt
+global lift
 
 global Thrust
 global flapdeflection
@@ -439,6 +443,7 @@ end
 % 
 % moment = AoA_momentinterp(M,Alpha) + flapmoment;
 
+Separation_LD = lift(end)/Fd(end)
 
 figure(1)
 

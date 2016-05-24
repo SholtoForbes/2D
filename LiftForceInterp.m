@@ -181,8 +181,8 @@ for v = 1500:100:3000 % Velocity (m/s)
 
             flapdeflection = flapdeflection_spline(M,Alpha4,-body_pitchingmoment4);
 
-            Drag = Cd_spline(M,Alpha4)*A*q +  flapdrag_spline(M,Alpha4,-body_pitchingmoment4);
-%               Drag = Cd_spline(M,Alpha4)*A*q ; % changed to just body drag
+%             Drag = Cd_spline(M,Alpha4)*A*q +  flapdrag_spline(M,Alpha4,-body_pitchingmoment4);
+              Drag = Cd_spline(M,Alpha4)*A*q ; % changed to just body drag
 
             liftarray(end,4) = Alpha4;
 
