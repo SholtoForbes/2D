@@ -57,12 +57,11 @@ ylabel('Vertical Position (km)','FontSize',16);
 title('Trajectory Comparison','FontSize',16)
 hold on
 ax1 = gca;
-set(ax1,'FontSize',16);
 plot(H1/1000, V1/1000, 'Color','k', 'LineStyle', '-')
 plot(H2/1000, V2/1000, 'Color','k', 'LineStyle', '-.')
 
 h = legend(ax1,  '45kPa', '55kPa');
-set(h,'FontSize',14)
+set(h,'FontSize',12)
 
 hlt = text(...
     'Parent', h.DecorationContainer, ...
@@ -70,14 +69,14 @@ hlt = text(...
     'HorizontalAlignment', 'center', ...
     'VerticalAlignment', 'bottom', ...
     'Position', [0.5, 1.05, 0], ...
-    'Units', 'normalized','FontSize',16);
+    'Units', 'normalized');
 
 subplot(2,6,[7,9])
 
 xlabel('Time (s)','FontSize',16)
 hold on
 ax2 = gca;
-set(ax2,'FontSize',16);
+set(ax2,'FontSize',20);
 
 plot(t1, v1/10^3, 'Color','k', 'LineStyle', '--', 'LineWidth', 2.2)
 plot(t2, v2/10^3, 'Color','k', 'LineStyle', '-', 'LineWidth', 2.2)
@@ -89,15 +88,13 @@ plot(t1, rad2deg(theta1), 'Color','k', 'LineStyle', '--')
 plot(t2, rad2deg(theta2), 'Color','k', 'LineStyle', ':', 'LineWidth', 1.5)
 
 h = legend(ax2,  '45kPa Velocity (m/s x 10^3)', '55kPa Velocity (m/s x 10^3)', '45kPa Dynamic Pressure (kPa x 10^4)', '55kPa Dynamic Pressure (kPa x 10^4)', '45kPa Trajectory Angle (deg)', '55kPa Trajectory Angle (deg)');
-set(h,'FontSize',14)
-xlim([0 max([max(t1) max(t2)])]);
+set(h,'FontSize',12)
 
 subplot(2,6,[10,12])
 
 xlabel('Time (s)','FontSize',16)
 hold on
 ax3 = gca;
-set(ax3,'FontSize',16);
 plot(t1, IspNet1/10^2, 'Color','k', 'LineStyle', '-')
 plot(t2, IspNet2/10^2, 'Color','k', 'LineStyle', '-.')
 
@@ -105,5 +102,5 @@ plot(t1, Alpha1, 'Color','k', 'LineStyle', '--')
 plot(t2, Alpha2, 'Color','k', 'LineStyle', ':', 'LineWidth', 1.5)
 
 h = legend(ax3,  '45kPa Net Isp (s x 10^2)', '55kPa Net Isp (s x 10^2)', '45kPa Angle of Attack (degrees)', '55kPa Angle of Attack (degrees)');
-set(h,'FontSize',14)
-xlim([0 max([max(t1) max(t2)])]);
+set(h,'FontSize',12)
+xlim = [0,max([max(t1) max(t2)])];

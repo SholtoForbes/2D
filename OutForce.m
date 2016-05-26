@@ -12,7 +12,7 @@ lift_search = -gravity.*cos(theta);
 %use LiftForceInterp splines
 Alpha = AoA_spline(v,V,lift_search);
 % flapdeflection = flapdeflection_spline(v,V,lift_search);
-Body_Drag = Drag_spline(v,V,lift_search); 
+Drag = Drag_spline(v,V,lift_search); 
 Flap_pitchingmoment = Flap_pitchingmoment_spline(v,V,lift_search);
 
 omegadot = diff(thetadot)./diff(time);
@@ -21,9 +21,9 @@ extramoment = [0 -omegadot*I];
 
 flapdeflection = flap_interp(M,Alpha,Flap_pitchingmoment + extramoment);
 
-flapdrag = flapdrag_interp(M,Alpha,Flap_pitchingmoment + extramoment);
+% flapdrag = flapdrag_interp(M,Alpha,Flap_pitchingmoment + extramoment);
 
-Drag = Body_Drag + flapdrag;
+% Drag = Body_Drag + flapdrag;
 
 
 

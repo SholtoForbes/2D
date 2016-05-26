@@ -234,7 +234,8 @@ bounds.upper.controls = [thetadotU];
 t0	    = 0;
 tfMax 	= Hf/1500;   %  max tf; DO NOT set to Inf even for time-free problems % remember to set higher than Vmax bounds min time
 
-bounds.lower.time 	= [t0; 100];				
+% bounds.lower.time 	= [t0; t0];	
+bounds.lower.time 	= [t0; 100];	
 bounds.upper.time	= [t0; tfMax];
 
 
@@ -311,13 +312,13 @@ if const == 1 || const == 5
 
 % guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-50 ,34000]; % high drag test
 
-% guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2) ,34900]; %50kpa limited
+guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2) ,34900]; %50kpa limited
 
-guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2) ,34800]; %50kpa limited with bdrag
+% guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000/v0^2) ,34900]; %55kPa limited
 
-% guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000/v0^2)+10 ,34900]; %55kPa limited
+% guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*45000/v0^2) ,34500];%45kPa limited
 
-% guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*45000/v0^2) ,34900];%45kPa limited
+% guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-50 ,34000]; %Testing
 
 else
 guess.states(1,:) = [0 ,Vf]; % for constant 50kPa
@@ -325,7 +326,12 @@ end
 
 guess.states(2,:) = [v0, vf]; %v for normal use
 
-guess.states(3,:) = [atan((Vf-V0)/(Hf-H0)),atan((Vf-V0)/(Hf-H0))]; 
+if const ==3
+guess.states(3,:) = [atan((Vf-V0)/(Hf-H0)),atan((Vf-V0)/(Hf-H0))];
+else
+% guess.states(3,:) = [deg2rad(1.8),atan((Vf-V0)/(Hf-H0))]; %for all tests
+guess.states(3,:) = [deg2rad(1.8),atan((Vf-V0)/(Hf-H0))]; 
+end
 
 guess.states(4,:) = [mfuelU, 0];
 
@@ -425,23 +431,6 @@ H(1) = 0;
 for i = 1:nodes-1
 H(i+1) = v(i)*(t(i+1) - t(i))*cos(theta(i)) + H(i);
 end
-
-
-% 
-% I = 150000; 
-% extramoment = zeros(1,nodes);
-% % omegadot = diff(transpose([0,diff(transpose(theta))./(diff(t))]))./diff(t);
-% omegadot = transpose(diff(transpose(thetadot)./(diff(t))));
-% 
-% extramoment = omegadot*I;
-% 
-% flapmoment = flapmoment_interp(M,Alpha,flapdeflection); 
-% 
-% flapdeflection = flap_interp(M,Alpha,flapmoment + [0,extramoment]);
-% 
-% flapmoment = flapmoment_interp(M,Alpha,flapdeflection); 
-% 
-% moment = AoA_momentinterp(M,Alpha) + flapmoment;
 
 Separation_LD = lift(end)/Fd(end)
 
@@ -727,8 +716,14 @@ subplot(4,1,4)
 plot(t,mfuel_F,t,mfuel);
 
 
-
-
+% Compute difference with CADAC for constant dynamic pressure path
+if const == 3
+    CADAC_DATA = dlmread('TRAJ.ASC');
+    CADAC_Alpha = interp1(CADAC_DATA(:,1),CADAC_DATA(:,4),t);
+    CADAC_V = interp1(CADAC_DATA(:,1),CADAC_DATA(:,11),t);
+    MeanError_V = sum((CADAC_V - V)./V)/nodes
+    MeanError_Alpha = sum((CADAC_Alpha - Alpha)./Alpha)/nodes
+end
 
 
 
