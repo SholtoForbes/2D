@@ -308,9 +308,6 @@ nodes = algorithm.nodes;
 tfGuess = tfMax; % this needs to be close to make sure solution stays withing Out_Force bounds
 
 if const == 1 || const == 5
-% guess.states(1,:) = [27900 ,34900]; % for testing
-
-% guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-50 ,34000]; % high drag test
 
 guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2) ,34900]; %50kpa limited
 
@@ -318,7 +315,7 @@ guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2) ,34900
 
 % guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*45000/v0^2) ,34500];%45kPa limited
 
-% guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-50 ,34000]; %Testing
+% guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2) ,34700]; %High Drag
 
 else
 guess.states(1,:) = [0 ,Vf]; % for constant 50kPa
@@ -329,8 +326,8 @@ guess.states(2,:) = [v0, vf]; %v for normal use
 if const ==3
 guess.states(3,:) = [atan((Vf-V0)/(Hf-H0)),atan((Vf-V0)/(Hf-H0))];
 else
-% guess.states(3,:) = [deg2rad(1.8),atan((Vf-V0)/(Hf-H0))]; %for all tests
-guess.states(3,:) = [deg2rad(1.8),atan((Vf-V0)/(Hf-H0))]; 
+guess.states(3,:) = [deg2rad(1.8),atan((Vf-V0)/(Hf-H0))]; %for all tests
+
 end
 
 guess.states(4,:) = [mfuelU, 0];
@@ -647,7 +644,8 @@ copyfile('payload.txt',sprintf('../ArchivedResults/payload_%s.txt',Timestamp))
 primal_old = primal;
 
 
-
+ts = timeseries(Isp,t);
+Mean_Isp = mean(ts)
 
 % ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 % TESTING AND VALIDATION

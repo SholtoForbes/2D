@@ -61,7 +61,8 @@ set(ax1,'FontSize',16);
 plot(H1/1000, V1/1000, 'Color','k', 'LineStyle', '-')
 plot(H2/1000, V2/1000, 'Color','k', 'LineStyle', '-.')
 
-h = legend(ax1,  '45kPa', '55kPa');
+% h = legend(ax1,  '45kPa', '55kPa');
+h = legend(ax1,  '100% Drag', '110% Drag');
 set(h,'FontSize',14)
 
 hlt = text(...
@@ -79,18 +80,33 @@ hold on
 ax2 = gca;
 set(ax2,'FontSize',16);
 
-plot(t1, v1/10^3, 'Color','k', 'LineStyle', '--', 'LineWidth', 2.2)
-plot(t2, v2/10^3, 'Color','k', 'LineStyle', '-', 'LineWidth', 2.2)
+plot(t1, v1/10^2, 'Color','k', 'LineStyle', '--', 'LineWidth', 2.2)
+plot(t2, v2/10^2, 'Color','k', 'LineStyle', '-', 'LineWidth', 2.2)
 
-plot(t1, q1/10^4, 'Color','k', 'LineStyle', '-')
-plot(t2, q2/10^4, 'Color','k', 'LineStyle', '-.')
+plot(t1, IspNet1/10^2, 'Color','k', 'LineStyle', ':', 'LineWidth', 1.5)
+plot(t2, IspNet2/10^2, 'Color','k', 'LineStyle', '-.')
 
-plot(t1, rad2deg(theta1), 'Color','k', 'LineStyle', '--')
-plot(t2, rad2deg(theta2), 'Color','k', 'LineStyle', ':', 'LineWidth', 1.5)
-
-h = legend(ax2,  '45kPa Velocity (m/s x 10^3)', '55kPa Velocity (m/s x 10^3)', '45kPa Dynamic Pressure (kPa x 10^4)', '55kPa Dynamic Pressure (kPa x 10^4)', '45kPa Trajectory Angle (deg)', '55kPa Trajectory Angle (deg)');
+h = legend(ax2,  '100% Drag Velocity (m/s x 10^2)', '110% Drag Velocity (m/s x 10^2)', '100% Drag Net Isp (s x 10^2)', '110% Drag Net Isp (s x 10^2)');
 set(h,'FontSize',14)
 xlim([0 max([max(t1) max(t2)])]);
+
+
+
+
+% plot(t1, v1/10^3, 'Color','k', 'LineStyle', '--', 'LineWidth', 2.2)
+% plot(t2, v2/10^3, 'Color','k', 'LineStyle', '-', 'LineWidth', 2.2)
+% 
+% plot(t1, q1/10^4, 'Color','k', 'LineStyle', '-')
+% plot(t2, q2/10^4, 'Color','k', 'LineStyle', '-.')
+% 
+% plot(t1, rad2deg(theta1), 'Color','k', 'LineStyle', '--')
+% plot(t2, rad2deg(theta2), 'Color','k', 'LineStyle', ':', 'LineWidth', 1.5)
+% 
+% h = legend(ax2,  '45kPa Velocity (m/s x 10^3)', '55kPa Velocity (m/s x 10^3)', '45kPa Dynamic Pressure (kPa x 10^4)', '55kPa Dynamic Pressure (kPa x 10^4)', '45kPa Trajectory Angle (deg)', '55kPa Trajectory Angle (deg)');
+% set(h,'FontSize',14)
+% xlim([0 max([max(t1) max(t2)])]);
+
+
 
 subplot(2,6,[10,12])
 

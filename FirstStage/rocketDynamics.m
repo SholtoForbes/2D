@@ -11,7 +11,8 @@ if isnan(gamma)
     gamma = deg2rad(90)
 end
 
-T = u(1,:);        %Thrust
+% T = u(1,:);        %Thrust
+T = 460000;
 
 density = 1.474085291*(0.9998541833.^h);  %Data fit off of wolfram alpha
 
@@ -39,7 +40,8 @@ global Tmax
 % dm = -60*ones(1,length(h)).*T/Tmax.*Tmax/200000;   %mass rate
 dm = -160*ones(1,length(h)).*T/Tmax;
 
-alpha = 0*ones(1,length(h));
+% alpha = 0*ones(1,length(h));
+alpha = u(1,:);
 
 xi = 0*ones(1,length(h));
 phi = 0*ones(1,length(h));

@@ -66,8 +66,8 @@ gammaUpp = deg2rad(90);
 % uLow = [0];
 % uUpp = [Tmax]; %Maximum thrust output
 
-uLow = [-1];
-uUpp = [0]; 
+% uLow = [0];
+% uUpp = [Tmax]; %Maximum thrust output
 
 
 P.bounds.initialTime.low = 0;

@@ -142,9 +142,9 @@ if const == 1 || const == 5
      %smoothing functions (can be adjusted depending on needs, remove if
      %not working
     omegadot = diff(thetadot)./diff(time);
-%     RunningCost = [0 0.005*abs(omegadot)]; % for smoothing 50kPa
-% RunningCost = [0 0.001*abs(omegadot)]; %for smoothing 45kPa and 55kPa
-    RunningCost = [0 0.001*abs(omegadot)];
+    RunningCost = [0 0.005*abs(omegadot)]; % for smoothing 50kPa
+% RunningCost = [0 0.001*abs(omegadot)]; %for smoothing 45kPa and 55kPa and
+% high drag
     
     
 % RunningCost = 0;
