@@ -66,7 +66,7 @@ end
 % determine aerodynamics necessary for trim
 [Fd, Alpha, flapdeflection,lift] = OutForce(theta,M,q,m,AoA_spline,flapdeflection_spline,Drag_spline,Flap_pitchingmoment_spline,flap_interp,flapdrag_interp,v,V,thetadot,time);
 
-% Fd = 1.1*Fd; % for L/D testing
+Fd = 1.1*Fd; % for L/D testing COMMENT OUT IF NOT HIGH DRAG
 
 
 
@@ -86,7 +86,7 @@ for i = 1:length(q)
 %         Efficiency(i) = .9; % for 45kPa
     Efficiency(i) = 1; % for 50kPa
 %     Efficiency(i) = 1.1; % for 55kPa
-%     Efficiency(i) = 1.2; 
+% %     Efficiency(i) = 1.2; 
     end
 end
 

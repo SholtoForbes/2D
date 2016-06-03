@@ -24,7 +24,8 @@ gamma0_prepitch = deg2rad(90);
 phase = 'prepitch';
 tspan = [0 15];
 y0 = [h0_prepitch, v0_prepitch, m0_prepitch, gamma0_prepitch];
-[t_prepitch, y] = ode45(@(t,y) rocketDynamics(y,Tmax,phase), tspan, y0);
+% [t_prepitch, y] = ode45(@(t,y) rocketDynamics(y,Tmax,phase), tspan, y0);
+[t_prepitch, y] = ode45(@(t,y) rocketDynamics(y,0,phase), tspan, y0);  
 
 % % FOR TESTING
 % phase = 'postpitch';
@@ -50,6 +51,7 @@ vF = 1850;
 mF = mEmpty+mSpartan;  %Assume that we use all of the fuel
 gammaF = deg2rad(1);
 hF = 26550;
+% hF = 30000;
 
 hLow = 0;   %Cannot go through the earth
 hUpp = 80000;  
@@ -66,7 +68,7 @@ gammaUpp = deg2rad(90);
 % uLow = [0];
 % uUpp = [Tmax]; %Maximum thrust output
 
-uLow = [-1];
+uLow = [-1.5]; % Can do either AoA or thrust
 uUpp = [0]; 
 
 
@@ -166,6 +168,8 @@ u = soln(end).interp.control(t);
 %                        Pre-Pitchover Simulation                         %
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 
+% Note this doesnt work for AoA control
+
 f_h0_prepitch = 0;  %Rocket starts on the ground
 f_v0_prepitch = 0;  %Rocket starts stationary
 f_m0_prepitch = mTotal;  %Rocket starts full of fuel
@@ -174,8 +178,8 @@ f_gamma0_prepitch = deg2rad(90);
 phase = 'prepitch';
 f_tspan = [0 15];
 f_y0 = [f_h0_prepitch, f_v0_prepitch, f_m0_prepitch, f_gamma0_prepitch];
-[f_t_prepitch, f_y_prepitch] = ode45(@(f_t,f_y) rocketDynamics(f_y,Tmax,phase), f_tspan, f_y0);
-
+% [f_t_prepitch, f_y_prepitch] = ode45(@(f_t,f_y) rocketDynamics(f_y,Tmax,phase), f_tspan, f_y0);
+[f_t_prepitch, f_y_prepitch] = ode45(@(f_t,f_y) rocketDynamics(f_y,0,phase), f_tspan, f_y0);
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 %                        Post-Pitchover Simulation                         %
@@ -189,7 +193,7 @@ f_gamma0 = deg2rad(89);    % pitchover
 phase = 'postpitch';
 f_tspan = [0 t(end)];
 f_y0 = [f_h0, f_v0, f_m0, f_gamma0];
-[f_t, f_y] = ode45(@(f_t,f_y) rocketDynamics(f_y,ThrustFunction(f_t,t,u),phase), f_tspan, f_y0);
+[f_t, f_y] = ode45(@(f_t,f_y) rocketDynamics(f_y,ControlFunction(f_t,t,u),phase), f_tspan, f_y0);
 
 
 
@@ -218,6 +222,6 @@ plot(t,x(4,:))
 xlabel('time (s)')
 ylabel('trajectory angle (rad)')
 subplot(2,3,5);
-plot(t,u/1000)
+plot(t,u)
 xlabel('time (s)')
-ylabel('thrust (kN)')
+ylabel('Control')
