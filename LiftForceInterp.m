@@ -1,10 +1,10 @@
-function [AoA_spline, flapdeflection_spline, Drag_spline,Flap_pitchingmoment_spline] = LiftForceInterp(communicator,communicator_trim,const, Atmosphere,ThrustF_spline,FuelF_spline)
+function [AoA_spline, flapdeflection_spline, Drag_spline,Flap_pitchingmoment_spline] = LiftForceInterpOld(communicator,communicator_trim,const, Atmosphere,ThrustF_spline,FuelF_spline)
 %Lift Force interpolator
 
 %this module takes values from communicator and communicator-trim and finds
 %appropriate AoA and flap deflection values to equalise a given q
 %normalised lift force. this allows for splines to be created that only
-%require M and lift force / q to give flap deflection, AoA and total drag
+%require M and lift force to give flap deflection, AoA and total drag
 
 
 %read communicator and create interpolatior / extrapolator splines
@@ -23,21 +23,19 @@ flapdrag_spline = scatteredInterpolant(communicator_trim(:,1),communicator_trim(
 
 flaplift_spline = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,6));
 
-
 A = 62.77; % reference area (m^2)
 
-% golden sections method, to search for a variety of M and lift forces / q
+% golden sections method, to search for a variety of M and lift forces
 %equalises the pitching moment of flap and body to calculate lift. works
 %towards the correct AoA (and corresponding flap pitching moment)
 liftarray = [];
 for v = 1500:100:3000 % Velocity (m/s)
     for alt = 20000:1000:50000 % Altitude (m)
-        for Lift = 0:5000:90000 % Lift force (N)   max mass of vehicle is 8755.1
-
+        for Lift = 0:5000:200000 % Lift force (N)   max mass of vehicle is 8755.1
+            
             liftarray(end+1,1) = v;
             liftarray(end,2) = alt;
             liftarray(end,3) = Lift;
-            
             
             c = spline( Atmosphere(:,1),  Atmosphere(:,5), alt); % Calculate speed of sound using atmospheric data
 
@@ -53,15 +51,15 @@ for v = 1500:100:3000 % Velocity (m/s)
             Efficiency = zeros(1,length(q));
             
             for i = 1:length(q)
-%                 if q(i) < 50000
+                if q(i) < 50000
 %                 if q(i) < 55000
-                if q(i) < 45000
+%                 if q(i) < 45000
                 Efficiency(i) = rho/(50000*2/v^2); % dont change this
 
 
                 else
-                    Efficiency(i) = .9; % for 45kPa
-%                 Efficiency(i) = 1; % for 50kPa
+%                     Efficiency(i) = .9; % for 45kPa
+                Efficiency(i) = 1; % for 50kPa
 %                 Efficiency(i) = 1.1; % for 55kPa
             %     Efficiency(i) = 1.2; 
                 end
@@ -103,7 +101,7 @@ for v = 1500:100:3000 % Velocity (m/s)
 
 
 
-            Alpha2 = 10; %first guesses of AoA
+            Alpha2 = 15; %first guesses of AoA
             %Fuel Cost ===========================================================================
 
             Fueldt = FuelF_spline(M,Alpha2).*Efficiency;

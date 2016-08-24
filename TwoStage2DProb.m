@@ -1,81 +1,67 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 2D Scramjet Flight
+% 2D Scramjet Flight Optimiser
+% By Sholto Forbes-Spyratos
+% Utilises the DIDO proprietary optimisation software
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 clear all;		
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+global iteration
+iteration = 1;
 
 %copy the current setting to archive
 Timestamp = datestr(now,30)
 copyfile('TwoStage2DProb.m',sprintf('../ArchivedResults/TwoStage2DProb_%s.m',Timestamp))
 copyfile('TwoStage2DCost.m',sprintf('../ArchivedResults/TwoStage2DCost_%s.m',Timestamp))
 
-
 % SET RUN MODE
 
 % const = 1: No end constraint, used for optimal trajectory calculation
 
-% const = 2: testing, Q end 
-
 % const = 3: Fuel mass is constrained at end point, used for constant dynamic pressure calculation
-
-% const == 4: testing, q state variable 
-
-% const == 5: fixed start position, not implemented properly yet, all but
-% events
-% should be the same as const==1
 
 global const
 const = 1
 
-
-
 % Inputs ============================================
-%Take inputs of communicator matrices
+%Take inputs of communicator matrices, these should be .txt files 
 communicator = importdata('communicatornew.txt');
-
 communicator_trim = importdata('communicator_trim.txt');
 
 % Produce Atmosphere Data
+global Atmosphere
 Atmosphere = dlmread('atmosphere.txt');
-% rho derivative
-global drho
-j=1;
-for i = 1:100:85000
-drho(j,1) = i;
-drho(j,2) = (spline(Atmosphere(:,1),  Atmosphere(:,4), i) - spline(Atmosphere(:,1),  Atmosphere(:,4), i-1))/1;
-j = j+1;
-end
 
-
-%produce engine splines for thrust and fuel usage
-% THESE ARENT SPLINES ANYMORE, JUST NAMED BADLY
+%produce scattered interpolants for thrust and fuel usage
 enginedata = dlmread('engineoutput_matrix');
 
-global ThrustF_spline
-ThrustF_spline= scatteredInterpolant(enginedata(:,1),enginedata(:,2),enginedata(:,3)); %interpolator for engine data (also able to extrapolate badly)
-global FuelF_spline
-FuelF_spline= scatteredInterpolant(enginedata(:,1),enginedata(:,2),enginedata(:,4)); %interpolator for engine data
+%Produce scattered interpolants for vehicle data
+global scattered
+
+scattered.T = scatteredInterpolant(enginedata(:,1),enginedata(:,2),enginedata(:,3)); %interpolator for engine data (also able to extrapolate badly)
+scattered.fuel = scatteredInterpolant(enginedata(:,1),enginedata(:,2),enginedata(:,4)); %interpolator for engine data
+
+M_eng = unique(sort(enginedata(:,1))); % create unique list of Mach numbers from engine data
+M_eng_interp = M_eng(1):0.1:M_eng(end); % enlarge spread, this is not necessary if you have a lot of engine data
+
+Alpha_eng = unique(sort(enginedata(:,2))); % create unique list of angle of attack numbers from engine data
+Alpha_eng_interp = Alpha_eng(1):0.1:Alpha_eng(end); 
+
+global grid
+[grid.Mgrid_eng2,grid.alpha_eng2] =  meshgrid(M_eng_interp,Alpha_eng_interp);
+grid.T_eng = scattered.T(grid.Mgrid_eng2,grid.alpha_eng2);
+grid.fuel_eng = scattered.fuel(grid.Mgrid_eng2,grid.alpha_eng2);
 
 
 
-%Produce splines for vehicle data
-global AoA_spline
-global flapdeflection_spline
-global Drag_spline
-global Flap_pitchingmoment_spline
-[AoA_spline, flapdeflection_spline, Drag_spline,Flap_pitchingmoment_spline] = LiftForceInterp(communicator,communicator_trim,const,Atmosphere,ThrustF_spline,FuelF_spline);
+% Call LiftForceInterp
+% This produces scattered interpolants which can calculate the vehicle
+% flight conditions required for trim at any flight conditions
+[scattered.AoA,scattered.flapdeflection,scattered.drag,scattered.flap_pm] = LiftForceInterp(communicator,communicator_trim,const,Atmosphere,scattered.T,scattered.fuel);
 
-%TESTING 
-global flapmoment_interp
-flapmoment_interp = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,3),communicator_trim(:,4));
-global flap_interp
-flap_interp = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,3));
-global flapdrag_interp
-flapdrag_interp = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,5));
-AoA_momentinterp = scatteredInterpolant(communicator(:,1),communicator(:,2),communicator(:,11));
-
-
-
+scattered.flap_def = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,3));
+scattered.flap_D = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,5));
+scattered.pm = scatteredInterpolant(communicator(:,1),communicator(:,2),communicator(:,11));
 
 ThirdStageData = dlmread('thirdstage.dat');
 % global ThirdStagePayloadSpline
@@ -88,24 +74,17 @@ global v_list
 global payload_array
 [alt_list,gamma_list,v_list,payload_array] = thirdstagemanipulation();
 
-
 %=============================================== 
 %Second Stage
-% V0 = 20000.; % 
 V0 = 20000.;
-% V0 = 0.;
 Vf = 50000.; %
-% Vf = 60000.;
-% Vf = 45000.;
 
 H0 = 0.;
 Hf = 700000.;
 
 v0 = 1797.9; % 
-% v0 = 2000;
-% vf = 2979.83; % 50kpa q at 33000m
 vf = 2839.51;
-%dawids results have around 1 degree or under flight path angle
+
 %===================
 % Problem variables:
 % control factor: omega
@@ -118,12 +97,8 @@ vf = 2839.51;
 % bound and scale the state and control variables
 %---------------------------------------
 
-% VL = -1.;
 VL = V0;
 VU = 1.0*Vf; 
-
-% VL = 27000;
-% VU = 40000; 
 
 HL = -1.;
 HU = 1.2*Hf;
@@ -131,43 +106,20 @@ HU = 1.2*Hf;
 vL = 1500;
 vU = 3100; % This limit must not cause the drag force to exceed the potential thrust of the vehicle by a large amount, otherwise DIDO will not solve
 
-
-
 if const == 1
-% thetaL = -0.1;
 thetaL = -0.1;
-% thetaL = 0.;
 else
 thetaL = -0.1; %  NEED TO WATCH THAT THIS IS NOT OVERCONSTRAINING
 end
-% thetaL = 0.;
-% thetaU = 0.26; %15 degrees
 
-% thetaU = 0.26/2;
 if const == 1
-% thetaU = 0.17;
-% thetaU = 0.1;
 thetaU = 0.05; % gives a good 50, 55kPa result, above this I think that flap deflection will go over max and extrapolate badly
-% thetaU = 0.06;
 else
 thetaU = 0.1;  
 end
-% thetaU = 0.4; 
 
-
-% mfuelL = -3000;
 mfuelL = 0;
 mfuelU = 994; % 
-
-QL = 0;
-% QU = 100*10^6; %joules, estimate
-% QU = 50*10^6; %this should limit the max heat, this is arbitrary, based on previous results
-% QU = 30*10^6;
-QU = 10*10^6;
-
-ql = 0;
-qu = 100000;
-
 
 % Define bounds of primals and controls ---------------------------------
 
@@ -175,56 +127,46 @@ qu = 100000;
 %bounds of exactly upper and lower fuel values over-constrain. I have
 %modified the bounds accordingly
 
-if const == 1 || const == 5
-% bounds.lower.states = [VL ; vL; thetaL; mfuelL-1];
-% bounds.lower.states = [VL ; vL; thetaL; mfuelL-3000];
 
-bounds.lower.states = [VL ; vL; thetaL; mfuelL];
-bounds.upper.states = [VU ; vU; thetaU; mfuelU+1];
+global scale
+% scale.V = 100;
+% scale.v = 10;
+% scale.theta = 0.1;
+% scale.thetadot = 0.01;
+% scale.m = 10;
 
-% bounds.upper.states = [VU ; vU; thetaU; mfuelU];
-end
+scale.V = 1;
+scale.v = 1;
+scale.theta = 1;
+scale.thetadot = 1;
+scale.m = 1;
 
-if const == 2
-bounds.lower.states = [VL ; vL; thetaL; mfuelL; -1];
-bounds.upper.states = [VU ; vU; thetaU; mfuelU; QU*1.2];
+if const == 1 
+bounds.lower.states = [VL/scale.V ; vL/scale.v; thetaL/scale.theta; mfuelL/scale.m; -0.003/scale.thetadot];
+bounds.upper.states = [VU/scale.V ; vU/scale.v; thetaU/scale.theta; (mfuelU+1)/scale.m; 0.006/scale.thetadot];
 end
 
 if const == 3
-bounds.lower.states = [VL ; vL; thetaL; mfuelL-3000];
-bounds.upper.states = [VU ; vU; thetaU; mfuelU];
-
-
-% bounds.lower.states = [VL ; vL; thetaL; mfuelL-1];
-% bounds.upper.states = [VU ; vU; thetaU; mfuelU+1];
-
-
-% bounds.lower.states = [VL ; vL*sin(deg2rad(5)); mfuelL-3000]; % FOR v_V TESTING
-% bounds.upper.states = [VU ; vU*sin(deg2rad(5));  mfuelU];
-
-end
-
-if const == 4
-bounds.lower.states = [VL ; vL; thetaL; mfuelL-3000; ql];
-bounds.upper.states = [VU ; vU; thetaU; mfuelU; qu];
+bounds.lower.states = [VL/scale.V ; vL/scale.v; thetaL/scale.theta; (mfuelL-3000)/scale.m];
+bounds.upper.states = [VU/scale.V ; vU/scale.v; thetaU/scale.theta; mfuelU/scale.m];
 end
 
 % control bounds
 
-% thetadotL = -0.05;
-% thetadotU = 0.05;
+% thetadotL = -0.02;
+% thetadotU = 0.02;
 
-thetadotL = -0.02;
-thetadotU = 0.02;
+% thetadotL = -0.02;
+% thetadotU = 0.006;
+% 
+% bounds.lower.controls = [thetadotL/scale.theta];
+% bounds.upper.controls = [thetadotU/scale.theta]; 
 
-bounds.lower.controls = [thetadotL];
-bounds.upper.controls = [thetadotU]; 
+omegadotL = -0.001;
+omegadotU = 0.001;
 
-
-
-% bounds.lower.controls = [thetaL]; % FOR v_V TESTING
-% bounds.upper.controls = [thetaU]; 
-
+bounds.lower.controls = [omegadotL/scale.thetadot];
+bounds.upper.controls = [omegadotU/scale.thetadot]; 
 
 %------------------
 % bound the horizon
@@ -238,38 +180,20 @@ tfMax 	= Hf/1500;   %  max tf; DO NOT set to Inf even for time-free problems % r
 bounds.lower.time 	= [t0; 100];	
 bounds.upper.time	= [t0; tfMax];
 
-
-
-
 %-------------------------------------------
 % Set up the bounds on the endpoint function
 %-------------------------------------------
 % See events file for definition of events function
 if const == 1 
-bounds.lower.events = [v0; mfuelU]; % previous, working
+bounds.lower.events = [v0/scale.v; mfuelU/scale.m]; % previous, working
 
-
-
-end
-
-if const == 2
-bounds.lower.events = [v0; mfuelU; QL; QU];
 end
 
 if const == 3
 % bounds.lower.events = [v0; vf; mfuelU]; 
-bounds.lower.events = [v0; mfuelU; mfuelL];
+bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m];
 end
 
-if const == 4
-bounds.lower.events = [v0; vf; mfuelU; 27000; 50000]; 
-end
-
-if const == 5
-Vinit = 28000;
-gammainit = 0;
-bounds.lower.events = [v0; mfuelU; Vinit; gammainit];
-end
 
 bounds.upper.events = bounds.lower.events;      % equality event function bounds
 
@@ -288,15 +212,12 @@ TwoStage2d.bounds       = bounds;
 % usually between 50-150 works. The node no. must be found using trial and error approach, but usually
 % working down from 100 works well. 
 
-
 % use 
 % 87 for const 50kPa
 % algorithm.nodes		= [87];
 %86 -88 for 50kPa limited
 algorithm.nodes		= [88];
 % algorithm.nodes		= [88];%for 55kPa and 45kPa limited
-
-
 
 global nodes
 
@@ -307,66 +228,55 @@ nodes = algorithm.nodes;
 
 tfGuess = tfMax; % this needs to be close to make sure solution stays withing Out_Force bounds
 
-if const == 1 || const == 5
+if const == 1
 
-% guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2) ,34900]; %50kpa limited
+% guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2) ,34900]/scale.V; %50kpa limited
 
+guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)+100 ,35000]/scale.V;
+% 
 % guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000/v0^2) ,34900]; %55kPa limited
 
 % guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*45000/v0^2) ,34500];%45kPa limited
 
-guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2) ,34700]; %High Drag
+% guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2) ,34700]; %High Drag
 
 else
-guess.states(1,:) = [0 ,Vf]; % for constant 50kPa
+guess.states(1,:) = [0 ,Vf]/scale.V; % for constant 50kPa
 end
 
-guess.states(2,:) = [v0, vf]; %v for normal use
+guess.states(2,:) = [v0, vf]/scale.v; %v for normal use
 
 if const ==3
-guess.states(3,:) = [atan((Vf-V0)/(Hf-H0)),atan((Vf-V0)/(Hf-H0))];
+guess.states(3,:) = [atan((Vf-V0)/(Hf-H0)),atan((Vf-V0)/(Hf-H0))]/scale.theta;
 else
-guess.states(3,:) = [deg2rad(1.8),atan((Vf-V0)/(Hf-H0))]; %for all tests
+% guess.states(3,:) = [deg2rad(1.8),atan((Vf-V0)/(Hf-H0))]/scale.theta; %for all tests
+guess.states(3,:) = [deg2rad(1.8),thetaU]/scale.theta;
+end 
 
-end
+guess.states(4,:) = [mfuelU, 0]/scale.m;
 
-guess.states(4,:) = [mfuelU, 0];
-
-if const == 2
-guess.states(5,:) = [0, 50*10^6];
-end
-
-if const == 4
-guess.states(5,:) = [50*10^3, 50*10^3];
-end
+guess.states(5,:) = [0,0];
 
 guess.controls(1,:)    = [0,0]; 
 
 guess.time        = [t0 ,tfGuess];
 
 
-
-% Tell DIDO the guess.  Note: The guess-free option is not available when
-% using "knots"
+% Tell DIDO the guess
 %========================
 algorithm.guess = guess;
-% algorithm.guess = primal_old;
 % %========================
 % algorithm.mode = 'accurate';
 %=====================================================================================
-
-
-% count
 
 % Call dido
 % =====================================================================
 tStart= cputime;    % start CPU clock 
 [cost, primal, dual] = dido(TwoStage2d, algorithm);
-runTime = cputime-tStart
+runTime = (cputime-tStart)
+runTime/60
 % ===================================================================
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %          OUTPUT             %
@@ -375,32 +285,20 @@ runTime = cputime-tStart
 global dfuel
 dfuel
 
-V = primal.states(1,:);
+V = primal.states(1,:)*scale.V;
 
-v = primal.states(2,:);
+v = primal.states(2,:)*scale.v;
 
 t = primal.nodes;
 
-% theta = primal.controls(1,:);
+theta = primal.states(3,:)*scale.theta;
 
-theta = primal.states(3,:);
-thetadot = primal.controls(1,:);
-% 
-mfuel = primal.states(4,:);
+mfuel = primal.states(4,:)*scale.m;
 
-% Q = primal.states(5,:);
+thetadot = primal.states(5,:)*scale.thetadot;
 
-% theta = primal.controls(1,:);
-
-% mfuel = primal.states(3,:);
-
-%calculating for interest
-% c = 300.; % this will need to be brought into line with vehicle model
-
-% M = v./ScaleFactor/c;
+omegadot = primal.controls(1,:)*scale.theta;
 global M
-% global v_array
-% v_array
 global q
 global Fd
 global Fueldt
@@ -412,8 +310,7 @@ global Alpha
 global ThirdStagePayloadMass
 global a
 
-global heating_rate
-global Q
+Thrust = Thrust./cos(deg2rad(Alpha));
 
 dt = t(2:end)-t(1:end-1); % Time change between each node pt
 FuelUsed = zeros(1,nodes-1);
@@ -517,9 +414,14 @@ hold on
 plot(t, rad2deg(thetadot))
 title('Trajectory Angle Change Rate (Deg/s)')
 
+subplot(5,5,25)
+hold on
+plot(t, rad2deg(omegadot))
+title('Omegadot Control (Deg/s2)')
+
+
 dim = [.8 .0 .2 .2];
 annotation('textbox',dim,'string',{['Third Stage Thrust: ', num2str(50), ' kN'],['Third Stage Starting Mass: ' num2str(2850) ' kg'],['Third Stage Isp: ' num2str(350) ' s']},'FitBoxToText','on');  
-
 
 figure(2)
 subplot(2,6,[1,6])
@@ -530,8 +432,6 @@ title('Trajectory')
 xlabel('Horizontal Position (km)')
 ylabel('Vertical Position (km)')
 
-
-
 for i = 1:floor(t(end)/30)
     [j,k] = min(abs(t-30*i));
     str = strcat(num2str(round(t(k))), 's');
@@ -541,7 +441,6 @@ for i = 1:floor(t(end)/30)
 end
 
 plot(H(end)/1000, V(end)/1000, 'o', 'MarkerSize', 10, 'MarkerEdgeColor','k')
-
 
 text(H(end)/1000,V(end)/1000,'Third Stage Transition Point','VerticalAlignment','top', 'FontSize', 10);
 
@@ -564,10 +463,7 @@ line(t, rad2deg(theta),'Parent',ax1,'Color','k', 'LineStyle','-')
 
 line(t, M,'Parent',ax1,'Color','k', 'LineStyle','--')
 
-
-
 line(t, v./(10^3),'Parent',ax1,'Color','k', 'LineStyle','-.')
-
 
 line(t, q./(10^4),'Parent',ax1,'Color','k', 'LineStyle',':', 'lineWidth', 2.0)
 
@@ -595,15 +491,12 @@ line(t, mfuel./(10^2),'Parent',ax2,'Color','k', 'LineStyle','-.')
 
 line(t, IspNet./(10^2),'Parent',ax2,'Color','k', 'LineStyle',':', 'lineWidth', 2.0)
 
-
-
 g = legend(ax2, 'AoA (degrees)','Flap Deflection (degrees)', 'Fuel Mass (kg x 10^2)', 'Net Isp (s x 10^2)');
 
 rect2 = [0.52, 0.35, .25, .25];
 set(g, 'Position', rect2)
 
 figure(3)
-
 
 subplot(2,5,[1,5]);
 
@@ -630,8 +523,6 @@ AoA = ThirdStageAoASpline(V(end), rad2deg(theta(end)), v(end));
 figure(4)
 evalc('ThirdStageVisTrajectory(AoA, V(end), rad2deg(theta(end)), v(end));');
 
-
-
 % save results
 dlmwrite('primal.txt', [primal.states;primal.controls;primal.nodes;q;IspNet;Alpha]);
 dlmwrite('payload.txt', ThirdStagePayloadMass);
@@ -643,7 +534,6 @@ copyfile('payload.txt',sprintf('../ArchivedResults/payload_%s.txt',Timestamp))
 
 primal_old = primal;
 
-
 ts = timeseries(Isp,t);
 Mean_Isp = mean(ts)
 
@@ -651,9 +541,6 @@ Mean_Isp = mean(ts)
 % TESTING AND VALIDATION
 % ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 % If these are valid then solution is a KKT point
-
-
-
 
 %COMPLEMENTARY CONDITIONS
 % These should be zero if the state or control is within set bounds
@@ -666,12 +553,10 @@ mu_4 = dual.states(4,:);
 
 mu_u = dual.controls;
 
-
 %GRADIENT NORMALITY CONDITION
 
 % Lagrangian of the Hamiltonian 
 dLHdu = dual.dynamics(3,:) + mu_u; % NEED TO CHECK THAT THIS IS THE CORRECT ANALYTICAL SOLUTION
-
 
 figure(5)
 
@@ -713,7 +598,6 @@ plot(t,V_F,t,V);
 subplot(4,1,4)
 plot(t,mfuel_F,t,mfuel);
 
-
 % Compute difference with CADAC for constant dynamic pressure path
 if const == 3
     CADAC_DATA = dlmread('TRAJ.ASC');
@@ -722,6 +606,23 @@ if const == 3
     MeanError_V = sum((CADAC_V - V)./V)/nodes
     MeanError_Alpha = sum((CADAC_Alpha - Alpha)./Alpha)/nodes
 end
+
+
+% =========================================================================
+% Troubleshooting Procedure
+% =========================================================================
+
+% 1: Check that you have posed your problem correctly ie. it is physically
+% feasible and the bounds allow for a solution
+% 2: Check for NaN values (check derivatives while running)
+% 3: Check guess, is it reasonable? Is it too close to the expected
+% solution? Both can cause errors! Sometimes there is no real rhyme or
+% reason to picking the correct guess, but a close bound to the outside of
+% the expected solution has worked the most in my experience
+% 4: Play with the no. of nodes, try both even and odd values
+% 5: Play with scaling
+% 6: Try all of the above in various combinations until it works!
+
 
 
 

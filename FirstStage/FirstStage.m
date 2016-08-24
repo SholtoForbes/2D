@@ -131,21 +131,6 @@ P.func.bndObj = @(t0,x0,tF,xF)( -xF(2)/100 );
         P.options(2).nlpOpt.MaxIter = 1e5;
         P.options(2).rungeKutta.nSegment = 40;
 
-
-% %%%% NOTES:
-% %
-% % 1) Orthogonal collocation (chebyshev) is not a good method for this problem, beause there is a
-% % discontinuity in solution of the thrust curve. It still sort of works,
-% % but will find a sub-optimal answer, or produce ringing.
-% %
-% % 2) Why does the 'trapezoid' low resolution version finish so quickly and the medium
-% % quality one take forever? Hint: Look at the feasibility printout: it is
-% cyclical. If you were to plot the solution as a function of iteration,
-% you would find that occasionally the discontinuity moves, which causes a
-% consistency error in the NLP. Eventually it gets to the "right" answer,
-% although it is pretty boring. I suspect that you could get more
-% interesting behavior with different constants.
-
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 %                              Solve!                                     %
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
@@ -207,12 +192,10 @@ plot(t,x(1,:)/1000)
 plot(f_t,f_y(:,1)/1000)
 xlabel('time (s)')
 ylabel('height (km)')
-title('Maximal Height Trajectory')
 subplot(2,3,2);
 plot(t,x(3,:))
 xlabel('time (s)')
 ylabel('mass (kg)')
-title('Goddard Rocket')
 subplot(2,3,3);
 plot(t,x(2,:))
 xlabel('time (s)')

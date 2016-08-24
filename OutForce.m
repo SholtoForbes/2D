@@ -1,30 +1,35 @@
-function [Drag, Alpha, flapdeflection,lift_search] = OutForce(theta,M,q,m,AoA_spline,flapdeflection_spline,Drag_spline,Flap_pitchingmoment_spline,flap_interp,flapdrag_interp,v,V,thetadot,time)
-% function [Alpha, D ,pitchingmoment] = OutForce(theta,M,q,m,S, communicator, communicator_trim)
-% Out_force interpolator
+function [Drag, Alpha, flapdeflection,lift_search] = OutForce(theta,M,q,m,scattered,v,V,thetadot,time)
+%THIS IS THE SLOWEST PART OF THE ROUTINE
 
 v_H = v.*cos(theta);
 
 % find aerodynamics using only gravity of vehicle
 gravity = m.*(- 6.674e-11.*5.97e24./(V + 6371e3).^2 + v_H.^2./(V + 6371e3)); %Includes Gravity Variation and Centripetal Force 
 
+% thetadot = [0 diff(theta)./diff(time)];
+
+% global iteration
+% if iteration > 30000
+% lift_search = -gravity.*cos(theta) + thetadot.*m.*v;
+% else
+% lift_search = -gravity.*cos(theta);
+% end
+
 lift_search = -gravity.*cos(theta);
 
 %use LiftForceInterp splines
-Alpha = AoA_spline(v,V,lift_search);
-% flapdeflection = flapdeflection_spline(v,V,lift_search);
-Drag = Drag_spline(v,V,lift_search); 
-Flap_pitchingmoment = Flap_pitchingmoment_spline(v,V,lift_search);
+Alpha = scattered.AoA(v,V,lift_search);
+% flapdeflection = scattered.flapdeflection(v,V,lift_search);
+flapdeflection = 1;
+Drag = scattered.drag(v,V,lift_search); 
+% Flap_pitchingmoment = scattered.flap_pm(v,V,lift_search);
 
-omegadot = diff(thetadot)./diff(time);
-I = 150000; 
-extramoment = [0 -omegadot*I];
-
-flapdeflection = flap_interp(M,Alpha,Flap_pitchingmoment + extramoment);
-
-% flapdrag = flapdrag_interp(M,Alpha,Flap_pitchingmoment + extramoment);
-
-% Drag = Body_Drag + flapdrag;
-
+% omegadot = diff(thetadot)./diff(time);
+% I = 150000; % from hand calculation
+% extramoment = [0 -omegadot*I];
+% 
+% flapdeflection = scattered.flap_def(M,Alpha,Flap_pitchingmoment + extramoment);
+end
 
 
 

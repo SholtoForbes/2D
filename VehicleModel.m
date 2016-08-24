@@ -1,8 +1,4 @@
-function [dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha, heating_rate, Q, rho,lift] = VehicleModel(time, theta, V, v, mfuel, nodes,AoA_spline,flapdeflection_spline,Drag_spline,Flap_pitchingmoment_spline,ThrustF_spline,FuelF_spline,flap_interp,flapdrag_interp, const,thetadot)
-% function [dfuel, v, m, q, M, v_array] = VehicleModel(time, theta, V, H, nodes)
-
-
-
+function [dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha, rho,lift] = VehicleModel(time, theta, V, v, mfuel, nodes,scattered, grid, const,thetadot, Atmosphere)
 
 % =======================================================
 % Vehicle Model
@@ -13,12 +9,7 @@ g = 9.81;
 
 dt_array = time(2:end)-time(1:end-1); % Time change between each node pt
 
-% dV_array = V(2:end)-V(1:end-1); % Vertical position change between each node pt
-% 
-% dH_array = H(2:end)-H(1:end-1); % horizontal position change between each node pt
-
 mstruct = 8755.1 - 994; % mass of everything but fuel from dawids work,added variable struct mass just under q calc
-% mstruct = 8755.1 - 994-3000;
 
 m = mfuel + mstruct;
 
@@ -29,11 +20,9 @@ m = mfuel + mstruct;
 %===================================================
 
 %======================================================
-% Adding better scramjet dynamics, added 21/4/15
-% communicator matrix is given in terms of forces and moments
+% THIS IS VERY COMPUTATIONALLY EXPENSIVE TAKE OUT
+% Atmosphere = dlmread('atmosphere.txt'); % import data from atmosphere matrix
 
-
-Atmosphere = dlmread('atmosphere.txt'); % import data from atmosphere matrix
 
 c = spline( Atmosphere(:,1),  Atmosphere(:,5), V); % Calculate speed of sound using atmospheric data
 
@@ -41,11 +30,7 @@ rho = spline( Atmosphere(:,1),  Atmosphere(:,4), V); % Calculate density using a
 
 q = 0.5 * rho .* (v .^2); % Calculating Dynamic Pressure
 
-
-
 M = v./c; % Calculating Mach No (Descaled)
-
-
 
 %-heating---------------------------
 kappa = 1.7415e-4;
@@ -60,65 +45,59 @@ for i = 1:length(dt_array)
     Q(i+1) = heating_rate(i)*dt_array(i) + Q(i);
 end
 
-
-% Control
+% Control =================================================================
 
 % determine aerodynamics necessary for trim
-[Fd, Alpha, flapdeflection,lift] = OutForce(theta,M,q,m,AoA_spline,flapdeflection_spline,Drag_spline,Flap_pitchingmoment_spline,flap_interp,flapdrag_interp,v,V,thetadot,time);
+[Fd, Alpha, flapdeflection,lift] = OutForce(theta,M,q,m,scattered,v,V,thetadot,time);
 
-Fd = 1.1*Fd; % for L/D testing COMMENT OUT IF NOT HIGH DRAG
-
+% Fd = 1.1*Fd; % for L/D testing COMMENT OUT IF NOT HIGH DRAG
 
 
 % THRUST AND MOTION ==================================================================
 
-
 if const == 1
-Efficiency = zeros(1,length(q));
-for i = 1:length(q)
-    if q(i) < 50000
-%     if q(i) < 55000
-%     if q(i) < 45000
-    Efficiency(i) = rho(i)/(50000*2/v(i)^2); % dont change this
-    
+    Efficiency = zeros(1,length(q));
+    for i = 1:length(q)
+        if q(i) < 50000
+    %     if q(i) < 55000
+    %     if q(i) < 45000
+        Efficiency(i) = rho(i)/(50000*2/v(i)^2); % dont change this
 
-    else
-%         Efficiency(i) = .9; % for 45kPa
-    Efficiency(i) = 1; % for 50kPa
-%     Efficiency(i) = 1.1; % for 55kPa
-% %     Efficiency(i) = 1.2; 
+        else
+    %         Efficiency(i) = .9; % for 45kPa
+        Efficiency(i) = 1; % for 50kPa
+    %     Efficiency(i) = 1.1; % for 55kPa
+    % %     Efficiency(i) = 1.2; 
+        end
     end
+else       
+    Efficiency = rho./(50000*2./v.^2); % linear rho efficiency, scaled to rho at 50000kpa
 end
-
-else
-        
-Efficiency = rho./(50000*2./v.^2); % linear rho efficiency, scaled to rho at 50000kpa
-end
-
 
 %Fuel Cost ===========================================================================
-% Efficiency
 
-% Fueldt = FuelF(M,Alpha);
-Fueldt = FuelF_spline(M,Alpha).*Efficiency;
-% Fueldt = FuelF_spline(M,Alpha);
+Thrust = interp2(grid.Mgrid_eng2,grid.alpha_eng2,grid.T_eng,M,Alpha,'spline').*cos(deg2rad(Alpha)).*Efficiency;
+Fueldt = interp2(grid.Mgrid_eng2,grid.alpha_eng2,grid.fuel_eng,M,Alpha,'spline').*Efficiency;
 
-Isp = ThrustF_spline(M,Alpha)./FuelF_spline(M,Alpha); % this isnt quite Isp (doesnt have g) but doesnt matter
-
-% Fueldt(1:nodes) = 4; % arbitrary
-
-Thrust = Isp.*Fueldt.*cos(theta); % Thrust in Direction of Motion (N)
-
-% Thrust = Isp.*Fueldt.*Efficiency4;
+% Fueldt = scattered.fuel(M,Alpha).*Efficiency;
+% 
+% Thrust = scattered.T(M,Alpha).*cos(deg2rad(Alpha)).*Efficiency;% Thrust in Direction of Motion (N)
 
 fuelchange_array = -Fueldt(1:end-1).*dt_array ;
 
-
 dfuel = sum(fuelchange_array); %total change in 'fuel' this is negative
 
-v_H = v.*cos(Alpha);
+v_H = v.*cos(theta);
 
-a = ((Thrust - (Fd + (6.674e-11.*5.97e24./(V + 6371e3).^2 - v_H.^2./(V + 6371e3)).*sin(theta))) ./ m );
+gravity = m.*(- 6.674e-11.*5.97e24./(V + 6371e3).^2 + v_H.^2./(V + 6371e3)); %Includes Gravity Variation and Centripetal Force 
+
+a = ((Thrust - (Fd + gravity.*sin(theta))) ./ m );
+
+
+
+
+% =========================================================================
+
 
 
 end
