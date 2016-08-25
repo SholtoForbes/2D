@@ -142,8 +142,11 @@ scale.thetadot = 1;
 scale.m = 1;
 
 if const == 1 
-bounds.lower.states = [VL/scale.V ; vL/scale.v; thetaL/scale.theta; mfuelL/scale.m; -0.003/scale.thetadot];
-bounds.upper.states = [VU/scale.V ; vU/scale.v; thetaU/scale.theta; (mfuelU+1)/scale.m; 0.006/scale.thetadot];
+bounds.lower.states = [VL/scale.V ; vL/scale.v; thetaL/scale.theta; mfuelL/scale.m; -0.002/scale.thetadot];
+bounds.upper.states = [VU/scale.V ; vU/scale.v; thetaU/scale.theta; (mfuelU+1)/scale.m; 0.002/scale.thetadot];
+
+% bounds.lower.states = [VL/scale.V ; vL/scale.v; 0/scale.theta; mfuelL/scale.m; -0.002/scale.thetadot];
+% bounds.upper.states = [VU/scale.V ; vU/scale.v; thetaU/scale.theta; (mfuelU+1)/scale.m; 0.002/scale.thetadot];
 end
 
 if const == 3
@@ -161,6 +164,9 @@ end
 % 
 % bounds.lower.controls = [thetadotL/scale.theta];
 % bounds.upper.controls = [thetadotU/scale.theta]; 
+
+% omegadotL = -0.0005;
+% omegadotU = 0.0005;
 
 omegadotL = -0.001;
 omegadotU = 0.001;
@@ -185,7 +191,7 @@ bounds.upper.time	= [t0; tfMax];
 %-------------------------------------------
 % See events file for definition of events function
 if const == 1 
-bounds.lower.events = [v0/scale.v; mfuelU/scale.m]; % previous, working
+bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m]; % previous, working
 
 end
 
@@ -232,7 +238,7 @@ if const == 1
 
 % guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2) ,34900]/scale.V; %50kpa limited
 
-guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)+100 ,35000]/scale.V;
+guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,35000]/scale.V;
 % 
 % guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000/v0^2) ,34900]; %55kPa limited
 
@@ -250,7 +256,7 @@ if const ==3
 guess.states(3,:) = [atan((Vf-V0)/(Hf-H0)),atan((Vf-V0)/(Hf-H0))]/scale.theta;
 else
 % guess.states(3,:) = [deg2rad(1.8),atan((Vf-V0)/(Hf-H0))]/scale.theta; %for all tests
-guess.states(3,:) = [deg2rad(1.8),thetaU]/scale.theta;
+guess.states(3,:) = [deg2rad(1.35),thetaU]/scale.theta;
 end 
 
 guess.states(4,:) = [mfuelU, 0]/scale.m;

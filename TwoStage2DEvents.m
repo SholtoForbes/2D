@@ -21,7 +21,7 @@ mfuelf = primal.states(4,end);
 
 if const == 1 
 
-endpointFunction = zeros(2,1); % previous, working
+endpointFunction = zeros(3,1); % previous, working
 
 end
 
@@ -55,7 +55,7 @@ endpointFunction(1) = v0;
 
 if const == 1
 endpointFunction(2) = mfuel0;
-
+endpointFunction(3) = mfuelf;
 end
 
 if const == 2

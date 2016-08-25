@@ -107,16 +107,14 @@ zeta(1) = 0;
 
 r = V + 6371000;
 i= 1;
-[Vdot(i),xidot(i),phidot(i),vdot(i),zetadot(i), Fueldt2(i), Alpha2(i), Fd2(i), lift2(i), Thrust2(i), flapdeflection2(i)] = RotCoords(r(i),xi(i),phi(i),gamma(i),v(i),zeta(i),m(i),grid, const, rho(i),M(i), q(i), scattered);
+[Vdot(i),xidot(i),phidot(i),vdot(i),zetadot(i), Fueldt(i), Alpha(i), Fd(i), lift(i), Thrust(i), flapdeflection(i)] = RotCoords(r(i),xi(i),phi(i),gamma(i),v(i),zeta(i),m(i),grid, const, rho(i),M(i), q(i), scattered);
 
 for i = 2:length(time)
 xi(i) = xi(i-1) + xidot(i-1)*(time(i) - time(i-1));
 phi(i) = phi(i-1) + phidot(i-1)*(time(i) - time(i-1));
 zeta(i) = zeta(i-1) + zetadot(i-1)*(time(i) - time(i-1));
-[Vdot(i),xidot(i),phidot(i),vdot(i),zetadot(i), Fueldt2(i), Alpha2(i), Fd2(i), lift2(i), Thrust2(i), flapdeflection2(i)] = RotCoords(r(i),xi(i),phi(i),gamma(i),v(i),zeta(i),m(i),grid, const, rho(i),M(i), q(i), scattered);
+[Vdot(i),xidot(i),phidot(i),vdot(i),zetadot(i), Fueldt(i), Alpha(i), Fd(i), lift(i), Thrust(i), flapdeflection(i)] = RotCoords(r(i),xi(i),phi(i),gamma(i),v(i),zeta(i),m(i),grid, const, rho(i),M(i), q(i), scattered);
 end
-
-lift2
 
 fuelchange_array = -Fueldt(1:end-1).*dt_array ;
 

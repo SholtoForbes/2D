@@ -6,21 +6,13 @@ v_H = v.*cos(theta);
 % find aerodynamics using only gravity of vehicle
 gravity = m.*(- 6.674e-11.*5.97e24./(V + 6371e3).^2 + v_H.^2./(V + 6371e3)); %Includes Gravity Variation and Centripetal Force 
 
-% thetadot = [0 diff(theta)./diff(time)];
+lift_search = -gravity.*cos(theta)
 
-% global iteration
-% if iteration > 30000
-% lift_search = -gravity.*cos(theta) + thetadot.*m.*v;
-% else
-% lift_search = -gravity.*cos(theta);
-% end
-
-lift_search = -gravity.*cos(theta);
 
 %use LiftForceInterp splines
 Alpha = scattered.AoA(v,V,lift_search);
-% flapdeflection = scattered.flapdeflection(v,V,lift_search);
-flapdeflection = 1;
+flapdeflection = scattered.flapdeflection(v,V,lift_search);
+% flapdeflection = 1;
 Drag = scattered.drag(v,V,lift_search); 
 % Flap_pitchingmoment = scattered.flap_pm(v,V,lift_search);
 
