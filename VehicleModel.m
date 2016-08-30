@@ -1,8 +1,11 @@
-function [dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha, rho,lift] = VehicleModel(time, theta, V, v, mfuel, nodes,scattered, grid, const,thetadot, Atmosphere)
+function [dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha, rho,lift, Penalty] = VehicleModel(time, theta, V, v, mfuel, nodes,scattered, grid, const,thetadot, Atmosphere)
 
 % =======================================================
 % Vehicle Model
 % =======================================================
+
+eta = 0.1;
+
 
 %Gravity
 g = 9.81;
@@ -20,10 +23,31 @@ m = mfuel + mstruct;
 %===================================================
 
 %======================================================
-% THIS IS VERY COMPUTATIONALLY EXPENSIVE TAKE OUT
-% Atmosphere = dlmread('atmosphere.txt'); % import data from atmosphere matrix
+
+%Rotational Coordinates =================================================
+%=================================================
+
+global xi
+global phi
+global zeta
+xi = zeros(1,length(time));
+phi = zeros(1,length(time));
+zeta = zeros(1,length(time));
+
+r = V + 6371000;
+i= 1;
+[xidot(i),phidot(i),zetadot(i), lift_search(i)] = RotCoords(r(i),xi(i),phi(i),theta(i),v(i),zeta(i),m(i),eta);
+
+for i = 2:length(time)
+xi(i) = xi(i-1) + xidot(i-1)*(time(i) - time(i-1));
+phi(i) = phi(i-1) + phidot(i-1)*(time(i) - time(i-1));
+zeta(i) = zeta(i-1) + zetadot(i-1)*(time(i) - time(i-1));
+
+[xidot(i),phidot(i),zetadot(i), lift_search(i)] = RotCoords(r(i),xi(i),phi(i),theta(i),v(i),zeta(i),m(i),eta);
+end
 
 
+% Aero Data =============================================================
 c = spline( Atmosphere(:,1),  Atmosphere(:,5), V); % Calculate speed of sound using atmospheric data
 
 rho = spline( Atmosphere(:,1),  Atmosphere(:,4), V); % Calculate density using atmospheric data
@@ -48,30 +72,43 @@ M = v./c; % Calculating Mach No (Descaled)
 % Control =================================================================
 
 % % determine aerodynamics necessary for trim
-[Fd, Alpha, flapdeflection,lift] = OutForce(theta,M,q,m,scattered,v,V,thetadot,time);
+[Fd, Alpha, flapdeflection,lift] = OutForce(theta,M,q,m,scattered,v,V,thetadot,time, lift_search);
 
-% Fd = 1.1*Fd; % for L/D testing COMMENT OUT IF NOT HIGH DRAG
-
+if const == 14
+    Fd = 1.1*Fd; % for L/D testing 
+end
 
 % THRUST AND MOTION ==================================================================
-
-if const == 1
-    Efficiency = zeros(1,length(q));
-    for i = 1:length(q)
+if const == 1 || 14
+    Efficiency = zeros(1,length(time));
+    Penalty = zeros(1,length(time));
+    for i = 1:length(time)
         if q(i) < 50000
-    %     if q(i) < 55000
-    %     if q(i) < 45000
-        Efficiency(i) = rho(i)/(50000*2/v(i)^2); % dont change this
-
+            Efficiency(i) = rho(i)/(50000*2/v(i)^2); % dont change this
         else
-    %         Efficiency(i) = .9; % for 45kPa
-        Efficiency(i) = 1; % for 50kPa
-    %     Efficiency(i) = 1.1; % for 55kPa
-    % %     Efficiency(i) = 1.2; 
-
+            Efficiency(i) = 1; % for 50kPa
+            Penalty(i) = q(i)/50000-1; 
         end
     end
-else       
+elseif const == 12
+    Efficiency = zeros(1,length(time));
+    for i = 1:length(time)
+        if q(i) < 55000
+            Efficiency(i) = rho(i)/(50000*2/v(i)^2); % dont change this
+        else
+            Efficiency(i) = 1.1; % for 55kPa
+        end
+    end
+elseif const == 13
+    Efficiency = zeros(1,length(time));
+    for i = 1:length(time)
+        if q(i) < 45000
+            Efficiency(i) = rho(i)/(50000*2/v(i)^2); % dont change this
+        else
+            Efficiency(i) = .9; % for 45kPa
+        end
+    end
+elseif const == 3
     Efficiency = rho./(50000*2./v.^2); % linear rho efficiency, scaled to rho at 50000kpa
 end
 
@@ -94,34 +131,7 @@ gravity = m.*(- 6.674e-11.*5.97e24./(V + 6371e3).^2 + v_H.^2./(V + 6371e3)); %In
 
 a = ((Thrust - (Fd + gravity.*sin(theta))) ./ m );
 
-
-
-
 % =========================================================================
-global xi
-global phi
-global zeta
-xi(1) = 0;
-phi(1) = 0;
-zeta(1) = 0;
-
-r = V + 6371000;
-i= 1;
-[Vdot(i),xidot(i),phidot(i),vdot(i),zetadot(i), Fueldt2(i), Alpha2(i), Fd2(i), lift2(i), Thrust2(i), flapdeflection2(i)] = RotCoords(r(i),xi(i),phi(i),gamma(i),v(i),zeta(i),m(i),grid, const, rho(i),M(i), q(i), scattered);
-
-for i = 2:length(time)
-xi(i) = xi(i-1) + xidot(i-1)*(time(i) - time(i-1));
-phi(i) = phi(i-1) + phidot(i-1)*(time(i) - time(i-1));
-zeta(i) = zeta(i-1) + zetadot(i-1)*(time(i) - time(i-1));
-[Vdot(i),xidot(i),phidot(i),vdot(i),zetadot(i), Fueldt2(i), Alpha2(i), Fd2(i), lift2(i), Thrust2(i), flapdeflection2(i)] = RotCoords(r(i),xi(i),phi(i),gamma(i),v(i),zeta(i),m(i),grid, const, rho(i),M(i), q(i), scattered);
-end
-
-lift2
-
-fuelchange_array = -Fueldt(1:end-1).*dt_array ;
-
-dfuel = sum(fuelchange_array); %total change in 'fuel' this is negative
-    
 
 
 end

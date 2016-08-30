@@ -35,7 +35,7 @@ omegadot  = primal.controls(1,:)*scale.thetadot; %
 Vdot = v.*sin(theta);
 
 %======================================================
-if const == 1 || const == 3 
+
 XDOT = [Vdot/scale.V;vdot/scale.v; thetadot/scale.thetadot; mfueldot/scale.m; omegadot/scale.thetadot];
 
 end

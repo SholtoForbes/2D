@@ -1,12 +1,12 @@
-function [Drag, Alpha, flapdeflection,lift_search] = OutForce(theta,M,q,m,scattered,v,V,thetadot,time)
+function [Drag, Alpha, flapdeflection,lift_search] = OutForce(theta,M,q,m,scattered,v,V,thetadot,time, lift_search)
 %THIS IS THE SLOWEST PART OF THE ROUTINE
 
-v_H = v.*cos(theta);
-
-% find aerodynamics using only gravity of vehicle
-gravity = m.*(- 6.674e-11.*5.97e24./(V + 6371e3).^2 + v_H.^2./(V + 6371e3)); %Includes Gravity Variation and Centripetal Force 
-
-lift_search = -gravity.*cos(theta)
+% v_H = v.*cos(theta);
+% % 
+% % % find aerodynamics using only gravity of vehicle
+% gravity = m.*(- 6.674e-11.*5.97e24./(V + 6371e3).^2 + v_H.^2./(V + 6371e3)); %Includes Gravity Variation and Centripetal Force 
+% 
+% lift_search = -gravity.*cos(theta);
 
 
 %use LiftForceInterp splines

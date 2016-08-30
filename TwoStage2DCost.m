@@ -1,4 +1,4 @@
-function [EndpointCost, RunningCost] = TwoStage2d(primal, algorithm)
+function [EndpointCost, RunningCost] = TwoStage2DCost(primal, algorithm)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Cost function for Rocket-Scramjet-Rocket System
@@ -48,8 +48,9 @@ mfuel = primal.states(4,:)*scale.m ;
 time = primal.nodes(1, :); % Time
 % thetadot  = primal.controls(1, :)*scale.theta;
 thetadot = primal.states(5,:)*scale.thetadot;
+omegadot  = primal.controls(1,:)*scale.thetadot;
 
-[dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha, rho,lift] = VehicleModel(time, theta, V, v, mfuel, nodes,scattered,grid,const,thetadot, Atmosphere);
+[dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha, rho,lift,Penalty] = VehicleModel(time, theta, V, v, mfuel, nodes,scattered,grid,const,thetadot, Atmosphere);
 
 % THIRD STAGE ======================================================
 % NEED TO WATCH THIS, IT CAN EXTRAPOLATE BUT IT DOESNT DO IT WELL
@@ -60,13 +61,22 @@ global gamma_list
 global v_list
 global payload_array
 
-if V(end) > 40000;
-ThirdStagePayloadMass = gaussmf(V(end),[10000 40000])*interp3(alt_list,gamma_list,v_list,payload_array,40000, rad2deg(theta(end)), v(end),'cubic');
+% if V(end) > 40000
+% ThirdStagePayloadMass = gaussmf(V(end),[10000 40000])*interp3(alt_list,gamma_list,v_list,payload_array,40000, rad2deg(theta(end)), v(end),'cubic');
+% elseif v(end) < 2000
+% ThirdStagePayloadMass = gaussmf(v(end),[1000 2000])*interp3(alt_list,gamma_list,v_list,payload_array,V(end), rad2deg(theta(end)), 2000,'cubic');
+%     
+% else
+% ThirdStagePayloadMass = interp3(alt_list,gamma_list,v_list,payload_array,V(end), rad2deg(theta(end)), v(end),'cubic');
+% end
+
+if V(end) > 40000
+ThirdStagePayloadMass = gaussmf(V(end),[10000 40000])*interp3(alt_list,gamma_list,v_list,payload_array,40000, rad2deg(theta(end)), v(end));
 elseif v(end) < 2000
-ThirdStagePayloadMass = gaussmf(v(end),[1000 2000])*interp3(alt_list,gamma_list,v_list,payload_array,V(end), rad2deg(theta(end)), 2000,'cubic');
+ThirdStagePayloadMass = gaussmf(v(end),[1000 2000])*interp3(alt_list,gamma_list,v_list,payload_array,V(end), rad2deg(theta(end)), 2000);
     
 else
-ThirdStagePayloadMass = interp3(alt_list,gamma_list,v_list,payload_array,V(end), rad2deg(theta(end)), v(end),'cubic');
+ThirdStagePayloadMass = interp3(alt_list,gamma_list,v_list,payload_array,V(end), rad2deg(theta(end)), v(end));
 end
 
 % Define Cost =======================================================
@@ -81,20 +91,22 @@ if const == 3
 Endcost = 0;
 end
 
-if const == 1 
+if const == 1  || const == 12 || const == 13 || const == 14
 Endcost =  - 0.01*mfuel(end) - ThirdStagePayloadMass;
 end
 
 EndpointCost = Endcost;
 
-if const == 1 
+if const == 1  || const == 12 || const == 13 || const == 14
     
 %smoothing functions (can be adjusted depending on needs, remove if not working
-omegadot = diff(thetadot)./diff(time);
+% omegadot = diff(thetadot)./diff(time);
 %  RunningCost = [0 0.005*abs(omegadot)]; % for smoothing 50kPa
 % RunningCost = [0 0.001*abs(omegadot)]; %for smoothing 45kPa and 55kPa and
 % high drag
-    RunningCost = 0;
+
+
+    RunningCost = Penalty  + abs(omegadot);
 % RunningCost = 0;
 end
 
@@ -104,4 +116,9 @@ omegadot = diff(thetadot)./diff(time);
      
 % RunningCost =((q-50000).^2+1000000)/1000000 + [0 0.005*abs(omegadot)]; % if a cost does not work, try loosening it 
 RunningCost =((q-50000).^2+2000000)/2000000 + [0 0.005*abs(omegadot)];
+
+
+end
+
+
 end

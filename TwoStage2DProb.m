@@ -1,7 +1,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 2D Scramjet Flight Optimiser
+% Scramjet Flight Optimiser
 % By Sholto Forbes-Spyratos
 % Utilises the DIDO proprietary optimisation software
+% startup.m must be run before this file
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 clear all;		
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -18,7 +19,10 @@ copyfile('TwoStage2DCost.m',sprintf('../ArchivedResults/TwoStage2DCost_%s.m',Tim
 
 % const = 1: No end constraint, used for optimal trajectory calculation
 
-% const = 3: Fuel mass is constrained at end point, used for constant dynamic pressure calculation
+% const = 1: 50kPa limit, 12: 55 kPa limit, 13: 45 kPa limit, 14: 50kPa limit & 10% additional drag
+
+% const = 3: Fuel mass is constrained at end point, used for constant
+% dynamic pressure calculation (50kPa constrained)
 
 global const
 const = 1
@@ -106,13 +110,13 @@ HU = 1.2*Hf;
 vL = 1500;
 vU = 3100; % This limit must not cause the drag force to exceed the potential thrust of the vehicle by a large amount, otherwise DIDO will not solve
 
-if const == 1
+if const == 1  || const == 12 || const == 13 || const == 14
 thetaL = -0.1;
 else
-thetaL = -0.1; %  NEED TO WATCH THAT THIS IS NOT OVERCONSTRAINING
+thetaL = -0.1; %  NEED TO WATCH THAT THIS IS NOT OVERCONSTRAINING (ie. scramjet needs to be able to fly the optimal trajectory within these limits)
 end
 
-if const == 1
+if const == 1  || const == 12 || const == 13 || const == 14
 thetaU = 0.05; % gives a good 50, 55kPa result, above this I think that flap deflection will go over max and extrapolate badly
 else
 thetaU = 0.1;  
@@ -141,12 +145,12 @@ scale.theta = 1;
 scale.thetadot = 1;
 scale.m = 1;
 
-if const == 1 
-bounds.lower.states = [VL/scale.V ; vL/scale.v; thetaL/scale.theta; mfuelL/scale.m; -0.002/scale.thetadot];
-bounds.upper.states = [VU/scale.V ; vU/scale.v; thetaU/scale.theta; (mfuelU+1)/scale.m; 0.002/scale.thetadot];
-
-% bounds.lower.states = [VL/scale.V ; vL/scale.v; 0/scale.theta; mfuelL/scale.m; -0.002/scale.thetadot];
+if const == 1  || const == 12 || const == 13 || const == 14
+% bounds.lower.states = [VL/scale.V ; vL/scale.v; thetaL/scale.theta; mfuelL/scale.m; -0.002/scale.thetadot];
 % bounds.upper.states = [VU/scale.V ; vU/scale.v; thetaU/scale.theta; (mfuelU+1)/scale.m; 0.002/scale.thetadot];
+
+bounds.lower.states = [VL/scale.V ; vL/scale.v; 0.1*thetaL/scale.theta; mfuelL/scale.m; -0.002/scale.thetadot];
+bounds.upper.states = [VU/scale.V ; vU/scale.v; thetaU/scale.theta; (mfuelU+1)/scale.m; 0.002/scale.thetadot];
 end
 
 if const == 3
@@ -190,8 +194,9 @@ bounds.upper.time	= [t0; tfMax];
 % Set up the bounds on the endpoint function
 %-------------------------------------------
 % See events file for definition of events function
-if const == 1 
-bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m]; % previous, working
+if const == 1 || const == 12 || const == 13 || const == 14
+    bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m]; % 
+% bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)]; % 
 
 end
 
@@ -220,10 +225,14 @@ TwoStage2d.bounds       = bounds;
 
 % use 
 % 87 for const 50kPa
+if const == 3
 % algorithm.nodes		= [87];
 %86 -88 for 50kPa limited
+elseif const == 1 || const == 14
 algorithm.nodes		= [88];
+elseif const == 12 || const == 13
 % algorithm.nodes		= [88];%for 55kPa and 45kPa limited
+end
 
 global nodes
 
@@ -238,13 +247,14 @@ if const == 1
 
 % guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2) ,34900]/scale.V; %50kpa limited
 
-guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,35000]/scale.V;
+guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,34500]/scale.V; %50kpa limited
 % 
-% guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000/v0^2) ,34900]; %55kPa limited
-
-% guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*45000/v0^2) ,34500];%45kPa limited
-
-% guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2) ,34700]; %High Drag
+elseif const == 12
+guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000/v0^2) ,34900]; %55kPa limited
+elseif const == 13
+guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*45000/v0^2) ,34500];%45kPa limited
+elseif const == 14
+guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2) ,34700]; %High Drag
 
 else
 guess.states(1,:) = [0 ,Vf]/scale.V; % for constant 50kPa
@@ -256,7 +266,7 @@ if const ==3
 guess.states(3,:) = [atan((Vf-V0)/(Hf-H0)),atan((Vf-V0)/(Hf-H0))]/scale.theta;
 else
 % guess.states(3,:) = [deg2rad(1.8),atan((Vf-V0)/(Hf-H0))]/scale.theta; %for all tests
-guess.states(3,:) = [deg2rad(1.35),thetaU]/scale.theta;
+guess.states(3,:) = [deg2rad(1.3),thetaU]/scale.theta;
 end 
 
 guess.states(4,:) = [mfuelU, 0]/scale.m;
@@ -620,7 +630,7 @@ end
 
 % 1: Check that you have posed your problem correctly ie. it is physically
 % feasible and the bounds allow for a solution
-% 2: Check for NaN values (check derivatives while running)
+% 2: Check for NaN values (check derivatives in Dynamics file while running)
 % 3: Check guess, is it reasonable? Is it too close to the expected
 % solution? Both can cause errors! Sometimes there is no real rhyme or
 % reason to picking the correct guess, but a close bound to the outside of
