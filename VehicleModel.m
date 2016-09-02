@@ -1,11 +1,12 @@
 function [dfuel, Fueldt, a, q, M, Fd, Thrust, flapdeflection, Alpha, rho,lift, Penalty] = VehicleModel(time, theta, V, v, mfuel, nodes,scattered, grid, const,thetadot, Atmosphere)
-
+% t1 = cputime;
 % =======================================================
 % Vehicle Model
 % =======================================================
 
-eta = 0.1;
+eta = .0*ones(1,length(time));
 
+% eta = 0.3 - 0.0001*time;
 
 %Gravity
 g = 9.81;
@@ -34,16 +35,18 @@ xi = zeros(1,length(time));
 phi = zeros(1,length(time));
 zeta = zeros(1,length(time));
 
+zeta(1) = deg2rad(64);
+
 r = V + 6371000;
 i= 1;
-[xidot(i),phidot(i),zetadot(i), lift_search(i)] = RotCoords(r(i),xi(i),phi(i),theta(i),v(i),zeta(i),m(i),eta);
+[xidot(i),phidot(i),zetadot(i), lift_search(i)] = RotCoords(r(i),xi(i),phi(i),theta(i),v(i),zeta(i),m(i),eta(i), thetadot(i));
 
 for i = 2:length(time)
 xi(i) = xi(i-1) + xidot(i-1)*(time(i) - time(i-1));
 phi(i) = phi(i-1) + phidot(i-1)*(time(i) - time(i-1));
 zeta(i) = zeta(i-1) + zetadot(i-1)*(time(i) - time(i-1));
 
-[xidot(i),phidot(i),zetadot(i), lift_search(i)] = RotCoords(r(i),xi(i),phi(i),theta(i),v(i),zeta(i),m(i),eta);
+[xidot(i),phidot(i),zetadot(i), lift_search(i)] = RotCoords(r(i),xi(i),phi(i),theta(i),v(i),zeta(i),m(i),eta(i), thetadot(i));
 end
 
 
@@ -73,7 +76,7 @@ M = v./c; % Calculating Mach No (Descaled)
 
 % % determine aerodynamics necessary for trim
 [Fd, Alpha, flapdeflection,lift] = OutForce(theta,M,q,m,scattered,v,V,thetadot,time, lift_search);
-
+% Alpha
 if const == 14
     Fd = 1.1*Fd; % for L/D testing 
 end
@@ -113,9 +116,13 @@ elseif const == 3
 end
 
 %Fuel Cost ===========================================================================
-
+% t1 = cputime;
+% M
+% Alpha
 Thrust = interp2(grid.Mgrid_eng2,grid.alpha_eng2,grid.T_eng,M,Alpha,'spline').*cos(deg2rad(Alpha)).*Efficiency;
 Fueldt = interp2(grid.Mgrid_eng2,grid.alpha_eng2,grid.fuel_eng,M,Alpha,'spline').*Efficiency;
+
+% time = cputime - t1
 
 % Fueldt = scattered.fuel(M,Alpha).*Efficiency;
 % 
@@ -133,7 +140,7 @@ a = ((Thrust - (Fd + gravity.*sin(theta))) ./ m );
 
 % =========================================================================
 
-
+% time = cputime - t1 
 end
 
 

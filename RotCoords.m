@@ -1,4 +1,4 @@
-function [xidot,phidot,zetadot, lift_search] = RotCoords(r,xi,phi,gamma,v,zeta,m,eta)
+function [xidot,phidot,zetadot, lift_search] = RotCoords(r,xi,phi,gamma,v,zeta,m,eta, gammadot)
 % Determination of motion in rotating coordinates
 
 %xi  Longitude (rad)
@@ -9,7 +9,8 @@ function [xidot,phidot,zetadot, lift_search] = RotCoords(r,xi,phi,gamma,v,zeta,m
 mu_E = 3.986e14; % m^3/s^2 Earth Gravitational Parameter
 omega_E = 7.292115e-5; % s^-1 Earth Rotation Rate
 
-lift_search = (-(v/r - mu_E/(r^2*v))*cos(gamma)*m*v - m*v*cos(phi)*(2*omega_E*cos(zeta) + omega_E^2*r/v*(cos(phi)*cos(gamma)+sin(phi)*sin(gamma)*sin(zeta))))/cos(eta); 
+lift_search = gammadot*m*v + (-(v/r - mu_E/(r^2*v))*cos(gamma)*m*v - m*v*cos(phi)*(2*omega_E*cos(zeta) + omega_E^2*r/v*(cos(phi)*cos(gamma)+sin(phi)*sin(gamma)*sin(zeta))))/cos(eta); 
+% lift_search =(-(v/r - mu_E/(r^2*v))*cos(gamma)*m*v - m*v*cos(phi)*(2*omega_E*cos(zeta) + omega_E^2*r/v*(cos(phi)*cos(gamma)+sin(phi)*sin(gamma)*sin(zeta))))/cos(eta); 
  
 % rdot = v*sin(gamma);
 

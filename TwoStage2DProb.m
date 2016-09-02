@@ -7,6 +7,9 @@
 clear all;		
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% cmd_str = 'wmic process where name="MATLAB.exe" CALL setpriority 128';
+% [~,~] = system(cmd_str);
+
 global iteration
 iteration = 1;
 
@@ -60,7 +63,7 @@ grid.fuel_eng = scattered.fuel(grid.Mgrid_eng2,grid.alpha_eng2);
 
 % Call LiftForceInterp
 % This produces scattered interpolants which can calculate the vehicle
-% flight conditions required for trim at any flight conditions
+% settings required for trim at any flight conditions
 [scattered.AoA,scattered.flapdeflection,scattered.drag,scattered.flap_pm] = LiftForceInterp(communicator,communicator_trim,const,Atmosphere,scattered.T,scattered.fuel);
 
 scattered.flap_def = scatteredInterpolant(communicator_trim(:,1),communicator_trim(:,2),communicator_trim(:,4),communicator_trim(:,3));
@@ -149,7 +152,8 @@ if const == 1  || const == 12 || const == 13 || const == 14
 % bounds.lower.states = [VL/scale.V ; vL/scale.v; thetaL/scale.theta; mfuelL/scale.m; -0.002/scale.thetadot];
 % bounds.upper.states = [VU/scale.V ; vU/scale.v; thetaU/scale.theta; (mfuelU+1)/scale.m; 0.002/scale.thetadot];
 
-bounds.lower.states = [VL/scale.V ; vL/scale.v; 0.1*thetaL/scale.theta; mfuelL/scale.m; -0.002/scale.thetadot];
+% bounds.lower.states = [VL/scale.V ; vL/scale.v; 0.1*thetaL/scale.theta; mfuelL/scale.m; -0.002/scale.thetadot];
+bounds.lower.states = [VL/scale.V ; vL/scale.v; 0.1*thetaL/scale.theta; mfuelL/scale.m; -0.001/scale.thetadot];
 bounds.upper.states = [VU/scale.V ; vU/scale.v; thetaU/scale.theta; (mfuelU+1)/scale.m; 0.002/scale.thetadot];
 end
 
@@ -229,7 +233,10 @@ if const == 3
 % algorithm.nodes		= [87];
 %86 -88 for 50kPa limited
 elseif const == 1 || const == 14
-algorithm.nodes		= [88];
+% algorithm.nodes		= [88];
+
+algorithm.nodes		= [75];
+
 elseif const == 12 || const == 13
 % algorithm.nodes		= [88];%for 55kPa and 45kPa limited
 end

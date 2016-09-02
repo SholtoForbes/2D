@@ -47,7 +47,7 @@ for v = 1500:100:3000 % Velocity (m/s)
             
             %% Calculate Thrust Component ==================================
 
-            if const == 1 || 14
+            if const == 1 || const == 14
                 Efficiency = zeros(1,length(q));
                 for i = 1:length(q)
                     if q(i) < 50000

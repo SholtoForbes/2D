@@ -105,8 +105,11 @@ if const == 1  || const == 12 || const == 13 || const == 14
 % RunningCost = [0 0.001*abs(omegadot)]; %for smoothing 45kPa and 55kPa and
 % high drag
 
-
-    RunningCost = Penalty  + abs(omegadot);
+    RunningCost = Penalty + abs(omegadot);
+%     RunningCost = Penalty ; % The Penalty function ensures that it does not go over 50kPa, but still allows it to search that space. 
+    %Omegadot cost smooths the trajectory (sometimes), but also throws a SOL error and
+    %reduces the validity of the optimisation result (so only use if you
+    %are sure of the end trajectory shape)
 % RunningCost = 0;
 end
 
