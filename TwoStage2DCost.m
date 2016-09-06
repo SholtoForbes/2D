@@ -62,21 +62,30 @@ global v_list
 global payload_array
 
 % if V(end) > 40000
-% ThirdStagePayloadMass = gaussmf(V(end),[10000 40000])*interp3(alt_list,gamma_list,v_list,payload_array,40000, rad2deg(theta(end)), v(end),'cubic');
+% ThirdStagePayloadMass = gaussmf(V(end),[10000 40000])*interp3(alt_list,gamma_list,v_list,payload_array,40000, rad2deg(theta(end)), v(end),'spline');
 % elseif v(end) < 2000
-% ThirdStagePayloadMass = gaussmf(v(end),[1000 2000])*interp3(alt_list,gamma_list,v_list,payload_array,V(end), rad2deg(theta(end)), 2000,'cubic');
+% ThirdStagePayloadMass = gaussmf(v(end),[1000 2000])*interp3(alt_list,gamma_list,v_list,payload_array,V(end), rad2deg(theta(end)), 2000,'spline');
 %     
 % else
-% ThirdStagePayloadMass = interp3(alt_list,gamma_list,v_list,payload_array,V(end), rad2deg(theta(end)), v(end),'cubic');
+% ThirdStagePayloadMass = interp3(alt_list,gamma_list,v_list,payload_array,V(end), rad2deg(theta(end)), v(end),'spline');
+% end
+
+% if V(end) > 40000
+% ThirdStagePayloadMass = gaussmf(V(end),[10000 40000])*interp3(alt_list,gamma_list,v_list,payload_array,40000, rad2deg(theta(end)), v(end));
+% elseif v(end) < 2000
+% ThirdStagePayloadMass = gaussmf(v(end),[1000 2000])*interp3(alt_list,gamma_list,v_list,payload_array,V(end), rad2deg(theta(end)), 2000);
+%     
+% else
+% ThirdStagePayloadMass = interp3(alt_list,gamma_list,v_list,payload_array,V(end), rad2deg(theta(end)), v(end));
 % end
 
 if V(end) > 40000
-ThirdStagePayloadMass = gaussmf(V(end),[10000 40000])*interp3(alt_list,gamma_list,v_list,payload_array,40000, rad2deg(theta(end)), v(end));
+ThirdStagePayloadMass = gaussmf(V(end),[10000 40000])*scattered.Payload(40000, rad2deg(theta(end)), v(end));
 elseif v(end) < 2000
-ThirdStagePayloadMass = gaussmf(v(end),[1000 2000])*interp3(alt_list,gamma_list,v_list,payload_array,V(end), rad2deg(theta(end)), 2000);
+ThirdStagePayloadMass = gaussmf(v(end),[1000 2000])*scattered.Payload(V(end), rad2deg(theta(end)), 2000);
     
 else
-ThirdStagePayloadMass = interp3(alt_list,gamma_list,v_list,payload_array,V(end), rad2deg(theta(end)), v(end));
+ThirdStagePayloadMass = scattered.Payload(V(end), rad2deg(theta(end)), v(end));
 end
 
 % Define Cost =======================================================

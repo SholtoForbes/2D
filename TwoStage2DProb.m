@@ -20,15 +20,14 @@ copyfile('TwoStage2DCost.m',sprintf('../ArchivedResults/TwoStage2DCost_%s.m',Tim
 
 % SET RUN MODE
 
-% const = 1: No end constraint, used for optimal trajectory calculation
-
+% const = 1x: No end constraint, used for optimal trajectory calculation
 % const = 1: 50kPa limit, 12: 55 kPa limit, 13: 45 kPa limit, 14: 50kPa limit & 10% additional drag
 
 % const = 3: Fuel mass is constrained at end point, used for constant
 % dynamic pressure calculation (50kPa constrained)
 
 global const
-const = 1
+const = 1 % 55kPa NOT WORKING AT THE MOMENT
 
 % Inputs ============================================
 %Take inputs of communicator matrices, these should be .txt files 
@@ -72,14 +71,14 @@ scattered.pm = scatteredInterpolant(communicator(:,1),communicator(:,2),communic
 
 ThirdStageData = dlmread('thirdstage.dat');
 % global ThirdStagePayloadSpline
-ThirdStagePayloadSpline = scatteredInterpolant(ThirdStageData(:,1),ThirdStageData(:,2),ThirdStageData(:,3),ThirdStageData(:,5)); % not actually a spline...
+scattered.Payload = scatteredInterpolant(ThirdStageData(:,1),ThirdStageData(:,2),ThirdStageData(:,3),ThirdStageData(:,5)); % not actually a spline...
 
 %TEST
 global alt_list
 global gamma_list
 global v_list
 global payload_array
-[alt_list,gamma_list,v_list,payload_array] = thirdstagemanipulation();
+[alt_list,gamma_list,v_list,payload_array] = thirdstagemanipulation('thirdstage.dat');
 
 %=============================================== 
 %Second Stage
@@ -238,7 +237,7 @@ elseif const == 1 || const == 14
 algorithm.nodes		= [75];
 
 elseif const == 12 || const == 13
-% algorithm.nodes		= [88];%for 55kPa and 45kPa limited
+algorithm.nodes		= [79];%for 55kPa and 45kPa limited
 end
 
 global nodes

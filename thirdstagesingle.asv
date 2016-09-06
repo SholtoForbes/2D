@@ -89,19 +89,16 @@ fclose('all');
 % system(['CADAC3.exe']);
 dos('start CADAC3.exe');
 
-pause(0.3)
 % cond2 = txt2mat('cond.dat'); % for whatever reason this only reads the last line (the only one necessary)
 
 cond2 = fopen('cond.dat');
 cond3 = fscanf(cond2,'%s');
 
-if length(cond3) < 348
-    pause(1)
+while length(cond3) < 348
     fclose('all');
     cond2 = fopen('cond.dat');
     cond3 = fscanf(cond2,'%s');
     fprintf('length not met')
-    length(cond3)
 end
 
 cond3
@@ -109,8 +106,8 @@ length(cond3)
 
 fclose('all');
 
-loc = findstr('Propmass',cond3);
+findstr
 
-payload = str2num(cond3(loc+8:loc+13))
+payload = str2num(cond3(330:335))
 
 time = cputime - t1;

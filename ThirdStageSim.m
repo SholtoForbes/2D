@@ -21,7 +21,7 @@ iteration = 1;
 % for u = 1800:200:3400
 
 k = 32000;
-j = 0.17;
+j = 0.1;
 u = 2800;
 
 [k j u];
@@ -56,55 +56,56 @@ Orbital_Velocity_f = sqrt(398600/(566.89 + 6371))*10^3; %Calculating the necessa
 % maxturnrateneg = -deg2rad(8)/110; %rad/s
 % maxturnrateneg = -0.003;
 
-%Reference area using diameter from Dawid (3i)
-A = pi*(0.9/2)^2; % this is the same for lift and drag
+%Reference area from Dawids Cadin
+A = 0.87;
 
 g = 9.81; %standard gravity
 
 %define starting condtions
 t(1) = 0.;
 
-dt = .5; %time step
+dt = .1; %time step
 
 i=1;
 
 %
 
-r(1) = r_E + 35500;
+r(1) = r_E + k;
 
-Alt(1) = r(1) - r_E;
+Alt(1) = k;
 
 xi(1) = 0;
     
-phi(1) = 0;
+phi(1) = -0.1314;
 
-gamma(1) = deg2rad(2.8);
+gamma(1) = deg2rad(j);
 
-v(1) = 2850;
+v(1) = u;
 
-zeta(1) = deg2rad(90);
+zeta(1) = deg2rad(84);
 
-m = 1750; %vehicle mass, less 1100kg fuel (to match Dawids glasgow paper)
+
+m(1) = 1750; %vehicle mass, less 1100kg fuel (to match Dawids glasgow paper)
 
 mdot = 14.71; %fuel mass flow rate from dawid
 
 mfuel(1) = 1100; %this is approx what dawid used
 % mfuel(1) = 800
 
+Alpha = deg2rad(10); % angle of attack, from dawids 6d
+
 while gamma(i) > 0;
     
-    if Alt(i) > 70000
-        m = 1750 - 302.8; %release of heat shield, from dawids glasgow paper
-    end
-    
     if mfuel(i) > 0
-        T = 2*50510;
-        Alpha = deg2rad(13); % angle of attack, from dawids 6d
+        T = 50510;
+        
+        mfuel(i+1) = mfuel(i) - mdot*dt;
     else
         T = 0;
-        Alpha = 0; 
+
+        mfuel(i+1) = mfuel(i);
     end
-    
+ 
     
     if Alt(i) < 85000
         c(i) = spline( Atmosphere(:,1),  Atmosphere(:,5), Alt(i)); % Calculate speed of sound using atmospheric data
@@ -115,6 +116,8 @@ while gamma(i) > 0;
 
         rho(i) = 0;
     end
+    
+    q(i) = 1/2*rho(i)*v(i)^2;
     
     M(i) = v(i)/c(i);
     
@@ -130,9 +133,17 @@ while gamma(i) > 0;
     CL(i) = CN(i)*cos(Alpha) - CA(i)*sin(Alpha);
     
     D(i) = 1/2*rho(i)*(v(i)^2)*A*CD(i);
+    
     L(i) = 1/2*rho(i)*(v(i)^2)*A*CL(i);
    
-    [rdot,xidot,phidot,gammadot,vdot,zetadot] = RotCoordsRocket(r(i),xi(i),phi(i),gamma(i),v(i),zeta(i),L(i),D(i),T,mfuel(i)+m,Alpha);
+    [rdot,xidot,phidot,gammadot,vdot,zetadot] = RotCoordsRocket(r(i),xi(i),phi(i),gamma(i),v(i),zeta(i),L(i),D(i),T,mfuel(i)+m(i),Alpha);
+    
+    
+    if gammadot < 0
+       
+        Alpha = 0;
+    end
+    
     
     r(i+1) = r(i) + rdot*dt;
     
@@ -148,11 +159,24 @@ while gamma(i) > 0;
     
     zeta(i+1) = zeta(i) + zetadot*dt;
     
-    mfuel(i+1) = mfuel(i) - mdot*dt;
+    
+    
+    if q(i) < 10
+        m(i+1) = 1750 - 302.8; %release of heat shield, from dawids glasgow paper
+        exocond = true;
+    else 
+        m(i+1) = m(i);
+        exocond = false;
+    end
     
     t(i+1) = t(i) + dt;    
     i = i+1;
     
+end
+
+if exocond == false
+    fprintf('Did not reach exoatmospheric conditions')
+    m(end) = 1750 - 302.8;
 end
 
 %Hohmann Transfer, from Dawid (3i)
@@ -182,7 +206,7 @@ g = 9.81;
 
 Isp = 350; %s
 
-m2 = m/(exp(v12/(Isp*g)));
+m2 = m(end)/(exp(v12/(Isp*g)));
 
 m3 = m2/(exp(v23/(Isp*g)));
 
