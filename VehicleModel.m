@@ -122,27 +122,15 @@ end
     
 %Fuel Cost ===========================================================================
 
-% WORKS
-% for i = 1:length(time)
-%     if Alpha(i) > 0 && Alpha(i) < 6
-%         Thrust(i) = interp2(grid.Mgrid_eng2,grid.alpha_eng2,grid.T_eng,M(i),Alpha(i),'spline').*cos(deg2rad(Alpha(i))).*Efficiency(i);
-%         Fueldt(i) = interp2(grid.Mgrid_eng2,grid.alpha_eng2,grid.fuel_eng,M(i),Alpha(i),'spline').*Efficiency(i);
-%     else
-%         Thrust(i) =  scattered.T(M(i),Alpha(i)).*cos(deg2rad(Alpha(i))).*Efficiency(i);
-%         Fueldt(i) =  scattered.fuel(M(i),Alpha(i)).*Efficiency(i);
-%     end
-% end
-
-Thrust = interp2(grid.Mgrid_eng2,grid.alpha_eng2,grid.T_eng,M,Alpha,'spline').*cos(deg2rad(Alpha)).*Efficiency;
-Fueldt = interp2(grid.Mgrid_eng2,grid.alpha_eng2,grid.fuel_eng,M,Alpha,'spline').*Efficiency;
-
 for i = 1:length(time)
-    if Alpha > 6
+    if Alpha(i) > 0 && Alpha(i) < 6
+        Thrust(i) = interp2(grid.Mgrid_eng2,grid.alpha_eng2,grid.T_eng,M(i),Alpha(i),'spline').*cos(deg2rad(Alpha(i))).*Efficiency(i);
+        Fueldt(i) = interp2(grid.Mgrid_eng2,grid.alpha_eng2,grid.fuel_eng,M(i),Alpha(i),'spline').*Efficiency(i);
+    else
         Thrust(i) =  scattered.T(M(i),Alpha(i)).*cos(deg2rad(Alpha(i))).*Efficiency(i);
         Fueldt(i) =  scattered.fuel(M(i),Alpha(i)).*Efficiency(i);
     end
 end
-
 
 fuelchange_array = -Fueldt(1:end-1).*dt_array ;
 

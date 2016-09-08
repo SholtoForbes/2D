@@ -28,7 +28,7 @@ copyfile('TwoStage2DCost.m',sprintf('../ArchivedResults/TwoStage2DCost_%s.m',Tim
 % const = 31: simple model for guess calc 
 
 global const
-const = 1 % 55kPa NOT WORKING AT THE MOMENT
+const = 14 % 55kPa NOT WORKING AT THE MOMENT
 
 % Inputs ============================================
 %Take inputs of communicator matrices, these should be .txt files 
@@ -576,6 +576,7 @@ mu_1 = dual.states(1,:);
 mu_2 = dual.states(2,:);
 mu_3 = dual.states(3,:);
 mu_4 = dual.states(4,:);
+mu_5 = dual.states(5,:);
 
 mu_u = dual.controls;
 
@@ -586,8 +587,8 @@ dLHdu = dual.dynamics(3,:) + mu_u; % NEED TO CHECK THAT THIS IS THE CORRECT ANAL
 
 figure(5)
 
-plot(t,dLHdu,t,mu_1,t,mu_2,t,mu_3,t,mu_4,t,mu_u);
-legend('dLHdu','mu_1','mu_2','mu_3','mu_4','mu_u');
+plot(t,dLHdu,t,mu_1,t,mu_2,t,mu_3,t,mu_4,t,mu_5,t,mu_u);
+legend('dLHdu','mu_1','mu_2','mu_3','mu_4','mu_5','mu_u');
 title('Validation')
 % ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 % FORWARD SIMULATION
@@ -598,9 +599,10 @@ title('Validation')
 
 
 
-theta_F = cumtrapz(t,thetadot);
+theta_F = cumtrapz(t,thetadot)+ theta(1);
 
-theta_F = theta_F + theta(1);
+thetadot_F = cumtrapz(t,omegadot) + thetadot(1);
+
 
 v_F = cumtrapz(t,a);
 v_F = v_F + v(1);
@@ -613,16 +615,18 @@ mfuel_F = mfuel_F + mfuel(1);
 
 figure(6)
 
-subplot(4,1,1)
+subplot(5,1,1)
 plot(t,theta_F,t,theta);
 title('Forward Simulation Comparison');
-
-subplot(4,1,2)
+% note this is just a trapezoidal rule check, may not be exactly accurate
+subplot(5,1,2)
 plot(t,v_F,t,v);
-subplot(4,1,3)
+subplot(5,1,3)
 plot(t,V_F,t,V);
-subplot(4,1,4)
+subplot(5,1,4)
 plot(t,mfuel_F,t,mfuel);
+subplot(5,1,4)
+plot(t,thetadot_F,t,thetadot);
 
 % Compute difference with CADAC for constant dynamic pressure path
 if const == 3
