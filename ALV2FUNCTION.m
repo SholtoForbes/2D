@@ -1,4 +1,4 @@
-function [diff,t,r,gamma,v,m,xi,phi,zeta,alpha,beta] = ALV2FUNCTION(x,r0,xi0,phi0,zeta0,rTarget,gammaTarget)
+function [diff,t,r,gamma,v,m,xi,phi,zeta,alpha,beta,T] = ALV2FUNCTION(x,r0,xi0,phi0,zeta0,rTarget,gammaTarget)
 gamma0 = x(1);
 
 
@@ -76,7 +76,7 @@ M(1) = v(1)/v_a; % Mach no Array
 Cd(1) = interp1(AeroCoeffs(:,1),AeroCoeffs(:,2),M(1)); % Drag Coefficient Array (N);
 D(1) = 0.5* Cd * v(1)^2 * A1 * interp1(atmosphere(:,1),atmosphere(:,4),r(1)-r_E);
 
-L(1) = D(1)*sin(alpha(1));
+L(1) = 0;
 % L(1) = 0;
 
 % SCALES THRUST, this is NOT REALISTIC (scaling should be sqrt(scale)).
@@ -97,7 +97,7 @@ while mParray(i) > 0 && r(i) >= r_E
 
 % Increment Equations of Motion
 
-[rdot,xidot,phidot,gammadot,vdot,zetadot] = RotCoords(r(i),xi(i),phi(i),gamma(i),v(i),zeta(i),L(i),D(i),T(i),m(i),alpha(i));
+[rdot,xidot,phidot,gammadot,vdot,zetadot] = RotCoordsRocket(r(i),xi(i),phi(i),gamma(i),v(i),zeta(i),L(i),D(i),T(i),m(i),alpha(i));
 
 r(i+1) = r(i) + dt*rdot;
 xi(i+1) = xi(i) + dt*xidot;
@@ -159,7 +159,7 @@ else
 D(i+1) = 0;
 end
 
-L(i+1) = D(i+1)*sin(alpha(i+1));
+L(i+1) = 0;
 % L(i+1) = 0;
 
 t(i+1) = t(i) + dt;

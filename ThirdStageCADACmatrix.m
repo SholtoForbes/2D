@@ -5,8 +5,8 @@ payload_matrix = [];
 % for theta = 0.0:.1:3
 % for v = [1500:200:2700 2725:25:2900 3000]
 
-for Alt = [32000:500:36000]
-for theta = 0.0:.1:3
+for Alt = [32250:500:36250]
+for theta = 0:.1:3
 for v = [2700:50:2950]
 
 % for lat = -pi:pi/3:pi
@@ -34,4 +34,4 @@ end
 % end
 
 
-dlmwrite('thirdstagearound35kmnew.dat', payload_matrix,'delimiter','\t')
+dlmwrite('thirdstagealternateheights1.dat', payload_matrix,'delimiter','\t')

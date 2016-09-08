@@ -74,7 +74,7 @@ for v = 1500:100:3000 % Velocity (m/s)
                         Efficiency(i) = .9; % for 45kPa
                     end
                 end
-            elseif const == 3
+            elseif const == 3 || const == 31
             Efficiency = rho./(50000*2./v.^2); % linear rho efficiency, scaled to rho at 50000kpa
             end
 

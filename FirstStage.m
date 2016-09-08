@@ -27,7 +27,7 @@ options.MaxFunEvals = 400 ;
 % 
 x = fmincon(@(x)ALV2FUNCTION(x,r0,xi0,phi0,zeta0,rTarget,gammaTarget),x0,A,b,Aeq,beq,lb,ub,nonlcon, options) 
 
-[diff,t,r,gamma,v,m,xi,phi,zeta,alpha,beta] = ALV2FUNCTION(x,r0,xi0,phi0,zeta0,rTarget,gammaTarget);
+[diff,t,r,gamma,v,m,xi,phi,zeta,alpha,beta,T] = ALV2FUNCTION(x,r0,xi0,phi0,zeta0,rTarget,gammaTarget);
 
 
 r_E = 6371000; % radius of Earth (m)

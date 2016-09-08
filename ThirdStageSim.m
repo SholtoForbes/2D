@@ -89,7 +89,7 @@ m(1) = 1750; %vehicle mass, less 1100kg fuel (to match Dawids glasgow paper)
 
 mdot = 14.71; %fuel mass flow rate from dawid
 
-mfuel(1) = 1100; %this is approx what dawid used
+mfuel(1) = 1100; %this is approx what dawid used (this is only fuel in atmosphere)
 % mfuel(1) = 800
 
 Alpha = deg2rad(10); % angle of attack, from dawids 6d

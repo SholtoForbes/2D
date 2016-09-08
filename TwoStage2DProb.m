@@ -25,6 +25,7 @@ copyfile('TwoStage2DCost.m',sprintf('../ArchivedResults/TwoStage2DCost_%s.m',Tim
 
 % const = 3: Fuel mass is constrained at end point, used for constant
 % dynamic pressure calculation (50kPa constrained)
+% const = 31: simple model for guess calc 
 
 global const
 const = 1 % 55kPa NOT WORKING AT THE MOMENT
@@ -70,16 +71,17 @@ scattered.flap_D = scatteredInterpolant(communicator_trim(:,1),communicator_trim
 scattered.pm = scatteredInterpolant(communicator(:,1),communicator(:,2),communicator(:,11));
 
 ThirdStageData = dlmread('thirdstage.dat');
-% global ThirdStagePayloadSpline
-scattered.Payload = scatteredInterpolant(ThirdStageData(:,1),ThirdStageData(:,2),ThirdStageData(:,3),ThirdStageData(:,5)); % not actually a spline...
+% % global ThirdStagePayloadSpline
+% scattered.Payload = scatteredInterpolant(ThirdStageData(:,1),ThirdStageData(:,2),ThirdStageData(:,3),ThirdStageData(:,5)); % not actually a spline...
 
 %TEST
 global alt_list
 global gamma_list
 global v_list
 global payload_array
-[alt_list,gamma_list,v_list,payload_array] = thirdstagemanipulation('thirdstage.dat');
+[alt_list.course,gamma_list.course,v_list.course,payload_array.course] = thirdstagemanipulation('thirdstage.dat');
 
+[alt_list.fine,gamma_list.fine,v_list.fine,payload_array.fine] = thirdstagemanipulation('thirdstagearound35kmnew.dat');
 %=============================================== 
 %Second Stage
 V0 = 20000.;
@@ -156,9 +158,9 @@ bounds.lower.states = [VL/scale.V ; vL/scale.v; 0.1*thetaL/scale.theta; mfuelL/s
 bounds.upper.states = [VU/scale.V ; vU/scale.v; thetaU/scale.theta; (mfuelU+1)/scale.m; 0.002/scale.thetadot];
 end
 
-if const == 3
-bounds.lower.states = [VL/scale.V ; vL/scale.v; thetaL/scale.theta; (mfuelL-3000)/scale.m];
-bounds.upper.states = [VU/scale.V ; vU/scale.v; thetaU/scale.theta; mfuelU/scale.m];
+if const == 3 || const == 31
+bounds.lower.states = [VL/scale.V ; vL/scale.v; thetaL/scale.theta; (mfuelL-3000)/scale.m; -0.001/scale.thetadot];
+bounds.upper.states = [VU/scale.V ; vU/scale.v; thetaU/scale.theta; mfuelU/scale.m; 0.002/scale.thetadot];
 end
 
 % control bounds
@@ -203,7 +205,7 @@ if const == 1 || const == 12 || const == 13 || const == 14
 
 end
 
-if const == 3
+if const == 3 || const == 31
 % bounds.lower.events = [v0; vf; mfuelU]; 
 bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m];
 end
@@ -228,8 +230,9 @@ TwoStage2d.bounds       = bounds;
 
 % use 
 % 87 for const 50kPa
-if const == 3
+if const == 3 || const == 31
 % algorithm.nodes		= [87];
+algorithm.nodes		= [80];
 %86 -88 for 50kPa limited
 elseif const == 1 || const == 14
 % algorithm.nodes		= [88];
@@ -263,13 +266,14 @@ elseif const == 14
 guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2) ,34700]; %High Drag
 
 else
-guess.states(1,:) = [0 ,Vf]/scale.V; % for constant 50kPa
+% guess.states(1,:) = [0 ,Vf]/scale.V; % for constant 50kPa
+guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/2860^2)+100];
 end
 
 guess.states(2,:) = [v0, vf]/scale.v; %v for normal use
 
-if const ==3
-guess.states(3,:) = [atan((Vf-V0)/(Hf-H0)),atan((Vf-V0)/(Hf-H0))]/scale.theta;
+if const ==3 || const == 31
+guess.states(3,:) = [0,0]/scale.theta;
 else
 % guess.states(3,:) = [deg2rad(1.8),atan((Vf-V0)/(Hf-H0))]/scale.theta; %for all tests
 guess.states(3,:) = [deg2rad(1.3),thetaU]/scale.theta;
