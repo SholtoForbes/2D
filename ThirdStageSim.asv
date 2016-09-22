@@ -1,4 +1,5 @@
 clear all
+% my attempt at third stage simulation... not very good
 
 time1 = cputime;
 
@@ -14,13 +15,14 @@ iteration = 1;
 
 % for minit = 1500:100:3000
 
+
 % for k = 20000:5000:60000
 % for j = -.05:.01:0.1
 % for u = 1800:200:3400
 
-k = 34000;
-j = 0.05;
-u = 2850;
+k = 32000;
+j = 0.1;
+u = 2800;
 
 [k j u];
         
@@ -59,12 +61,10 @@ A = 0.87;
 
 g = 9.81; %standard gravity
 
-Isp = 350;
-
 %define starting condtions
 t(1) = 0.;
 
-dt = 1.; %time step
+dt = .1; %time step
 
 i=1;
 
@@ -90,17 +90,14 @@ m(1) = 1750; %vehicle mass, less 1100kg fuel (to match Dawids glasgow paper)
 mdot = 14.71; %fuel mass flow rate from dawid
 
 mfuel(1) = 1100; %this is approx what dawid used (this is only fuel in atmosphere)
-% mfuel(1) = 1000
+% mfuel(1) = 800
 
-Alpha = deg2rad(10); % angle of attack, from dawids 6d
-
-
+Alpha = deg2rad(20); % angle of attack, from dawids 6d
 
 while gamma(i) > 0;
-    p(i) = spline( Atmosphere(:,1),  Atmosphere(:,3), Alt(i));
     
     if mfuel(i) > 0
-        T = Isp*mdot*9.81*6371000^2/r(i)^2 + (101325-p(i))*0.636;
+        T = 50510 + (101325-;
         
         mfuel(i+1) = mfuel(i) - mdot*dt;
     else
@@ -147,6 +144,7 @@ while gamma(i) > 0;
         Alpha = 0;
     end
     
+    
     r(i+1) = r(i) + rdot*dt;
     
     Alt(i+1) = r(i+1) - r_E;
@@ -160,6 +158,8 @@ while gamma(i) > 0;
     v(i+1) = v(i) + vdot*dt;
     
     zeta(i+1) = zeta(i) + zetadot*dt;
+    
+    
     
     if q(i) < 10
         m(i+1) = 1750 - 302.8; %release of heat shield, from dawids glasgow paper
@@ -214,18 +214,40 @@ m4 = m3/(exp(v34/(Isp*g)));
 
 mpayload = m4 - 347.4; % subtract structural mass, from Dawids glasgow paper
 
+% plot(Hor, Alt)
 
 payload_matrix(iteration,1) = k ;
 payload_matrix(iteration,2) = j ;
 payload_matrix(iteration,3) = u ;
 payload_matrix(iteration,4) = mpayload;
 
+% payload_matrix(iteration,1) = minit ;
+% payload_matrix(iteration,2) = k ;
+% payload_matrix(iteration,3) = j ;
+% payload_matrix(iteration,4) = u ;
+% payload_matrix(iteration,5) = mpayload;
+
 [k j u mpayload]
 
 
+% thirdstage = fopen('thirdstage.dat','a+');
+%         
+% thirdstage_results = [num2str(Starting_Altitude,'%10.4e') ' ' num2str(Starting_Theta,'%10.4e') ' ' num2str(mpayload,'%10.4e') '\r\n'] ;
+%         
+% fprintf(thirdstage,thirdstage_results);
 figure(1)
 plot(t, Alt)
 figure(2)
 plot(t,v)
 
+% iteration = iteration + 1;
+%  end
+% end
+% end
+% % end     
+% dlmwrite('thirdstage.dat', payload_matrix,'delimiter','\t')
 
+
+% dlmwrite('thirdstagewithmass.dat', payload_matrix,'delimiter','\t')
+
+% time = cputime - time1

@@ -28,7 +28,7 @@ copyfile('TwoStage2DCost.m',sprintf('../ArchivedResults/TwoStage2DCost_%s.m',Tim
 % const = 31: simple model for guess calc 
 
 global const
-const = 14 % 55kPa NOT WORKING AT THE MOMENT
+const = 13 
 
 % Inputs ============================================
 %Take inputs of communicator matrices, these should be .txt files 
@@ -91,6 +91,7 @@ H0 = 0.;
 Hf = 700000.;
 
 v0 = 1797.9; % 
+% v0 = 1850;
 vf = 2839.51;
 
 %===================
@@ -149,12 +150,11 @@ scale.theta = 1;
 scale.thetadot = 1;
 scale.m = 1;
 
-if const == 1  || const == 12 || const == 13 || const == 14
-% bounds.lower.states = [VL/scale.V ; vL/scale.v; thetaL/scale.theta; mfuelL/scale.m; -0.002/scale.thetadot];
-% bounds.upper.states = [VU/scale.V ; vU/scale.v; thetaU/scale.theta; (mfuelU+1)/scale.m; 0.002/scale.thetadot];
-
-% bounds.lower.states = [VL/scale.V ; vL/scale.v; 0.1*thetaL/scale.theta; mfuelL/scale.m; -0.002/scale.thetadot];
+if const == 1  || const == 12 || const == 14 
 bounds.lower.states = [VL/scale.V ; vL/scale.v; 0.1*thetaL/scale.theta; mfuelL/scale.m; -0.001/scale.thetadot];
+bounds.upper.states = [VU/scale.V ; vU/scale.v; thetaU/scale.theta; (mfuelU+1)/scale.m; 0.002/scale.thetadot];
+elseif const == 13
+bounds.lower.states = [VL/scale.V ; vL/scale.v; 0.1*thetaL/scale.theta; mfuelL/scale.m; -0.0003/scale.thetadot];
 bounds.upper.states = [VU/scale.V ; vU/scale.v; thetaU/scale.theta; (mfuelU+1)/scale.m; 0.002/scale.thetadot];
 end
 
@@ -176,10 +176,13 @@ end
 
 % omegadotL = -0.0005;
 % omegadotU = 0.0005;
-
+if const == 13
 omegadotL = -0.001;
 omegadotU = 0.001;
-
+else
+omegadotL = -0.001;
+omegadotU = 0.001;
+end
 bounds.lower.controls = [omegadotL/scale.thetadot];
 bounds.upper.controls = [omegadotU/scale.thetadot]; 
 
@@ -199,10 +202,14 @@ bounds.upper.time	= [t0; tfMax];
 % Set up the bounds on the endpoint function
 %-------------------------------------------
 % See events file for definition of events function
-if const == 1 || const == 12 || const == 13 || const == 14
+if const == 1 || const == 12 || const == 14
     bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m]; % 
 % bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)]; % 
 
+end
+
+if const == 13
+bounds.lower.events = [v0/scale.v; mfuelU/scale.m; mfuelL/scale.m; interp1(Atmosphere(:,4),Atmosphere(:,1),2*45000/v0^2)];
 end
 
 if const == 3 || const == 31
@@ -231,16 +238,16 @@ TwoStage2d.bounds       = bounds;
 % use 
 % 87 for const 50kPa
 if const == 3 || const == 31
-% algorithm.nodes		= [87];
 algorithm.nodes		= [80];
-%86 -88 for 50kPa limited
-elseif const == 1 || const == 14
-% algorithm.nodes		= [88];
-
+elseif const == 1
 algorithm.nodes		= [75];
-
-elseif const == 12 || const == 13
-algorithm.nodes		= [79];%for 55kPa and 45kPa limited
+elseif const == 12 
+algorithm.nodes		= [78];
+elseif const == 13
+algorithm.nodes		= [78];
+% algorithm.nodes		= [77];
+elseif const == 14
+algorithm.nodes		= [78];
 end
 
 global nodes
@@ -259,9 +266,11 @@ if const == 1
 guess.states(1,:) =[interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2)-100 ,34500]/scale.V; %50kpa limited
 % 
 elseif const == 12
-guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000/v0^2) ,34900]; %55kPa limited
+% guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000/v0^2)-100 ,34900]; %55kPa limited
+guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*55000/v0^2)-100 ,34900];
 elseif const == 13
-guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*45000/v0^2) ,34500];%45kPa limited
+% guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*45000/v0^2)+100 ,34500];%45kPa limited
+guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*45000/v0^2)+100 ,34500];%45kPa limited
 elseif const == 14
 guess.states(1,:) = [interp1(Atmosphere(:,4),Atmosphere(:,1),2*50000/v0^2) ,34700]; %High Drag
 
@@ -274,9 +283,11 @@ guess.states(2,:) = [v0, vf]/scale.v; %v for normal use
 
 if const ==3 || const == 31
 guess.states(3,:) = [0,0]/scale.theta;
+elseif const == 13
+% guess.states(3,:) = [deg2rad(1.0),thetaU]/scale.theta;
+guess.states(3,:) = [deg2rad(0.5),thetaU]/scale.theta;
 else
-% guess.states(3,:) = [deg2rad(1.8),atan((Vf-V0)/(Hf-H0))]/scale.theta; %for all tests
-guess.states(3,:) = [deg2rad(1.3),thetaU]/scale.theta;
+guess.states(3,:) = [deg2rad(1.3),thetaU]/scale.theta;  
 end 
 
 guess.states(4,:) = [mfuelU, 0]/scale.m;
@@ -299,8 +310,13 @@ algorithm.guess = guess;
 % =====================================================================
 tStart= cputime;    % start CPU clock 
 [cost, primal, dual] = dido(TwoStage2d, algorithm);
-runTime = (cputime-tStart)
-runTime/60
+
+
+% runTime = (cputime-tStart)
+% runTime/60
+
+EndTime = datestr(now,30)
+
 % ===================================================================
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
