@@ -1,0 +1,26 @@
+clear all
+global mscale
+mscale = .01;
+x0 = [15; 1250*mscale]
+options.Algorithm = 'sqp'
+options.
+
+x = fmincon(@Velocity,x0,[],[],[],[],[13 1000*mscale],[18 1300*mscale],@Altitude,options)
+
+
+
+
+
+
+
+
+
+% x0 = [1250*mscale]
+% x = fmincon(@Velocity,x0,[],[],[],[],[1000*mscale],[1300*mscale],[],options)
+
+% [AltF, vF] = ThirdStageSim([16 1250])
+
+
+% for i = [1100:1200]
+%     Velocity(i)
+% end

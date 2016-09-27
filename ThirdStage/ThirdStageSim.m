@@ -1,4 +1,6 @@
-clear all
+function [AltF_actual, vF, Alt, v, t, mpayload, Alpha] = ThirdStageSim(AoA_list, mfuel_burn)
+
+
 
 time1 = cputime;
 
@@ -18,8 +20,8 @@ iteration = 1;
 % for j = -.05:.01:0.1
 % for u = 1800:200:3400
 
-k = 32000;
-j = 0.01;
+k = 34000;
+j = 0.05;
 u = 2850;
 
 [k j u];
@@ -43,6 +45,11 @@ u = 2850;
         Hor = [];
         D = [];
         L = [];
+        
+
+
+
+mfuel(1) = mfuel_burn;
 
 HelioSync_Altitude = 566.89 + 6371; %Same as Dawids
 
@@ -64,7 +71,8 @@ Isp = 350;
 %define starting condtions
 t(1) = 0.;
 
-dt = 1.; %time step
+dt_main = 1.; %time step
+dt = dt_main;
 
 i=1;
 
@@ -89,14 +97,32 @@ m(1) = 2850; %vehicle mass, (to match Dawids glasgow paper)
 
 mdot = 14.71; %fuel mass flow rate from dawid
 
-mfuel(1) = 1100; %this is approx what dawid used (this is only fuel in atmosphere)
-% mfuel(1) = 1270
+burntime = mfuel_burn/mdot;
 
-Alpha = deg2rad(16); % angle of attack, from dawids 6d
+% Alpha = deg2rad(13); % angle of attack, from dawids 6d
 
 exocond = false;
+Fuel = true;
+
+j = 1;
+
 
 while gamma(i) > 0;
+    
+    % Linear tangent steering over each control segment
+    if j < length(AoA_list)
+    Alpha(i) = atan((tan(AoA_list(j+1)) - tan(AoA_list(j)))/(burntime / length(AoA_list)) * (t(i) - burntime*(j-1)/length(AoA_list)) + tan(AoA_list(j)));
+    elseif j == length(AoA_list)
+    Alpha(i) = atan((0 - tan(AoA_list(j)))/(burntime / j) * (t(i) - burntime*(j-1)/length(AoA_list)) + tan(AoA_list(j)));
+    end
+    
+    if t(i) > burntime*j/length(AoA_list) && t(i) < burntime
+        j = j + 1;
+%         Alpha = deg2rad(AoA_list(j));
+    elseif t(i) >= burntime
+        Alpha(i) = 0;
+    end
+    
     p(i) = spline( Atmosphere(:,1),  Atmosphere(:,3), Alt(i));
     
     if Alt(i) < 85000
@@ -111,7 +137,7 @@ while gamma(i) > 0;
     
     q(i) = 1/2*rho(i)*v(i)^2;
     
-    if mfuel(i) > 0
+    if Fuel == true
         T = Isp*mdot*9.81*6371000^2/r(i)^2 + (101325-p(i))*0.636;
         
         mfuel(i+1) = mfuel(i) - mdot*dt;
@@ -144,23 +170,26 @@ while gamma(i) > 0;
     
     CA(i) = 0.346 + 0.183*M(i) - 0.058*M(i)^2 + 0.00382*M(i)^3;
     
-    CN(i) = (5.006 - 0.519*M(i) + 0.031*M(i)^2)*Alpha;
+    CN(i) = (5.006 - 0.519*M(i) + 0.031*M(i)^2)*Alpha(i);
     
-    CD(i) = CA(i)*cos(Alpha) + CN(i)*sin(Alpha);
+    CD(i) = CA(i)*cos(Alpha(i)) + CN(i)*sin(Alpha(i));
     
-    CL(i) = CN(i)*cos(Alpha) - CA(i)*sin(Alpha);
+    CL(i) = CN(i)*cos(Alpha(i)) - CA(i)*sin(Alpha(i));
     
     D(i) = 1/2*rho(i)*(v(i)^2)*A*CD(i);
     
     L(i) = 1/2*rho(i)*(v(i)^2)*A*CL(i);
    
-    [rdot,xidot,phidot,gammadot,vdot,zetadot] = RotCoordsRocket(r(i),xi(i),phi(i),gamma(i),v(i),zeta(i),L(i),D(i),T,m(i),Alpha);
+    [rdot,xidot,phidot,gammadot,vdot,zetadot] = RotCoordsRocket(r(i),xi(i),phi(i),gamma(i),v(i),zeta(i),L(i),D(i),T,m(i),Alpha(i));
     
-    
-    if gammadot < 0
-       
-        Alpha = 0;
+    if i == 1 && gammadot < 0
+        fprintf('BAD CONDITIONS!');
     end
+    
+%     if gammadot < 0
+%        
+%         Alpha(i) = 0;
+%     end
     
     r(i+1) = r(i) + rdot*dt;
     
@@ -176,12 +205,30 @@ while gamma(i) > 0;
     
     zeta(i+1) = zeta(i) + zetadot*dt;
     
-    t(i+1) = t(i) + dt;    
+    if mfuel(i+1) < mdot*dt && Fuel == true
+        dt = mfuel(i+1)/mdot;
+        t(i+1) = t(i) + dt;
+        Fuel = false;
+    else
+        dt = dt_main;
+        t(i+1) = t(i) + dt;
+    end
     i = i+1;
 end
 
+AltF = Alt(end);
+AltF_actual = Alt(end);
+
+
+vF = v(end);
+
+if AltF > HelioSync_Altitude
+    AltF = HelioSync_Altitude;
+end
+
+
 if exocond == false
-    fprintf('Did not reach exoatmospheric conditions')
+%     fprintf('Did not reach exoatmospheric conditions')
     m(end) = m(end) - 302.8;
 end
 
@@ -196,11 +243,11 @@ vexo = sqrt((v(end)*sin(zeta(end)))^2 + (v(end)*cos(zeta(end)) + r(end)*Omega_E*
 
 inc = asin(v(end)*sin(pi-zeta(end))/vexo);  % orbit inclination angle
 
-v12 = sqrt(mu / (Alt(end)/10^3 + Rearth))*10^3 - vexo;
+v12 = sqrt(mu / (AltF/10^3 + Rearth))*10^3 - vexo;
 
-v23 = sqrt(mu / (Alt(end)/10^3+ Rearth))*(sqrt(2*HelioSync_Altitude/((Alt(end)/10^3 + Rearth)+HelioSync_Altitude))-1)*10^3;
+v23 = sqrt(mu / (AltF/10^3+ Rearth))*(sqrt(2*HelioSync_Altitude/((AltF/10^3 + Rearth)+HelioSync_Altitude))-1)*10^3;
 
-v34 = sqrt(mu / HelioSync_Altitude)*(1 - sqrt(2*(Alt(end)/10^3 + Rearth)/((Alt(end)/10^3 + Rearth)+HelioSync_Altitude)))*10^3;
+v34 = sqrt(mu / HelioSync_Altitude)*(1 - sqrt(2*(AltF/10^3 + Rearth)/((AltF/10^3 + Rearth)+HelioSync_Altitude)))*10^3;
 
 dvtot = v12 + v23 + v34;
 
@@ -221,17 +268,17 @@ m4 = m3/(exp(v34/(Isp*g)));
 mpayload = m4 - 347.4; % subtract structural mass, from Dawids glasgow paper
 
 
-payload_matrix(iteration,1) = k ;
-payload_matrix(iteration,2) = j ;
-payload_matrix(iteration,3) = u ;
-payload_matrix(iteration,4) = mpayload;
-
-[k j u mpayload]
-
-
-figure(5)
-plot(t, Alt)
-figure(6)
-plot(t,v)
+% payload_matrix(iteration,1) = k ;
+% payload_matrix(iteration,2) = j ;
+% payload_matrix(iteration,3) = u ;
+% payload_matrix(iteration,4) = mpayload;
+% 
+% [k j u mpayload]
+% 
+% 
+% figure(5)
+% plot(t, Alt)
+% figure(6)
+% plot(t,v)
 
 

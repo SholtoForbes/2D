@@ -1,5 +1,6 @@
-clear all
-% my attempt at third stage simulation... not very good
+function [AltF, vF, Alt, v, t, mpayload] = ThirdStageSim(AoA_list, mfuel_burn)
+
+
 
 time1 = cputime;
 
@@ -15,14 +16,13 @@ iteration = 1;
 
 % for minit = 1500:100:3000
 
-
 % for k = 20000:5000:60000
 % for j = -.05:.01:0.1
 % for u = 1800:200:3400
 
-k = 32000;
-j = 0.1;
-u = 2800;
+k = 34000;
+j = 0.05;
+u = 2850;
 
 [k j u];
         
@@ -45,6 +45,11 @@ u = 2800;
         Hor = [];
         D = [];
         L = [];
+        
+
+
+
+mfuel(1) = mfuel_burn;
 
 HelioSync_Altitude = 566.89 + 6371; %Same as Dawids
 
@@ -61,10 +66,13 @@ A = 0.87;
 
 g = 9.81; %standard gravity
 
+Isp = 350;
+
 %define starting condtions
 t(1) = 0.;
 
-dt = .1; %time step
+dt_main = 1.; %time step
+dt = dt_main;
 
 i=1;
 
@@ -85,27 +93,36 @@ v(1) = u;
 zeta(1) = deg2rad(84);
 
 
-m(1) = 1750; %vehicle mass, less 1100kg fuel (to match Dawids glasgow paper)
+m(1) = 2850; %vehicle mass, (to match Dawids glasgow paper)
 
 mdot = 14.71; %fuel mass flow rate from dawid
 
-mfuel(1) = 1100; %this is approx what dawid used (this is only fuel in atmosphere)
-% mfuel(1) = 800
+burntime = mfuel_burn/mdot;
 
-Alpha = deg2rad(20); % angle of attack, from dawids 6d
+% Alpha = deg2rad(13); % angle of attack, from dawids 6d
+
+exocond = false;
+Fuel = true;
+
+j = 1;
+% Alpha = deg2rad(AoA_list(j));
+
 
 while gamma(i) > 0;
     
-    if mfuel(i) > 0
-        T = 50510 + (101325-;
-        
-        mfuel(i+1) = mfuel(i) - mdot*dt;
-    else
-        T = 0;
-
-        mfuel(i+1) = mfuel(i);
+    % Linear tangent steering over each control segment
+    if j < length(AoA_list)
+    Alpha = atan((tan(AoA_list(j+1)) - tan(AoA_list(j)))/(burntime / j) * (t(i) - burntime*(j-1)/length(AoA_list)) + tan(AoA_list(j)));
+    elseif j == length(AoA_list)
+    Alpha = atan((0 - tan(AoA_list(j)))/(burntime / j) * (t(i) - burntime*(j-1)/length(AoA_list)) + tan(AoA_list(j)));
     end
- 
+    
+    if t(i) > burntime*j/length(AoA_list) && t(i) < burntime
+        j = j + 1;
+%         Alpha = deg2rad(AoA_list(j));
+    end
+    
+    p(i) = spline( Atmosphere(:,1),  Atmosphere(:,3), Alt(i));
     
     if Alt(i) < 85000
         c(i) = spline( Atmosphere(:,1),  Atmosphere(:,5), Alt(i)); % Calculate speed of sound using atmospheric data
@@ -119,6 +136,32 @@ while gamma(i) > 0;
     
     q(i) = 1/2*rho(i)*v(i)^2;
     
+    if Fuel == true
+        T = Isp*mdot*9.81*6371000^2/r(i)^2 + (101325-p(i))*0.636;
+        
+        mfuel(i+1) = mfuel(i) - mdot*dt;
+        
+        if q(i) < 10 && exocond == false
+            m(i+1) = m(i) - 302.8 - mdot*dt; %release of heat shield, from dawids glasgow paper
+            exocond = true;
+        else 
+            m(i+1) = m(i) - mdot*dt;
+        end
+        
+    else
+        T = 0;
+
+        mfuel(i+1) = mfuel(i);
+        
+        if q(i) < 10 && exocond == false
+            m(i+1) = m(i) - 302.8; %release of heat shield, from dawids glasgow paper
+            exocond = true;
+        else 
+            m(i+1) = m(i);
+        end
+    end
+ 
+
     M(i) = v(i)/c(i);
     
     %calculate axial and normal coefficient, and then lift and drag
@@ -136,14 +179,16 @@ while gamma(i) > 0;
     
     L(i) = 1/2*rho(i)*(v(i)^2)*A*CL(i);
    
-    [rdot,xidot,phidot,gammadot,vdot,zetadot] = RotCoordsRocket(r(i),xi(i),phi(i),gamma(i),v(i),zeta(i),L(i),D(i),T,mfuel(i)+m(i),Alpha);
+    [rdot,xidot,phidot,gammadot,vdot,zetadot] = RotCoordsRocket(r(i),xi(i),phi(i),gamma(i),v(i),zeta(i),L(i),D(i),T,m(i),Alpha);
     
+    if i == 1 && gammadot < 0
+        fprintf('BAD GUESS!');
+    end
     
     if gammadot < 0
        
         Alpha = 0;
     end
-    
     
     r(i+1) = r(i) + rdot*dt;
     
@@ -159,24 +204,27 @@ while gamma(i) > 0;
     
     zeta(i+1) = zeta(i) + zetadot*dt;
     
-    
-    
-    if q(i) < 10
-        m(i+1) = 1750 - 302.8; %release of heat shield, from dawids glasgow paper
-        exocond = true;
-    else 
-        m(i+1) = m(i);
-        exocond = false;
+    if mfuel(i+1) < mdot*dt && Fuel == true
+        dt = mfuel(i+1)/mdot;
+        t(i+1) = t(i) + dt;
+        Fuel = false;
+    else
+        dt = dt_main;
+        t(i+1) = t(i) + dt;
     end
-    
-    t(i+1) = t(i) + dt;    
     i = i+1;
-    
 end
 
+AltF = Alt(end);
+
+vF = v(end);
+
+if Alt
+
+
 if exocond == false
-    fprintf('Did not reach exoatmospheric conditions')
-    m(end) = 1750 - 302.8;
+%     fprintf('Did not reach exoatmospheric conditions')
+    m(end) = m(end) - 302.8;
 end
 
 %Hohmann Transfer, from Dawid (3i)
@@ -214,40 +262,18 @@ m4 = m3/(exp(v34/(Isp*g)));
 
 mpayload = m4 - 347.4; % subtract structural mass, from Dawids glasgow paper
 
-% plot(Hor, Alt)
 
-payload_matrix(iteration,1) = k ;
-payload_matrix(iteration,2) = j ;
-payload_matrix(iteration,3) = u ;
-payload_matrix(iteration,4) = mpayload;
-
-% payload_matrix(iteration,1) = minit ;
-% payload_matrix(iteration,2) = k ;
-% payload_matrix(iteration,3) = j ;
-% payload_matrix(iteration,4) = u ;
-% payload_matrix(iteration,5) = mpayload;
-
-[k j u mpayload]
-
-
-% thirdstage = fopen('thirdstage.dat','a+');
-%         
-% thirdstage_results = [num2str(Starting_Altitude,'%10.4e') ' ' num2str(Starting_Theta,'%10.4e') ' ' num2str(mpayload,'%10.4e') '\r\n'] ;
-%         
-% fprintf(thirdstage,thirdstage_results);
-figure(1)
-plot(t, Alt)
-figure(2)
-plot(t,v)
-
-% iteration = iteration + 1;
-%  end
-% end
-% end
-% % end     
-% dlmwrite('thirdstage.dat', payload_matrix,'delimiter','\t')
+% payload_matrix(iteration,1) = k ;
+% payload_matrix(iteration,2) = j ;
+% payload_matrix(iteration,3) = u ;
+% payload_matrix(iteration,4) = mpayload;
+% 
+% [k j u mpayload]
+% 
+% 
+% figure(5)
+% plot(t, Alt)
+% figure(6)
+% plot(t,v)
 
 
-% dlmwrite('thirdstagewithmass.dat', payload_matrix,'delimiter','\t')
-
-% time = cputime - time1
