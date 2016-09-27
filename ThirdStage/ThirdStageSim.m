@@ -1,4 +1,4 @@
-function [AltF_actual, vF, Alt, v, t, mpayload, Alpha] = ThirdStageSim(AoA_list, mfuel_burn)
+function [AltF_actual, vF, Alt, v, t, mpayload, Alpha] = ThirdStageSim(mfuel_burn)
 
 
 
@@ -20,9 +20,13 @@ iteration = 1;
 % for j = -.05:.01:0.1
 % for u = 1800:200:3400
 
-k = 34000;
-j = 0.05;
+k = 35000;
+j = 0.01;
 u = 2850;
+
+rho_init = spline( Atmosphere(:,1),  Atmosphere(:,4), k);
+q_init = 0.5*rho_init*u^2;
+AoA_list = asin(50000/q_init*0.1736);
 
 [k j u];
         
